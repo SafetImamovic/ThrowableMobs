@@ -18,6 +18,9 @@
     "entrypoints": {
         "main": [
             "io.github.safetimamovic.throwablemobs.ThrowableMobsFabric"
+        ],
+        "client": [
+            "io.github.safetimamovic.throwablemobs.ThrowableMobsFabricClient"
         ]
     },
     "mixins": [
