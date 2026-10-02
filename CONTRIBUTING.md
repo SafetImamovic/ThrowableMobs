@@ -65,15 +65,15 @@ We use [git-flow](https://nvie.com/posts/a-successful-git-branching-model/).
 
 | Branch | Purpose | Branches from | Merges into |
 |---|---|---|---|
-| `main` | Released code only. Every commit is a tagged release. | — | — |
-| `develop` | Integration branch for the next release. Should always build. | `main` | — |
+| `master` | Released code only. Every commit is a tagged release. | — | — |
+| `develop` | Integration branch for the next release. Should always build. | `master` | — |
 | `feature/<name>` | New features and non-urgent fixes. | `develop` | `develop` |
-| `release/<version>` | Release preparation: version bump, changelog, last fixes. No new features. | `develop` | `main` **and** `develop` |
-| `hotfix/<version>` | Urgent fix for a released version. | `main` | `main` **and** `develop` |
+| `release/<version>` | Release preparation: version bump, changelog, last fixes. No new features. | `develop` | `master` **and** `develop` |
+| `hotfix/<version>` | Urgent fix for a released version. | `master` | `master` **and** `develop` |
 
 **Rules:**
 
-- Never commit directly to `main` or `develop`. Everything goes through a pull request.
+- Never commit directly to `master` or `develop`. Everything goes through a pull request.
 - Branch names are lowercase kebab-case and short: `feature/creeper-impact-explosion`, `feature/catching`, `release/0.2.0`, `hotfix/0.2.1`.
 - Bug fixes for unreleased code are `feature/` branches too (e.g. `feature/fix-slime-split-loop`).
 - Keep feature branches short-lived. Rebase onto `develop` regularly to avoid painful merges:
@@ -81,7 +81,7 @@ We use [git-flow](https://nvie.com/posts/a-successful-git-branching-model/).
   git fetch origin
   git rebase origin/develop
   ```
-- Releases are tagged on `main` as `v<version>` (e.g. `v0.2.0`). Tags trigger the publishing workflow.
+- Releases are tagged on `master` as `v<version>` (e.g. `v0.2.0`). Tags trigger the publishing workflow.
 - Versions follow [Semantic Versioning](https://semver.org). The public API (`api` package) and the datapack JSON schema are what count as "breaking".
 
 The [git-flow CLI](https://github.com/petervanderdoes/gitflow-avh) (`git flow feature start <name>`) is optional — plain git with the branch names above is fine.
@@ -158,7 +158,7 @@ onImpact(ImpactContext).
 1. Fork the repo (or create a branch if you have write access) from `develop`.
 2. Make your changes as atomic commits.
 3. Make sure `./gradlew build` passes locally, and test in-game on **both Fabric and NeoForge** if you touched gameplay.
-4. Open a PR **against `develop`** (hotfixes: against `main`).
+4. Open a PR **against `develop`** (hotfixes: against `master`).
 5. Fill in the PR description:
    - What does it change and why? Link the issue (`Closes #123`).
    - How did you test it? (Loader(s), single-player / dedicated server, screenshots or a short clip for gameplay changes.)
