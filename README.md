@@ -30,4 +30,8 @@ Requires JDK 25.
 
 Loader-specific calls from `common` go through `platform/Services` (Java `ServiceLoader`).
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — git-flow branching, atomic Conventional Commits, PRs against `develop`.
+
 Based on [MultiLoader-Template](https://github.com/jaredlll08/MultiLoader-Template).
