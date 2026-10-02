@@ -19,6 +19,24 @@ class ThrowPhysicsTest
         }
 
         @Test
+        void heavierMobsSlowTheCarrierMore()
+        {
+                double chicken = ThrowPhysics.massFromHitbox(0.4, 0.7, 400);
+                double cow = ThrowPhysics.massFromHitbox(0.9, 1.4, 400);
+                double chickenSlowdown = ThrowPhysics.carrySlowdown(chicken, 1500, 0.5, 0.6);
+                double cowSlowdown = ThrowPhysics.carrySlowdown(cow, 1500, 0.5, 0.6);
+                assertTrue(chickenSlowdown < 0.02);
+                assertTrue(cowSlowdown > chickenSlowdown && cowSlowdown < 0.2);
+        }
+
+        @Test
+        void carrySlowdownIsCapped()
+        {
+                assertEquals(0.6, ThrowPhysics.carrySlowdown(1e9, 1500, 0.5, 0.6), EPS);
+                assertEquals(0.0, ThrowPhysics.carrySlowdown(0, 1500, 0.5, 0.6), EPS);
+        }
+
+        @Test
         void launchSpeedIsCapped()
         {
                 assertEquals(3.0, ThrowPhysics.launchSpeed(1e9, 1, 1, 3.0), EPS);

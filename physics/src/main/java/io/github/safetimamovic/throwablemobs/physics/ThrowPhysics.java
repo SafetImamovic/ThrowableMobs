@@ -20,6 +20,15 @@ public final class ThrowPhysics
                 return width * width * height * density;
         }
 
+        /**
+         * Carrier slowdown as a fraction of movement speed (0.15 = 15 % slower):
+         * {@code clamp(m / mMax × factor, 0, maxSlowdown)}.
+         */
+        public static double carrySlowdown(double mass, double maxMass, double factor, double maxSlowdown)
+        {
+                return Math.clamp(mass / maxMass * factor, 0.0, maxSlowdown);
+        }
+
         /** Launch speed from a fixed impulse: {@code min(J × charge / m, vMax)}. */
         public static double launchSpeed(double impulse, double charge, double mass, double maxSpeed)
         {
