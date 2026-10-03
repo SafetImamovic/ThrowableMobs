@@ -2,6 +2,7 @@ package io.github.safetimamovic.throwablemobs.carry;
 
 import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
@@ -209,6 +210,12 @@ public final class CarryManager
                 mob.setPos(carrier.getX(), carrier.getY() + carrier.getBbHeight(), carrier.getZ());
                 mob.setDeltaMovement(Vec3.ZERO);
                 mob.resetFallDistance();
+                if (ThrowableMobsConfig.CARRY.carriedFacing() == CarriedFacing.CARRIER)
+                {
+                        mob.setYRot(carrier.getYRot());
+                        mob.setYHeadRot(carrier.getYRot());
+                        mob.setYBodyRot(carrier.getYRot());
+                }
                 // The mob sits inside the portal frame with its carrier; without a cooldown it sometimes travels on
                 // its own, ending the carry. Only the carrier's dimension change decides what happens to it.
                 mob.setPortalCooldown();

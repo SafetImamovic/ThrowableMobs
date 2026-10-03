@@ -18,10 +18,20 @@ public final class ThrowableMobsConfig
                 true,
                 true,
                 true,
-                true);
+                true,
+                CarriedFacing.CARRIER);
 
         private ThrowableMobsConfig()
         {
+        }
+
+        /** Which way a carried mob faces. */
+        public enum CarriedFacing
+        {
+                /** Turns with its carrier, facing where the carrier looks. */
+                CARRIER,
+                /** Keeps the direction it faced when picked up. */
+                KEEP
         }
 
         /**
@@ -38,6 +48,7 @@ public final class ThrowableMobsConfig
          *                               tunnels)
          * @param protectFromFall        carried mobs take no fall damage when their carrier falls
          * @param protectFromCarrier     carried mobs can't be hurt by their carrier
+         * @param carriedFacing          which way carried mobs face
          */
         public record CarryConfig(
                 boolean requireSneak,
@@ -51,7 +62,8 @@ public final class ThrowableMobsConfig
                 boolean showPrompt,
                 boolean protectFromSuffocation,
                 boolean protectFromFall,
-                boolean protectFromCarrier)
+                boolean protectFromCarrier,
+                CarriedFacing carriedFacing)
         {
         }
 }

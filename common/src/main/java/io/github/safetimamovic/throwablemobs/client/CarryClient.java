@@ -4,6 +4,7 @@ import io.github.safetimamovic.throwablemobs.carry.CarryRules;
 import io.github.safetimamovic.throwablemobs.carry.CarryState;
 import io.github.safetimamovic.throwablemobs.carry.LocalCarry;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.function.Consumer;
@@ -15,6 +16,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
@@ -162,5 +164,16 @@ public final class CarryClient
                 entity.yOld = entity.yo;
                 entity.zOld = entity.zo;
                 entity.setDeltaMovement(Vec3.ZERO);
+                if (ThrowableMobsConfig.CARRY.carriedFacing() == CarriedFacing.CARRIER
+                        && entity instanceof LivingEntity living)
+                {
+                        // Previous rotations from the carrier's too, so turning interpolates like the position.
+                        living.setYRot(carrier.getYRot());
+                        living.yRotO = carrier.yRotO;
+                        living.yHeadRot = carrier.getYRot();
+                        living.yHeadRotO = carrier.yRotO;
+                        living.yBodyRot = carrier.getYRot();
+                        living.yBodyRotO = carrier.yRotO;
+                }
         }
 }
