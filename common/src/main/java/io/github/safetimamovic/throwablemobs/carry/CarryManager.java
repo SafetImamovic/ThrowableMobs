@@ -374,6 +374,17 @@ public final class CarryManager
                 mob.resetFallDistance();
         }
 
+        /**
+         * Movement multiplier from the carry slowdown (1 = not slowed). Read from the synced attribute modifier, so it
+         * works on the carrier's client too, where player movement is simulated.
+         */
+        public static double speedFactor(LivingEntity entity)
+        {
+                AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
+                AttributeModifier slowdown = speed != null ? speed.getModifier(SLOWDOWN_ID) : null;
+                return slowdown != null ? 1.0 + slowdown.amount() : 1.0;
+        }
+
         /** Transient modifier: not saved, so a crash can't leave a player permanently slowed. */
         private static void applySlowdown(ServerPlayer player, Mob mob)
         {

@@ -3,7 +3,10 @@
   "minVersion": "0.8",
   "package": "io.github.safetimamovic.throwablemobs.mixin",
   "compatibilityLevel": "JAVA_25",
-  "mixins": [],
+  "mixins": [
+    "LivingEntityMixin",
+    "PlayerMixin"
+  ],
   "client": [],
   "server": [],
   "injectors": {
