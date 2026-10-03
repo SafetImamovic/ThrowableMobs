@@ -675,6 +675,8 @@ disabled = []                         # e.g. ["throwablemobs:split"]
 
 Every number in §8 is in here. Validate ranges, and document each key in a comment.
 
+**Naming: one spelling per concept.** Vanilla's `server.properties` is the cautionary tale: `white-list` (turns the list on) sits next to `enforce-whitelist` (kicks players not on it). `white-list` is the old key, kept so existing servers don't break; `enforce-whitelist` came later with the other spelling, and now admins have to remember both. Our config keys, tags and translation keys use `snake_case` with one term per concept (e.g. `drop_ground_allowed` / `drop_ground_denied`, never mixing allow/white). Pick names before 1.0: renaming a key later means keeping the old one forever.
+
 ---
 
 ## 12. Multiplayer: catching & passing
