@@ -12,7 +12,7 @@ Requires JDK 25.
 
 ```sh
 ./gradlew build                     # jars in fabric/build/libs and neoforge/build/libs
-./gradlew :common:test              # unit tests
+./gradlew :physics:test             # unit tests
 ./gradlew :fabric:runClient         # dev client (Fabric)
 ./gradlew :neoforge:runClient       # dev client (NeoForge)
 ./gradlew :fabric:runServer         # dedicated server
@@ -23,6 +23,7 @@ Requires JDK 25.
 
 | Module | Contents |
 |---|---|
+| `physics/` | Pure-Java physics math (mass, launch, impact). No Minecraft imports; unit tested. |
 | `common/` | Almost all code. Compiles against vanilla only. |
 | `fabric/` | Fabric entrypoint and Fabric-specific glue. |
 | `neoforge/` | NeoForge entrypoint and NeoForge-specific glue. |

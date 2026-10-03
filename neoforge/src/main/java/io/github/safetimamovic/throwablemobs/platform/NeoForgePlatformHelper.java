@@ -4,23 +4,27 @@ import io.github.safetimamovic.throwablemobs.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 
-public class NeoForgePlatformHelper implements IPlatformHelper {
+public class NeoForgePlatformHelper implements IPlatformHelper
+{
 
-    @Override
-    public String getPlatformName() {
+        @Override
+        public String getPlatformName()
+        {
 
-        return "NeoForge";
-    }
+                return "NeoForge";
+        }
 
-    @Override
-    public boolean isModLoaded(String modId) {
+        @Override
+        public boolean isModLoaded(String modId)
+        {
 
-        return ModList.get().isLoaded(modId);
-    }
+                return ModList.get().isLoaded(modId);
+        }
 
-    @Override
-    public boolean isDevelopmentEnvironment() {
+        @Override
+        public boolean isDevelopmentEnvironment()
+        {
 
-        return !FMLLoader.getCurrent().isProduction();
-    }
+                return !FMLLoader.getCurrent().isProduction();
+        }
 }
