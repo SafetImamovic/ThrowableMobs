@@ -24,6 +24,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -205,6 +206,12 @@ public final class CarryManager
                 mob.setPos(carrier.getX(), carrier.getY() + carrier.getBbHeight(), carrier.getZ());
                 mob.setDeltaMovement(Vec3.ZERO);
                 mob.resetFallDistance();
+                // NoAI stops the swell goal, but Creeper#tick keeps applying the last swell direction, so a creeper
+                // picked up mid-hiss would still explode. Ignited creepers (flint and steel) keep burning on purpose.
+                if (mob instanceof Creeper creeper && !creeper.isIgnited())
+                {
+                        creeper.setSwellDir(-1);
+                }
         }
 
         private static void release(Mob mob, Vec3 at)
