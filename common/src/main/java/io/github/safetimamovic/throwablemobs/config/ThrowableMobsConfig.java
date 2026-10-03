@@ -15,6 +15,9 @@ public final class ThrowableMobsConfig
                 true,
                 0.5,
                 0.6,
+                true,
+                true,
+                true,
                 true);
 
         private ThrowableMobsConfig()
@@ -31,6 +34,10 @@ public final class ThrowableMobsConfig
          * @param slowdownFactor    carrier slowdown at {@code maxMass}, before the cap
          * @param maxSlowdown       cap on carrier slowdown (0.6 = 60 % slower)
          * @param showPrompt        client: show the pick-up / drop prompt under the crosshair
+         * @param protectFromSuffocation carried mobs take no suffocation damage (their head is in the ceiling in 2-high
+         *                               tunnels)
+         * @param protectFromFall        carried mobs take no fall damage when their carrier falls
+         * @param protectFromCarrier     carried mobs can't be hurt by their carrier
          */
         public record CarryConfig(
                 boolean requireSneak,
@@ -41,7 +48,10 @@ public final class ThrowableMobsConfig
                 boolean ownerOnlyForTamed,
                 double slowdownFactor,
                 double maxSlowdown,
-                boolean showPrompt)
+                boolean showPrompt,
+                boolean protectFromSuffocation,
+                boolean protectFromFall,
+                boolean protectFromCarrier)
         {
         }
 }

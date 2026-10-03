@@ -186,8 +186,8 @@ public final class CarryManager
         }
 
         /**
-         * Damage hook (server). A carried mob takes no suffocation damage (it sits in the ceiling in 2-high tunnels), no
-         * fall damage, and no damage from its carrier.
+         * Damage hook (server). Depending on the config, a carried mob takes no suffocation damage (it sits in the
+         * ceiling in 2-high tunnels), no fall damage, and no damage from its carrier.
          */
         public static boolean allowDamage(LivingEntity entity, DamageSource source)
         {
@@ -196,9 +196,12 @@ public final class CarryManager
                 {
                         return true;
                 }
+                CarryConfig config = ThrowableMobsConfig.CARRY;
                 boolean fromCarrier = source.getEntity() != null
                         && source.getEntity().getUUID().equals(state.carrier());
-                return !(source.is(DamageTypes.IN_WALL) || source.is(DamageTypeTags.IS_FALL) || fromCarrier);
+                return !(config.protectFromSuffocation() && source.is(DamageTypes.IN_WALL)
+                        || config.protectFromFall() && source.is(DamageTypeTags.IS_FALL)
+                        || config.protectFromCarrier() && fromCarrier);
         }
 
         private static void follow(Player carrier, Mob mob)
