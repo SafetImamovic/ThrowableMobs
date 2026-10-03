@@ -23,10 +23,24 @@ public final class ThrowableMobsConfig
                 true,
                 GroundFilter.DENY_LIST,
                 DimensionChange.TRAVEL,
-                CarrierLogout.DROP);
+                CarrierLogout.DROP,
+                PromptAnchor.CROSSHAIR,
+                0,
+                12);
 
         private ThrowableMobsConfig()
         {
+        }
+
+        /** Client: where the pick-up / put-down prompt is drawn from; the offsets move it from there. */
+        public enum PromptAnchor
+        {
+                /** Screen centre, where the crosshair is. */
+                CROSSHAIR,
+                /** Top centre of the screen. */
+                TOP,
+                /** Bottom centre of the screen (use a negative Y offset to sit above the hotbar). */
+                BOTTOM
         }
 
         /** Which way a carried mob faces. */
@@ -89,6 +103,9 @@ public final class ThrowableMobsConfig
          * @param dropGroundFilter       which blocks count as valid ground
          * @param onDimensionChange      what happens to a carried mob when its carrier changes dimension
          * @param onCarrierLogout        what happens to a carried mob when its carrier logs out
+         * @param promptAnchor           client: where the prompt is drawn from
+         * @param promptOffsetX          client: horizontal prompt offset from the anchor, in GUI pixels
+         * @param promptOffsetY          client: vertical prompt offset from the anchor, in GUI pixels (down is positive)
          */
         public record CarryConfig(
                 boolean requireSneak,
@@ -107,7 +124,10 @@ public final class ThrowableMobsConfig
                 boolean dropNeedsGround,
                 GroundFilter dropGroundFilter,
                 DimensionChange onDimensionChange,
-                CarrierLogout onCarrierLogout)
+                CarrierLogout onCarrierLogout,
+                PromptAnchor promptAnchor,
+                int promptOffsetX,
+                int promptOffsetY)
         {
         }
 }

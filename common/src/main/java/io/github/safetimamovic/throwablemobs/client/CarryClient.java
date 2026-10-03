@@ -6,6 +6,7 @@ import io.github.safetimamovic.throwablemobs.carry.DropTarget;
 import io.github.safetimamovic.throwablemobs.carry.LocalCarry;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.function.Consumer;
@@ -133,8 +134,15 @@ public final class CarryClient
                         return;
                 }
 
-                int x = graphics.guiWidth() / 2;
-                int y = graphics.guiHeight() / 2 + 12;
+                CarryConfig config = ThrowableMobsConfig.CARRY;
+                int anchorY = switch (config.promptAnchor())
+                {
+                        case CROSSHAIR -> graphics.guiHeight() / 2;
+                        case TOP -> 0;
+                        case BOTTOM -> graphics.guiHeight();
+                };
+                int x = graphics.guiWidth() / 2 + config.promptOffsetX();
+                int y = anchorY + config.promptOffsetY();
                 graphics.centeredText(minecraft.font, prompt, x, y, PROMPT_COLOR);
                 if (reason != null)
                 {
