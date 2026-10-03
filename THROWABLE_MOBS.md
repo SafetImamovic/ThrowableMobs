@@ -715,7 +715,7 @@ Every number in §8 is in here. Validate ranges, and document each key in a comm
 - [ ] **Carry On** compat: detect it, avoid double-handling the same click (config: let Carry On handle carry, we handle throw?).
 - [ ] **Common tags**: `#c:bosses` + `#c:capturing_not_supported` in default `unthrowable`; teleport atoms respect `#c:teleporting_not_supported`; `#c:glass_panes` in `breakable_on_impact`. No hardcoded `c:` checks in code.
 - [ ] Mods that change mob size (Pehkui-style scaling): compute mass from **current** bounding box.
-- [ ] Shaders/render mods: carry rendering via vanilla passenger rendering = safe.
+- [ ] Shaders/render mods: carried mob is a normal entity positioned by the client lock, rendered by vanilla = safe.
 - [ ] Dedicated server: no client classes in common/server paths (test with `runServer`!).
 - [ ] Mod works **server-optional?** Not really (needs client input + HUD). Document: "required on both sides".
 - [ ] Mixins: minimize. Use loader events where possible. If you mixin, use **MixinExtras** (`@WrapOperation`, `@ModifyExpressionValue`) — far more compatible than `@Redirect`/`@Overwrite`.
@@ -839,7 +839,7 @@ Hand-written reference tables rot. Generate them:
 | Milestone | Scope |
 |---|---|
 | **M0 — Setup** | JDK 25, MultiLoader-Template on 26.3 (or 26.2 if loaders lag), Neovim + jdtls + DAP working, `runClient` on both loaders. **Follow-up:** split `physics/` into its own MC-free Gradle module. |
-| **M1 — Pick up & drop** | Carry as passenger, sneak+right-click, restore state, `unthrowable` tag (incl. `c:` defaults), dedicated server test. |
+| **M1 — Pick up & drop** | Carry (follow model, §7), sneak+right-click, on-screen prompt, restore state, `unthrowable` tag (incl. `c:` defaults), dedicated server test. |
 | **M2 — Throw** | Charge, impulse launch, flight sim, block/entity collision, energy damage, knockback, damage type, config file. |
 | **M3 — Behavior system** | `ThrowBehavior` API, registry, 6 vanilla behaviors (creeper, enderman, slime, chicken, blaze, cat), datapack loader, heuristics. |
 | **M4 — Catching** | Server catch check, recoil, self-catch, glow highlight, latency compensation. |
@@ -873,7 +873,7 @@ Settled 2026-10-02:
 
 - MultiLoader-Template (26.3 branch) layout: `common/`, `fabric/`, `neoforge/`, `build-logic/`.
 - Versions pinned in `gradle.properties`: MC 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, NeoForge 26.3.0.41-**beta** (no stable 26.3 NeoForge yet — bump when it lands), Loom 1.18.2, ModDevGradle 2.0.148, Gradle 9.7.1, Java 25.
-- `./gradlew build` produces `throwablemobs-{fabric,neoforge}-26.3-0.1.0.jar`; JUnit tests run on `common` (`physics/ThrowPhysics` + test). **TODO:** move `physics/` out of `common` into its own module (§3).
+- `./gradlew build` produces `throwablemobs-{fabric,neoforge}-26.3-0.1.0.jar`; JUnit tests run on the `physics/` module (`ThrowPhysics` + test), split out of `common` during M1 (§3).
 - Both loaders verified loading the mod on a dev server.
 - Neovim: `~/AppData/Local/nvim/lua/plugins/java.lua` (nvim-jdtls + nvim-dap + dap-ui, Mason auto-installs jdtls/java-debug-adapter/java-test); treesitter java/groovy/properties parsers.
 
