@@ -23,7 +23,7 @@ public final class ThrowableMobsConfig
                 true,
                 GroundFilter.DENY_LIST,
                 DimensionChange.TRAVEL,
-                CarrierLogout.DROP,
+                CarrierLogout.KEEP_CARRYING,
                 PromptAnchor.CROSSHAIR,
                 0,
                 12);
