@@ -19,7 +19,9 @@ public final class ThrowableMobsConfig
                 true,
                 true,
                 true,
-                CarriedFacing.CARRIER);
+                CarriedFacing.CARRIER,
+                true,
+                GroundFilter.DENY_LIST);
 
         private ThrowableMobsConfig()
         {
@@ -32,6 +34,15 @@ public final class ThrowableMobsConfig
                 CARRIER,
                 /** Keeps the direction it faced when picked up. */
                 KEEP
+        }
+
+        /** Which blocks count as ground to put a carried mob down on. Both need a collision shape to stand on. */
+        public enum GroundFilter
+        {
+                /** Any block except those in {@code #throwablemobs:drop_ground_denied}. */
+                DENY_LIST,
+                /** Only blocks in {@code #throwablemobs:drop_ground_allowed}. */
+                ALLOW_LIST
         }
 
         /**
@@ -49,6 +60,10 @@ public final class ThrowableMobsConfig
          * @param protectFromFall        carried mobs take no fall damage when their carrier falls
          * @param protectFromCarrier     carried mobs can't be hurt by their carrier
          * @param carriedFacing          which way carried mobs face
+         * @param dropNeedsGround        putting a mob down needs the carrier to look at valid ground within reach (so
+         *                               it can't be dropped off a skyblock platform); otherwise it falls back to in
+         *                               front of the carrier, or their feet
+         * @param dropGroundFilter       which blocks count as valid ground
          */
         public record CarryConfig(
                 boolean requireSneak,
@@ -63,7 +78,9 @@ public final class ThrowableMobsConfig
                 boolean protectFromSuffocation,
                 boolean protectFromFall,
                 boolean protectFromCarrier,
-                CarriedFacing carriedFacing)
+                CarriedFacing carriedFacing,
+                boolean dropNeedsGround,
+                GroundFilter dropGroundFilter)
         {
         }
 }

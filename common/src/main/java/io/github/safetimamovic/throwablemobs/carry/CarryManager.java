@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -80,7 +81,7 @@ public final class CarryManager
                 ServerPlayer serverPlayer = (ServerPlayer) player;
                 if (carriedBy(serverPlayer) != null)
                 {
-                        dropInFront(serverPlayer);
+                        drop(serverPlayer);
                         return InteractionResult.SUCCESS;
                 }
                 if (target instanceof Mob mob && CarryRules.check(serverPlayer, mob) == null)
@@ -96,7 +97,7 @@ public final class CarryManager
         {
                 if (CarryRules.isCarryInput(player))
                 {
-                        dropInFront(player);
+                        drop(player);
                 }
         }
 
@@ -115,14 +116,39 @@ public final class CarryManager
                 follow(player, mob);
         }
 
-        public static void dropInFront(ServerPlayer player)
+        /** Puts the carried mob down on the ground the player looks at; refuses if that isn't valid ground. */
+        public static void drop(ServerPlayer player)
         {
-                Mob mob = CARRIED.remove(player.getUUID());
-                removeSlowdown(player);
-                if (mob != null && !mob.isRemoved())
+                Mob mob = carriedBy(player);
+                if (mob == null)
                 {
-                        release(mob, dropPosition(player, mob));
+                        CARRIED.remove(player.getUUID());
+                        removeSlowdown(player);
+                        return;
                 }
+                Vec3 at = DropTarget.find(player, mob);
+                if (at == null)
+                {
+                        if (ThrowableMobsConfig.CARRY.dropNeedsGround())
+                        {
+                                player.sendOverlayMessage(Component.translatable("throwablemobs.carry.need_ground"));
+                                return;
+                        }
+                        at = fallbackDropPosition(player, mob);
+                }
+                CARRIED.remove(player.getUUID());
+                removeSlowdown(player);
+                release(mob, at);
+        }
+
+        /**
+         * Use-block hook (both sides). Sneak + use on a block while carrying puts the mob down (via
+         * {@code DropCarriedPayload}), so the block itself mustn't react: no chests opening under the mob.
+         */
+        public static InteractionResult onUseBlock(Player player, Level level)
+        {
+                boolean carrying = level.isClientSide() ? LocalCarry.get() != null : carriedBy(player) != null;
+                return carrying && CarryRules.isCarryInput(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
 
         /** Once per server tick: keep carried mobs on their carriers' heads, drop them when the carry is broken. */
@@ -270,8 +296,11 @@ public final class CarryManager
                 }
         }
 
-        /** One step in front of the player if there's room and nothing in between, else at the player's feet. */
-        private static Vec3 dropPosition(ServerPlayer player, Mob mob)
+        /**
+         * Without a ground target and with {@code dropNeedsGround} off: one step in front of the player if there's room
+         * and nothing in between, else at the player's feet.
+         */
+        private static Vec3 fallbackDropPosition(ServerPlayer player, Mob mob)
         {
                 Vec3 look = player.getLookAngle();
                 Vec3 flat = new Vec3(look.x, 0.0, look.z);

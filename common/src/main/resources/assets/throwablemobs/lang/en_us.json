@@ -2,7 +2,7 @@
     "throwablemobs.prompt.key": "[%s]",
     "throwablemobs.prompt.keys": "[%s] + [%s]",
     "throwablemobs.prompt.pick_up": "%s to pick up",
-    "throwablemobs.prompt.drop": "%s to drop",
+    "throwablemobs.prompt.drop": "%s to put down",
     "throwablemobs.prompt.cannot": "Can't pick this one up",
     "throwablemobs.carry.denied.unthrowable": "This one can't be carried",
     "throwablemobs.carry.denied.too_heavy": "Too heavy",
@@ -10,5 +10,6 @@
     "throwablemobs.carry.denied.leashed": "It's on a leash",
     "throwablemobs.carry.denied.riding": "It's riding something",
     "throwablemobs.carry.denied.already_carried": "Someone is already carrying it",
-    "throwablemobs.carry.denied.unavailable": "Not right now"
+    "throwablemobs.carry.denied.unavailable": "Not right now",
+    "throwablemobs.carry.need_ground": "Look at the ground to put it down"
 }

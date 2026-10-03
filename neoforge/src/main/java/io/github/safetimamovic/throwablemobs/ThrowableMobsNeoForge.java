@@ -29,6 +29,15 @@ public class ThrowableMobsNeoForge
 
                 IEventBus bus = NeoForge.EVENT_BUS;
                 bus.addListener(ThrowableMobsNeoForge::onEntityInteract);
+                bus.addListener((PlayerInteractEvent.RightClickBlock event) ->
+                {
+                        InteractionResult result = CarryManager.onUseBlock(event.getEntity(), event.getLevel());
+                        if (result != InteractionResult.PASS)
+                        {
+                                event.setCancellationResult(result);
+                                event.setCanceled(true);
+                        }
+                });
                 bus.addListener((LivingIncomingDamageEvent event) ->
                 {
                         if (!CarryManager.allowDamage(event.getEntity(), event.getSource()))

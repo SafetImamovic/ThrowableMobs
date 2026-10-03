@@ -2,6 +2,7 @@ package io.github.safetimamovic.throwablemobs.client;
 
 import io.github.safetimamovic.throwablemobs.carry.CarryRules;
 import io.github.safetimamovic.throwablemobs.carry.CarryState;
+import io.github.safetimamovic.throwablemobs.carry.DropTarget;
 import io.github.safetimamovic.throwablemobs.carry.LocalCarry;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
@@ -99,9 +100,16 @@ public final class CarryClient
 
                 Component prompt;
                 Component reason = null;
-                if (LocalCarry.get() != null)
+                if (LocalCarry.get() instanceof Mob carried)
                 {
-                        prompt = Component.translatable("throwablemobs.prompt.drop", inputKeys(minecraft));
+                        if (ThrowableMobsConfig.CARRY.dropNeedsGround() && DropTarget.find(player, carried) == null)
+                        {
+                                prompt = Component.translatable("throwablemobs.carry.need_ground");
+                        }
+                        else
+                        {
+                                prompt = Component.translatable("throwablemobs.prompt.drop", inputKeys(minecraft));
+                        }
                 }
                 else if (minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob)
                 {
