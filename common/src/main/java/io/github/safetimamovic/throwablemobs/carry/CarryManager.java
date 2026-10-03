@@ -3,6 +3,7 @@ package io.github.safetimamovic.throwablemobs.carry;
 import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
@@ -233,36 +234,83 @@ public final class CarryManager
                 }
         }
 
-        /** A mob loading with a CarryState nobody holds (crash, restart, chunk reload) gets its original state back. */
+        /**
+         * A mob loading with a CarryState nobody holds (crash, restart, chunk reload) gets its original state back. With
+         * {@link CarrierLogout#KEEP_CARRYING} it waits for its carrier instead, and is carried again if they're online.
+         */
         public static void onEntityLoad(Entity entity)
         {
                 CarryState state = Services.CARRY_STATE.get(entity);
-                if (state != null && entity instanceof Mob mob && CARRIED.get(state.carrier()) != mob)
+                if (state == null || !(entity instanceof Mob mob) || CARRIED.get(state.carrier()) == mob)
                 {
-                        release(mob, mob.position());
+                        return;
                 }
+                if (keepsCarryOnLogout() && mob.level() instanceof ServerLevel level)
+                {
+                        ServerPlayer carrier = level.getServer().getPlayerList().getPlayer(state.carrier());
+                        if (carrier == null)
+                        {
+                                return;
+                        }
+                        if (carriedBy(carrier) == null)
+                        {
+                                hold(carrier, mob, state);
+                                return;
+                        }
+                }
+                release(mob, mob.position());
         }
 
         public static void onLogout(ServerPlayer player)
         {
                 Mob mob = CARRIED.remove(player.getUUID());
                 removeSlowdown(player);
-                if (mob != null && !mob.isRemoved())
+                if (mob != null && !mob.isRemoved() && !keepsCarryOnLogout())
                 {
                         release(mob, mob.position());
                 }
         }
 
+        /**
+         * With {@link CarrierLogout#KEEP_CARRYING}: pick the waiting mob back up. It hangs where the carrier logged out,
+         * so it's near their login position; mobs loading later are handled by {@link #onEntityLoad}.
+         */
+        public static void onLogin(ServerPlayer player)
+        {
+                if (!keepsCarryOnLogout() || carriedBy(player) != null)
+                {
+                        return;
+                }
+                for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16.0)))
+                {
+                        CarryState state = Services.CARRY_STATE.get(mob);
+                        if (state != null && state.carrier().equals(player.getUUID()))
+                        {
+                                hold(player, mob, state);
+                                return;
+                        }
+                }
+        }
+
+        /** Server stop. With {@link CarrierLogout#KEEP_CARRYING} the mobs are saved still carried, to resume later. */
         public static void dropAll()
         {
-                for (Mob mob : CARRIED.values())
+                if (!keepsCarryOnLogout())
                 {
-                        if (!mob.isRemoved())
+                        for (Mob mob : CARRIED.values())
                         {
-                                release(mob, mob.position());
+                                if (!mob.isRemoved())
+                                {
+                                        release(mob, mob.position());
+                                }
                         }
                 }
                 CARRIED.clear();
+        }
+
+        private static boolean keepsCarryOnLogout()
+        {
+                return ThrowableMobsConfig.CARRY.onCarrierLogout() == CarrierLogout.KEEP_CARRYING;
         }
 
         /**

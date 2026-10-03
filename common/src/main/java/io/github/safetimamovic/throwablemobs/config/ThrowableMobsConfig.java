@@ -22,7 +22,8 @@ public final class ThrowableMobsConfig
                 CarriedFacing.CARRIER,
                 true,
                 GroundFilter.DENY_LIST,
-                DimensionChange.TRAVEL);
+                DimensionChange.TRAVEL,
+                CarrierLogout.DROP);
 
         private ThrowableMobsConfig()
         {
@@ -55,6 +56,18 @@ public final class ThrowableMobsConfig
                 TRAVEL
         }
 
+        /** What happens to a carried mob when its carrier logs out (or the server stops). */
+        public enum CarrierLogout
+        {
+                /** The mob is put down where the carrier was. */
+                DROP,
+                /**
+                 * The mob stays where it is, frozen, until the carrier logs back in and carries it again. A carrier who
+                 * never returns leaves it frozen for good.
+                 */
+                KEEP_CARRYING
+        }
+
         /**
          * @param requireSneak      pick up / drop needs sneak + use (otherwise use alone)
          * @param requireEmptyHand  pick up needs an empty main hand
@@ -75,6 +88,7 @@ public final class ThrowableMobsConfig
          *                               front of the carrier, or their feet
          * @param dropGroundFilter       which blocks count as valid ground
          * @param onDimensionChange      what happens to a carried mob when its carrier changes dimension
+         * @param onCarrierLogout        what happens to a carried mob when its carrier logs out
          */
         public record CarryConfig(
                 boolean requireSneak,
@@ -92,7 +106,8 @@ public final class ThrowableMobsConfig
                 CarriedFacing carriedFacing,
                 boolean dropNeedsGround,
                 GroundFilter dropGroundFilter,
-                DimensionChange onDimensionChange)
+                DimensionChange onDimensionChange,
+                CarrierLogout onCarrierLogout)
         {
         }
 }

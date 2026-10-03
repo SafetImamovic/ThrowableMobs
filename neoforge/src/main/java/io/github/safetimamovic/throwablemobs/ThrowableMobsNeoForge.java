@@ -53,6 +53,13 @@ public class ThrowableMobsNeoForge
                                 CarryManager.onEntityLoad(event.getEntity());
                         }
                 });
+                bus.addListener((PlayerEvent.PlayerLoggedInEvent event) ->
+                {
+                        if (event.getEntity() instanceof ServerPlayer player)
+                        {
+                                CarryManager.onLogin(player);
+                        }
+                });
                 bus.addListener((PlayerEvent.PlayerLoggedOutEvent event) ->
                 {
                         if (event.getEntity() instanceof ServerPlayer player)

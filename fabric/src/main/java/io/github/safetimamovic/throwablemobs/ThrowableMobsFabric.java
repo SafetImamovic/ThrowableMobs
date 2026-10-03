@@ -34,6 +34,8 @@ public class ThrowableMobsFabric implements ModInitializer
                 ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> CarryManager.onEntityLoad(entity));
                 ServerLivingEntityEvents.ALLOW_DAMAGE.register(
                         (entity, source, amount) -> CarryManager.allowDamage(entity, source));
+                ServerPlayConnectionEvents.JOIN
+                        .register((listener, sender, server) -> CarryManager.onLogin(listener.getPlayer()));
                 ServerPlayConnectionEvents.DISCONNECT
                         .register((listener, server) -> CarryManager.onLogout(listener.getPlayer()));
                 ServerLifecycleEvents.SERVER_STOPPING.register(server -> CarryManager.dropAll());
