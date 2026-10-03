@@ -206,6 +206,9 @@ public final class CarryManager
                 mob.setPos(carrier.getX(), carrier.getY() + carrier.getBbHeight(), carrier.getZ());
                 mob.setDeltaMovement(Vec3.ZERO);
                 mob.resetFallDistance();
+                // The mob sits inside the portal frame with its carrier; without a cooldown it sometimes travels on
+                // its own, ending the carry. Only the carrier's dimension change decides what happens to it.
+                mob.setPortalCooldown();
                 // NoAI stops the swell goal, but Creeper#tick keeps applying the last swell direction, so a creeper
                 // picked up mid-hiss would still explode. Ignited creepers (flint and steel) keep burning on purpose.
                 if (mob instanceof Creeper creeper && !creeper.isIgnited())
