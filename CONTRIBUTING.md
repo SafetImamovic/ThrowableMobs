@@ -48,7 +48,7 @@ git checkout develop
 Useful tasks:
 
 ```sh
-./gradlew :common:test              # unit tests
+./gradlew :physics:test             # unit tests
 ./gradlew :fabric:runClient         # dev client (Fabric)
 ./gradlew :neoforge:runClient       # dev client (NeoForge)
 ./gradlew :fabric:runServer         # dedicated server — test multiplayer features here
@@ -182,7 +182,7 @@ PRs are merged once CI is green and a maintainer has approved. We prefer **rebas
 
 ## Testing
 
-- **Unit tests** (JUnit 5, `common/src/test`) for pure logic — physics math, config parsing, catch geometry. Keep physics code free of Minecraft imports so it stays testable.
+- **Unit tests** (JUnit 5, `physics/src/test`) for pure logic — physics math, catch geometry. The `physics` module has no Minecraft imports so it stays testable; keep it that way.
 - **GameTests** for in-game behavior (e.g. "a thrown creeper explodes on impact").
 - **Manual testing:** for multiplayer features, run a dedicated server and connect two clients.
 - Bug fixes should come with a test that fails without the fix whenever practical.
