@@ -8,9 +8,11 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
+import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.function.Consumer;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,10 +25,11 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Client side of carrying: locks carried mobs to their carriers, turns sneak + use on air into a drop request, and
- * draws the pick-up / drop prompt under the crosshair.
+ * Client side of carrying: turns the key mappings into pick-up / put-down requests, locks carried mobs to their
+ * carriers, and draws the prompt under the crosshair.
  */
 public final class CarryClient
 {
@@ -36,7 +39,8 @@ public final class CarryClient
         private static Consumer<CustomPacketPayload> sendToServer = payload ->
         {
         };
-        private static boolean useWasDown;
+        /** Our key that swallowed a use press; vanilla's use stays released until this key is let go. */
+        private static @Nullable KeyMapping suppressingUse;
 
         private CarryClient()
         {
@@ -77,16 +81,77 @@ public final class CarryClient
                         }
                 }
                 LocalCarry.set(localCarried);
+        }
 
-                // Right-clicking air with an empty hand sends nothing in vanilla, so ask the server to drop.
-                // Clicks on an entity already reach the server as an interaction (CarryManager.onUseEntity).
-                boolean useDown = minecraft.options.keyUse.isDown();
-                if (useDown && !useWasDown && localCarried != null && CarryRules.isCarryInput(player)
-                        && !(minecraft.hitResult instanceof EntityHitResult))
+        /**
+         * Start of each client tick, before vanilla handles its key mappings: turns presses of our keys into requests.
+         * The defaults share keys with vanilla (Left Shift with Sneak, Right Button with Use), so when one of our keys
+         * acts, vanilla's use is swallowed for that press: no trading with the villager you just picked up. Pick up and
+         * put down may share a key; only one applies at a time, so it toggles.
+         */
+        public static void tickInput(Minecraft minecraft)
+        {
+                keepUseSuppressed(minecraft);
+                boolean pickUpPressed = consumeAll(CarryKeys.PICK_UP);
+                boolean putDownPressed = consumeAll(CarryKeys.PUT_DOWN);
+                LocalPlayer player = minecraft.player;
+                if (player == null || !CarryKeys.modifierHeld())
                 {
-                        sendToServer.accept(DropCarriedPayload.INSTANCE);
+                        return;
                 }
-                useWasDown = useDown;
+                if (LocalCarry.get() != null)
+                {
+                        if (putDownPressed)
+                        {
+                                sendToServer.accept(DropCarriedPayload.INSTANCE);
+                                suppressUse(minecraft, CarryKeys.PUT_DOWN);
+                        }
+                }
+                else if (pickUpPressed && CarryRules.canUseHands(player)
+                        && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob
+                        && CarryRules.check(player, mob) == null)
+                {
+                        sendToServer.accept(new PickUpPayload(mob.getId()));
+                        suppressUse(minecraft, CarryKeys.PICK_UP);
+                }
+        }
+
+        private static void suppressUse(Minecraft minecraft, KeyMapping ours)
+        {
+                KeyMapping use = minecraft.options.keyUse;
+                if (ours.same(use))
+                {
+                        consumeAll(use);
+                        use.setDown(false);
+                        suppressingUse = ours;
+                }
+        }
+
+        /** Vanilla repeats use every few ticks while the key is held, so keep it released until ours is let go. */
+        private static void keepUseSuppressed(Minecraft minecraft)
+        {
+                if (suppressingUse == null)
+                {
+                        return;
+                }
+                if (suppressingUse.isDown())
+                {
+                        minecraft.options.keyUse.setDown(false);
+                }
+                else
+                {
+                        suppressingUse = null;
+                }
+        }
+
+        private static boolean consumeAll(KeyMapping key)
+        {
+                boolean pressed = false;
+                while (key.consumeClick())
+                {
+                        pressed = true;
+                }
+                return pressed;
         }
 
         /** HUD layer under the crosshair: "[Shift] + [Right Button] to pick up", "Can't pick this one up", or drop. */
@@ -109,19 +174,25 @@ public final class CarryClient
                         }
                         else
                         {
-                                prompt = Component.translatable("throwablemobs.prompt.drop", inputKeys(minecraft));
+                                Component keys = inputKeys(CarryKeys.PUT_DOWN);
+                                if (keys == null)
+                                {
+                                        return;
+                                }
+                                prompt = Component.translatable("throwablemobs.prompt.drop", keys);
                         }
                 }
                 else if (minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob)
                 {
-                        if (ThrowableMobsConfig.CARRY.requireEmptyHand() && !player.getMainHandItem().isEmpty())
+                        Component keys = inputKeys(CarryKeys.PICK_UP);
+                        if (!CarryRules.canUseHands(player) || keys == null)
                         {
                                 return;
                         }
                         CarryRules.Denial denial = CarryRules.check(player, mob);
                         if (denial == null)
                         {
-                                prompt = Component.translatable("throwablemobs.prompt.pick_up", inputKeys(minecraft));
+                                prompt = Component.translatable("throwablemobs.prompt.pick_up", keys);
                         }
                         else
                         {
@@ -151,16 +222,19 @@ public final class CarryClient
                 }
         }
 
-        /** Current key names, so the text follows rebinding. */
-        private static Component inputKeys(Minecraft minecraft)
+        /** Current key names, so the text follows rebinding; {@code null} if the action's key is unbound. */
+        private static @Nullable Component inputKeys(KeyMapping action)
         {
-                Component use = minecraft.options.keyUse.getTranslatedKeyMessage();
-                if (!ThrowableMobsConfig.CARRY.requireSneak())
+                if (action.isUnbound())
                 {
-                        return Component.translatable("throwablemobs.prompt.key", use);
+                        return null;
+                }
+                if (CarryKeys.MODIFIER.isUnbound())
+                {
+                        return Component.translatable("throwablemobs.prompt.key", action.getTranslatedKeyMessage());
                 }
                 return Component.translatable("throwablemobs.prompt.keys",
-                        minecraft.options.keyShift.getTranslatedKeyMessage(), use);
+                        CarryKeys.MODIFIER.getTranslatedKeyMessage(), action.getTranslatedKeyMessage());
         }
 
         /**

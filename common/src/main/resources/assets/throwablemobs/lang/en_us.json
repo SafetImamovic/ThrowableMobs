@@ -1,4 +1,8 @@
 {
+    "key.category.throwablemobs.controls": "Throwable Mobs",
+    "key.throwablemobs.modifier": "Modifier",
+    "key.throwablemobs.pick_up": "Pick up",
+    "key.throwablemobs.put_down": "Put down",
     "throwablemobs.prompt.key": "[%s]",
     "throwablemobs.prompt.keys": "[%s] + [%s]",
     "throwablemobs.prompt.pick_up": "%s to pick up",

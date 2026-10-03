@@ -20,7 +20,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -33,7 +32,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -47,6 +45,9 @@ import org.jspecify.annotations.Nullable;
 public final class CarryManager
 {
         private static final Identifier SLOWDOWN_ID = Constants.id("carry_slowdown");
+
+        /** Extra reach allowed for pick-up requests, for movement between the client's check and the server's. */
+        private static final double PICK_UP_REACH_TOLERANCE = 3.0;
 
         /** Carrier UUID to carried mob. Server-side only; mobs that load with a stale {@link CarryState} are restored. */
         private static final Map<UUID, Mob> CARRIED = new HashMap<>();
@@ -62,48 +63,40 @@ public final class CarryManager
         }
 
         /**
-         * Use-entity hook (both sides). With the carry input: drop if carrying, otherwise pick up when the rules allow.
-         * A denied pickup passes, so vanilla interactions (trading, mounting) still work.
+         * Use-entity hook (both sides). Nobody interacts with a carried mob: no trading with the villager on your head.
+         * Picking up and putting down go through the key mappings and their payloads, not vanilla interactions.
          */
-        public static InteractionResult onUseEntity(Player player, Level level, InteractionHand hand, Entity target)
+        public static InteractionResult onUseEntity(Entity target)
         {
-                if (hand != InteractionHand.MAIN_HAND || !CarryRules.isCarryInput(player))
-                {
-                        return InteractionResult.PASS;
-                }
-                if (level.isClientSide())
-                {
-                        // Predict the server's answer so the hand swings and vanilla doesn't also act on the click.
-                        if (LocalCarry.get() != null)
-                        {
-                                return InteractionResult.SUCCESS;
-                        }
-                        return target instanceof Mob mob && CarryRules.check(player, mob) == null
-                                ? InteractionResult.SUCCESS
-                                : InteractionResult.PASS;
-                }
-
-                ServerPlayer serverPlayer = (ServerPlayer) player;
-                if (carriedBy(serverPlayer) != null)
-                {
-                        drop(serverPlayer);
-                        return InteractionResult.SUCCESS;
-                }
-                if (target instanceof Mob mob && CarryRules.check(serverPlayer, mob) == null)
-                {
-                        pickUp(serverPlayer, mob);
-                        return InteractionResult.SUCCESS;
-                }
-                return InteractionResult.PASS;
+                return Services.CARRY_STATE.get(target) != null ? InteractionResult.FAIL : InteractionResult.PASS;
         }
 
-        /** {@link io.github.safetimamovic.throwablemobs.network.DropCarriedPayload} from a client. */
+        /** {@link io.github.safetimamovic.throwablemobs.network.DropCarriedPayload} from a client (put-down key). */
         public static void onDropRequest(ServerPlayer player)
         {
-                if (CarryRules.isCarryInput(player))
+                if (!player.isSpectator())
                 {
                         drop(player);
                 }
+        }
+
+        /** {@link io.github.safetimamovic.throwablemobs.network.PickUpPayload} from a client (pick-up key). */
+        public static void onPickUpRequest(ServerPlayer player, int entityId)
+        {
+                if (!CarryRules.canUseHands(player) || carriedBy(player) != null
+                        || !(player.level().getEntity(entityId) instanceof Mob mob)
+                        || !player.isWithinEntityInteractionRange(mob, PICK_UP_REACH_TOLERANCE))
+                {
+                        return;
+                }
+                CarryRules.Denial denial = CarryRules.check(player, mob);
+                if (denial != null)
+                {
+                        // The client only asks when its own check passed, so tell the player why the server disagrees.
+                        player.sendOverlayMessage(denial.message());
+                        return;
+                }
+                pickUp(player, mob);
         }
 
         /** Picks up without checking {@link CarryRules}; callers check first. */
@@ -150,16 +143,6 @@ public final class CarryManager
                 CARRIED.remove(player.getUUID());
                 removeSlowdown(player);
                 release(mob, at);
-        }
-
-        /**
-         * Use-block hook (both sides). Sneak + use on a block while carrying puts the mob down (via
-         * {@code DropCarriedPayload}), so the block itself mustn't react: no chests opening under the mob.
-         */
-        public static InteractionResult onUseBlock(Player player, Level level)
-        {
-                boolean carrying = level.isClientSide() ? LocalCarry.get() != null : carriedBy(player) != null;
-                return carrying && CarryRules.isCarryInput(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
 
         /** Once per server tick: keep carried mobs on their carriers' heads, drop them when the carry is broken. */

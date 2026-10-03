@@ -293,13 +293,13 @@ ThrowableMobs/
 
 | Action | Input |
 |---|---|
-| Pick up | Sneak + right-click mob with empty main hand |
+| Pick up | Modifier + Pick up (default Left Shift + right-click) on a mob, empty main hand |
 | Charge throw | Hold right-click while carrying (charge bar like a bow) |
 | Throw | Release right-click |
-| Drop gently | Sneak + right-click while carrying (or a keybind) |
+| Put down | Modifier + Put down (default Left Shift + right-click) while carrying, looking at ground |
 | Catch | Empty hand + look at incoming mob (+ optionally hold right-click) — see §12 |
 
-Sneak+right-click conflicts with Carry On and with villager/horse interactions. Make the trigger configurable (`pickup_requires_sneak`, `pickup_key = "use" | "keybind"`), and provide a dedicated keybind option.
+Three key mappings in Controls → Throwable Mobs: **Modifier** (default Left Shift; unbind it to need no modifier), **Pick up** and **Put down** (both default right-click, so the same key toggles). The defaults share keys with Sneak and Use; when one of ours acts, vanilla's use is swallowed for that press, so no trading with the villager you just picked up. Same input as Carry On (clash accepted).
 
 ### Carrying
 - **Follow model** (not a passenger): vanilla refuses entities riding players on the server (`PLAYER` is `.noSave()`), and passengers aren't saved with chunks. The mob stays a normal, always-saved entity; the server moves it above the carrier's head each tick (AI, gravity and physics off), and the client mod locks it to the carrier for smooth rendering. A carry-state attachment (persistent + synced) records who carries it. Details: `docs/plans/m1-carry.md`.
@@ -622,7 +622,6 @@ Sketch of the server config:
 
 ```toml
 [pickup]
-require_sneak = true
 require_empty_hand = true
 max_mass = 1500.0
 allow_players = false
@@ -863,7 +862,7 @@ Settled 2026-10-02:
 | Defaults | **Balanced survival.** But every number is configurable and per-mob behavior is data-driven, so goofy packs can crank it (explosion power, impulse, `max_mass`, unthrowable list). Consider shipping a built-in "chaos" datapack/config preset players can enable. |
 | Players throwable | Config option, **off by default**. |
 | Villagers | **Throwable by default.** |
-| Pick-up input | Sneak + right-click (same as Carry On — clash accepted for now). Changeable **in game** (keybind in Controls + client config screen) and in the default config file. |
+| Pick-up input | Key mappings **Modifier** (Left Shift) + **Pick up** / **Put down** (right-click), all rebindable in Controls; Modifier can be unbound. Same default as Carry On (clash accepted for now). |
 | License | **MIT** |
 | Server plugin | **Paper port planned (M8)**, Paper API only (no Spigot). Shares the `physics/` module + mob profile JSON schema. |
 | Common tags | Code checks only our own tags; `c:` tags are default *contents* of them (pack devs can remove). No hardcoded `c:` checks. |

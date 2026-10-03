@@ -43,13 +43,11 @@ public final class CarryRules
         {
         }
 
-        /** The pick-up / drop input: sneak (if required) with an empty main hand (if required), not a spectator. */
-        public static boolean isCarryInput(Player player)
+        /** Free to pick something up, whatever the input: not a spectator, main hand empty (if required). */
+        public static boolean canUseHands(Player player)
         {
-                CarryConfig config = ThrowableMobsConfig.CARRY;
                 return !player.isSpectator()
-                        && (!config.requireSneak() || player.isShiftKeyDown())
-                        && (!config.requireEmptyHand() || player.getMainHandItem().isEmpty());
+                        && (!ThrowableMobsConfig.CARRY.requireEmptyHand() || player.getMainHandItem().isEmpty());
         }
 
         /** Why {@code player} can't pick up {@code mob}, or {@code null} if they can. Ignores input and reach. */

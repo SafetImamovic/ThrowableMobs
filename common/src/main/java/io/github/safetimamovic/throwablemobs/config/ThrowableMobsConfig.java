@@ -8,7 +8,6 @@ public final class ThrowableMobsConfig
 {
         public static final CarryConfig CARRY = new CarryConfig(
                 true,
-                true,
                 1500.0,
                 400.0,
                 true,
@@ -83,7 +82,6 @@ public final class ThrowableMobsConfig
         }
 
         /**
-         * @param requireSneak      pick up / drop needs sneak + use (otherwise use alone)
          * @param requireEmptyHand  pick up needs an empty main hand
          * @param maxMass           heaviest mob a player can lift, in game-kg (see THROWABLE_MOBS.md §8.1)
          * @param defaultDensity    density for mass-from-hitbox, game-kg per block³
@@ -108,7 +106,6 @@ public final class ThrowableMobsConfig
          * @param promptOffsetY          client: vertical prompt offset from the anchor, in GUI pixels (down is positive)
          */
         public record CarryConfig(
-                boolean requireSneak,
                 boolean requireEmptyHand,
                 double maxMass,
                 double defaultDensity,

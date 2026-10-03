@@ -2,6 +2,7 @@ package io.github.safetimamovic.throwablemobs;
 
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
+import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.platform.NeoForgeCarryStateAccess;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -25,19 +26,13 @@ public class ThrowableMobsNeoForge
                 NeoForgeCarryStateAccess.ATTACHMENT_TYPES.register(modEventBus);
                 modEventBus.addListener((RegisterPayloadHandlersEvent event) -> event.registrar("1")
                         .playToServer(DropCarriedPayload.TYPE, DropCarriedPayload.STREAM_CODEC,
-                                (payload, context) -> CarryManager.onDropRequest((ServerPlayer) context.player())));
+                                (payload, context) -> CarryManager.onDropRequest((ServerPlayer) context.player()))
+                        .playToServer(PickUpPayload.TYPE, PickUpPayload.STREAM_CODEC,
+                                (payload, context) -> CarryManager.onPickUpRequest((ServerPlayer) context.player(),
+                                        payload.entityId())));
 
                 IEventBus bus = NeoForge.EVENT_BUS;
                 bus.addListener(ThrowableMobsNeoForge::onEntityInteract);
-                bus.addListener((PlayerInteractEvent.RightClickBlock event) ->
-                {
-                        InteractionResult result = CarryManager.onUseBlock(event.getEntity(), event.getLevel());
-                        if (result != InteractionResult.PASS)
-                        {
-                                event.setCancellationResult(result);
-                                event.setCanceled(true);
-                        }
-                });
                 bus.addListener((LivingIncomingDamageEvent event) ->
                 {
                         if (!CarryManager.allowDamage(event.getEntity(), event.getSource()))
@@ -72,9 +67,7 @@ public class ThrowableMobsNeoForge
 
         private static void onEntityInteract(PlayerInteractEvent.EntityInteract event)
         {
-                InteractionResult result = CarryManager.onUseEntity(event.getEntity(), event.getLevel(),
-                        event.getHand(),
-                        event.getTarget());
+                InteractionResult result = CarryManager.onUseEntity(event.getTarget());
                 if (result != InteractionResult.PASS)
                 {
                         event.setCancellationResult(result);
