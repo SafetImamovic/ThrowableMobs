@@ -4,10 +4,13 @@ import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.network.chat.Component;
@@ -30,6 +33,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -104,8 +108,14 @@ public final class CarryManager
         /** Picks up without checking {@link CarryRules}; callers check first. */
         public static void pickUp(ServerPlayer player, Mob mob)
         {
-                Services.CARRY_STATE.set(mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
+                hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
                         mob.level().getGameTime()));
+        }
+
+        /** Starts or resumes a carry with an existing state, keeping the original flags it recorded. */
+        private static void hold(ServerPlayer player, Mob mob, CarryState state)
+        {
+                Services.CARRY_STATE.set(mob, state);
                 mob.setNoAi(true);
                 mob.setNoGravity(true);
                 mob.noPhysics = true;
@@ -154,6 +164,7 @@ public final class CarryManager
         /** Once per server tick: keep carried mobs on their carriers' heads, drop them when the carry is broken. */
         public static void tick(MinecraftServer server)
         {
+                List<Map.Entry<ServerPlayer, Mob>> travelling = new ArrayList<>();
                 Iterator<Map.Entry<UUID, Mob>> it = CARRIED.entrySet().iterator();
                 while (it.hasNext())
                 {
@@ -167,16 +178,58 @@ public final class CarryManager
                                 removeSlowdown(carrier);
                                 continue;
                         }
-                        if (carrier == null || !carrier.isAlive() || carrier.isSpectator()
-                                || carrier.level() != mob.level())
+                        if (carrier == null || !carrier.isAlive() || carrier.isSpectator())
                         {
-                                // Logout, death, dimension change: drop where the mob is, above the carrier's last spot.
+                                // Logout, death: drop where the mob is, above the carrier's last spot.
                                 it.remove();
                                 removeSlowdown(carrier);
                                 release(mob, mob.position());
                                 continue;
                         }
+                        if (carrier.level() != mob.level())
+                        {
+                                it.remove();
+                                if (ThrowableMobsConfig.CARRY.onDimensionChange() == DimensionChange.TRAVEL)
+                                {
+                                        // Teleporting adds entities to the other level, so not while iterating.
+                                        travelling.add(Map.entry(carrier, mob));
+                                }
+                                else
+                                {
+                                        removeSlowdown(carrier);
+                                        release(mob, mob.position());
+                                }
+                                continue;
+                        }
                         follow(carrier, mob);
+                }
+                for (Map.Entry<ServerPlayer, Mob> entry : travelling)
+                {
+                        travel(entry.getKey(), entry.getValue());
+                }
+        }
+
+        /**
+         * Moves a carried mob to its carrier's new dimension. Vanilla replaces the entity with a copy there; the copy
+         * loads as an orphan and gets released by {@link #onEntityLoad}, so the carry resumes with the state captured
+         * here, which still holds the mob's original flags.
+         */
+        private static void travel(ServerPlayer carrier, Mob mob)
+        {
+                CarryState state = Services.CARRY_STATE.get(mob);
+                Entity arrived = mob.teleport(new TeleportTransition(carrier.level(), carrier.position()
+                        .add(0.0, carrier.getBbHeight(), 0.0), Vec3.ZERO, carrier.getYRot(), mob.getXRot(),
+                        TeleportTransition.DO_NOTHING));
+                if (state != null && arrived instanceof Mob arrivedMob && !arrivedMob.isRemoved())
+                {
+                        hold(carrier, arrivedMob, state);
+                        return;
+                }
+                removeSlowdown(carrier);
+                Mob left = arrived instanceof Mob arrivedMob ? arrivedMob : mob;
+                if (!left.isRemoved())
+                {
+                        release(left, left.position());
                 }
         }
 

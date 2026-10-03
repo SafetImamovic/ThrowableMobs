@@ -21,7 +21,8 @@ public final class ThrowableMobsConfig
                 true,
                 CarriedFacing.CARRIER,
                 true,
-                GroundFilter.DENY_LIST);
+                GroundFilter.DENY_LIST,
+                DimensionChange.TRAVEL);
 
         private ThrowableMobsConfig()
         {
@@ -45,6 +46,15 @@ public final class ThrowableMobsConfig
                 ALLOW_LIST
         }
 
+        /** What happens to a carried mob when its carrier changes dimension (portal, {@code /tp}). */
+        public enum DimensionChange
+        {
+                /** The mob is put down where the carrier left. */
+                DROP,
+                /** The mob travels with the carrier and stays carried. */
+                TRAVEL
+        }
+
         /**
          * @param requireSneak      pick up / drop needs sneak + use (otherwise use alone)
          * @param requireEmptyHand  pick up needs an empty main hand
@@ -64,6 +74,7 @@ public final class ThrowableMobsConfig
          *                               it can't be dropped off a skyblock platform); otherwise it falls back to in
          *                               front of the carrier, or their feet
          * @param dropGroundFilter       which blocks count as valid ground
+         * @param onDimensionChange      what happens to a carried mob when its carrier changes dimension
          */
         public record CarryConfig(
                 boolean requireSneak,
@@ -80,7 +91,8 @@ public final class ThrowableMobsConfig
                 boolean protectFromCarrier,
                 CarriedFacing carriedFacing,
                 boolean dropNeedsGround,
-                GroundFilter dropGroundFilter)
+                GroundFilter dropGroundFilter,
+                DimensionChange onDimensionChange)
         {
         }
 }
