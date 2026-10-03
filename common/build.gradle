@@ -21,14 +21,9 @@ dependencies {
     // Fabric and NeoForge both bundle MixinExtras, so it is safe to use it in common
     compileOnly(annotationProcessor('io.github.llamalad7:mixinextras-common:0.5.3'))
 
-    // Pure-Java unit tests (physics math etc.). In-game behavior is covered by GameTests instead.
-    testImplementation(platform("org.junit:junit-bom:${junit_version}"))
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-}
-
-tasks.named('test', Test) {
-    useJUnitPlatform()
+    // Pure-Java physics math. `api` so loader projects see it through their compileOnly(':common').
+    // Its unit tests live in :physics; in-game behavior is covered by GameTests.
+    api(project(':physics'))
 }
 
 configurations {

@@ -9,6 +9,10 @@ configurations {
     commonResources {
         canBeResolved = true
     }
+    // :physics sources are compiled into the loader jar, same as :common.
+    physicsJava {
+        canBeResolved = true
+    }
 }
 
 dependencies {
@@ -20,11 +24,14 @@ dependencies {
     }
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
+    physicsJava(project(path: ':physics', configuration: 'physicsJava'))
 }
 
 tasks.named('compileJava', JavaCompile) {
     dependsOn(configurations.commonJava)
     source(configurations.commonJava)
+    dependsOn(configurations.physicsJava)
+    source(configurations.physicsJava)
 }
 
 processResources {
@@ -35,11 +42,15 @@ processResources {
 tasks.named('javadoc', Javadoc).configure {
     dependsOn(configurations.commonJava)
     source(configurations.commonJava)
+    dependsOn(configurations.physicsJava)
+    source(configurations.physicsJava)
 }
 
 tasks.named('sourcesJar', Jar) {
     dependsOn(configurations.commonJava)
     from(configurations.commonJava)
+    dependsOn(configurations.physicsJava)
+    from(configurations.physicsJava)
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 }
