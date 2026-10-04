@@ -112,6 +112,7 @@ public final class ThrowableMobsConfig
                 int minChargeTicks,
                 double inheritVelocity,
                 int throwerGraceTicks,
+                boolean allowTrajectory,
                 double gravity,
                 double drag,
                 int maxFlightTicks,
@@ -131,7 +132,8 @@ public final class ThrowableMobsConfig
                 PromptAnchor anchor,
                 int offsetX,
                 int offsetY,
-                boolean showChargeBar)
+                boolean showChargeBar,
+                boolean showTrajectory)
         {
         }
 }

@@ -46,6 +46,7 @@
     "throwablemobs.configuration.min_charge_ticks": "Min Charge Ticks",
     "throwablemobs.configuration.inherit_velocity": "Inherit Thrower Movement",
     "throwablemobs.configuration.thrower_grace_ticks": "Thrower Grace Ticks",
+    "throwablemobs.configuration.allow_trajectory": "Allow Trajectory Preview",
     "throwablemobs.configuration.flight": "Flight",
     "throwablemobs.configuration.gravity": "Gravity",
     "throwablemobs.configuration.drag": "Drag",
@@ -61,5 +62,6 @@
     "throwablemobs.configuration.prompt_anchor": "Anchor",
     "throwablemobs.configuration.prompt_offset_x": "Offset X",
     "throwablemobs.configuration.prompt_offset_y": "Offset Y",
-    "throwablemobs.configuration.show_charge_bar": "Show Charge Bar"
+    "throwablemobs.configuration.show_charge_bar": "Show Charge Bar",
+    "throwablemobs.configuration.show_trajectory": "Show Trajectory Preview"
 }

@@ -50,6 +50,7 @@ public final class CreatorConfig
         private static final IntValue MIN_CHARGE_TICKS;
         private static final DoubleValue INHERIT_VELOCITY;
         private static final IntValue THROWER_GRACE_TICKS;
+        private static final BooleanValue ALLOW_TRAJECTORY;
 
         private static final DoubleValue GRAVITY;
         private static final DoubleValue DRAG;
@@ -135,6 +136,9 @@ public final class CreatorConfig
                 THROWER_GRACE_TICKS = builder.comment("Ticks after the throw during which the mob can't hit its",
                                 "thrower.")
                         .defineInRange("thrower_grace_ticks", 5, 0, 100);
+                ALLOW_TRAJECTORY = builder.comment("Players may see the trajectory preview while charging (each one",
+                                "can still hide it in their own settings). Off for everyone when false.")
+                        .define("allow_trajectory", true);
                 builder.pop();
 
                 builder.comment("A thrown mob in the air.").push("flight");
@@ -200,6 +204,7 @@ public final class CreatorConfig
                         get(MIN_CHARGE_TICKS),
                         get(INHERIT_VELOCITY),
                         get(THROWER_GRACE_TICKS),
+                        get(ALLOW_TRAJECTORY),
                         get(GRAVITY),
                         get(DRAG),
                         get(MAX_FLIGHT_TICKS),

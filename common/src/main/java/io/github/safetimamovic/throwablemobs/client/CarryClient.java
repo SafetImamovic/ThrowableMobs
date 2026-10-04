@@ -90,6 +90,11 @@ public final class CarryClient
                         }
                 }
                 LocalCarry.set(localCarried);
+                if (chargeTicks >= 0 && localCarried instanceof Mob mob && ThrowableMobsConfig.prompt().showTrajectory()
+                        && ThrowableMobsConfig.throwing().allowTrajectory())
+                {
+                        TrajectoryPreview.draw(level, player, mob, chargeTicks);
+                }
         }
 
         /**

@@ -23,6 +23,7 @@ public final class PlayerConfig
         private static final IntValue PROMPT_OFFSET_X;
         private static final IntValue PROMPT_OFFSET_Y;
         private static final BooleanValue SHOW_CHARGE_BAR;
+        private static final BooleanValue SHOW_TRAJECTORY;
 
         static
         {
@@ -40,6 +41,9 @@ public final class PlayerConfig
                         .defineInRange("prompt_offset_y", 12, -4096, 4096);
                 SHOW_CHARGE_BAR = builder.comment("Show a charge bar under the prompt while charging a throw.")
                         .define("show_charge_bar", true);
+                SHOW_TRAJECTORY = builder.comment("Show where the mob will fly and land while charging a throw (if",
+                                "the server allows it).")
+                        .define("show_trajectory", true);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -52,7 +56,7 @@ public final class PlayerConfig
         static PromptConfig read()
         {
                 return new PromptConfig(get(SHOW_PROMPT), get(PROMPT_ANCHOR), get(PROMPT_OFFSET_X), get(PROMPT_OFFSET_Y),
-                        get(SHOW_CHARGE_BAR));
+                        get(SHOW_CHARGE_BAR), get(SHOW_TRAJECTORY));
         }
 
         /** Not loaded on a dedicated server, which has no client config; the defaults apply there. */

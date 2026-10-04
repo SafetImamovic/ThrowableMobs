@@ -172,7 +172,7 @@ public final class ThrowManager
                 Entity nearest = null;
                 double nearestDistance = Double.MAX_VALUE;
                 for (Entity entity : mob.level().getEntities(mob, mob.getBoundingBox().expandTowards(flight.velocity()),
-                        entity -> canHit(entity, flight, ticks, config)))
+                        entity -> canHit(entity, flight.thrower(), ticks, config)))
                 {
                         double distance = entity.distanceToSqr(mob);
                         if (distance < nearestDistance)
@@ -184,14 +184,18 @@ public final class ThrowManager
                 return nearest;
         }
 
-        private static boolean canHit(Entity entity, Flight flight, int ticks, ThrowConfig config)
+        /**
+         * Whether a mob {@code ticks} into its flight can hit {@code entity}: living, not carried, and not its thrower
+         * during the grace ticks. Shared with the client's trajectory preview.
+         */
+        public static boolean canHit(Entity entity, UUID thrower, int ticks, ThrowConfig config)
         {
                 if (!(entity instanceof LivingEntity) || !entity.isAlive() || entity.isSpectator() || !entity.isPickable()
                         || Services.CARRY_STATE.get(entity) != null)
                 {
                         return false;
                 }
-                return ticks > config.throwerGraceTicks() || !entity.getUUID().equals(flight.thrower());
+                return ticks > config.throwerGraceTicks() || !entity.getUUID().equals(thrower);
         }
 
         /**
