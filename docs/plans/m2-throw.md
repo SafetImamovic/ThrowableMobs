@@ -40,7 +40,7 @@ On a **dedicated server**, on both **Fabric and NeoForge**, a player who carries
 | Moving the mob | Two options. **(a)** our velocity + `entity.move(MoverType.SELF, v)` each tick: free AABB block collision, but vanilla `travel` / air friction (`0.91`, `0.98`) also run on a mob even with `NoAi` and must be stopped or cancelled. **(b)** `noPhysics = true`, own position update + own AABB sweep against blocks: full control, more code. Spike (a) first; fall back to (b). |
 | Client smoothness | Fast mobs (chicken at 2 b/t) may stutter with normal entity tracking. Check the update interval / velocity sync; may need to send velocity so clients extrapolate. |
 | Entity hits | Sweep along `v` with the mob's AABB inflated, `ProjectileUtil`-style. Fast mobs must not tunnel through thin targets. |
-| Landing | "Landed" = on ground and speed below `land_speed`. Bounces (restitution) can loop; cap bounces at 1 in M2. |
+| Landing | The flight ends at the first impact (block or entity), in water, or at `max_flight_ticks`; then vanilla takes over with the leftover motion. No bounces in M2, so no `land_speed`. |
 
 Spike = throwaway code, Fabric only, fixed throw speed, `runServer` + 2 clients. Gate: chicken thrown at full speed flies smooth on both clients, lands, no wall clipping.
 
@@ -71,6 +71,21 @@ Gate passed: smooth on both clients, stops at walls, AI back on landing.
 | 8 | **Loader events** | Reuse M1 wiring; add fall-damage cancel during flight and entity-load orphan fix for `ThrowState`. |
 | 9 | **Tests** | Unit tests for step 0. Manual matrix below. |
 
+## Status (2026-10-04)
+
+| Step | State |
+|---|---|
+| 0 physics | Done. 14 unit tests pass. |
+| 1 spike | Done, findings above. |
+| 2–6, 8 | Done on both loaders: config, `ThrowState`, `thrown_mob` damage type (in `#minecraft:no_knockback`, our own push replaces vanilla knockback), Throw key + `ChargeThrowPayload` / `ThrowPayload`, `ThrowManager` with impacts inside it (no separate `ImpactResolver`). Tested in game on Fabric. |
+| 7 charge bar | Done. |
+| 7b trajectory preview | Next. |
+
+Implementation notes:
+- Block impacts use only the blocked part of the velocity (`v − actual movement`), so skimming the ground hurts less than hitting a wall head-on.
+- The thrown mob's own damage uses vanilla `fly_into_wall`; the hit entity gets `thrown_mob` with the thrower as attacker. Both set the thrower as last player attacker, so kills give XP and player-only loot.
+- With the modifier unbound, Put down and Throw share the same input and Put down wins; Throw then needs its own key.
+
 ## Config (creator file)
 
 Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "game-kg".
@@ -87,7 +102,6 @@ Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "g
 | flight | `gravity` | `0.05` | Arrow value. |
 | flight | `drag` | `0.99` | Per tick, linear. |
 | flight | `max_flight_ticks` | `200` | Then flight ends wherever the mob is. |
-| flight | `land_speed` | `0.05` | Below this on ground → landed. |
 | impact | `damage_per_energy` | `0.1` | `k_E`. |
 | impact | `min_impact_energy` | `10.0` | `E_min`, below this no damage. |
 | impact | `max_impact_damage` | `20.0` | |
