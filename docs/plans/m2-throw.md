@@ -85,6 +85,7 @@ Implementation notes:
 - Block impacts use only the blocked part of the velocity (`v − actual movement`), so skimming the ground hurts less than hitting a wall head-on.
 - The thrown mob's own damage uses vanilla `fly_into_wall`; the hit entity gets `thrown_mob` with the thrower as attacker. Both set the thrower as last player attacker, so kills give XP and player-only loot.
 - The preview moves with `Entity.collideBoundingBox`, the collision `Entity#move` uses on the server, so it lands where the real throw lands. Vanilla collects gizmos per client tick and draws them every frame, so it updates at 20 Hz.
+- Flight pose: `ThrowState` is synced to tracking clients so they know a mob is flying. A client mixin on `LivingEntityRenderer` takes the direction from the mob's movement since the last tick, sets its facing, and tilts and spins the model around the middle of its hitbox at the end of `setupRotations`. Positive X rotation tips the head backward there, because vanilla flips the model afterwards.
 - With the modifier unbound, Put down and Throw share the same input and Put down wins; Throw then needs its own key.
 
 ## Config (creator file)
@@ -119,6 +120,8 @@ Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "g
 | charge_bar | `charge_bar_width` / `_height` | `120` / `10` | GUI pixels. |
 | trajectory | `show_trajectory` | `true` | Also needs the server's `allow_trajectory`. |
 | trajectory | `trajectory_style` | `LINE` | `LINE`, `DASHED`, `DOTS` (one per tick), `LANDING_ONLY`. The landing box shows in every style. |
+| flight_pose | `flight_pose` | `HEAD_FIRST` | How thrown mobs look in the air, visual only. `NONE`, `FACE_DIRECTION` (upright, faces where it flies), `TILT` (nose up, then nose down), `HEAD_FIRST` (lies along the path, head leading, like an arrow). |
+| flight_pose | `spiral_speed` | `0` | Degrees per tick of spin around the flight direction with `TILT` / `HEAD_FIRST`, like a thrown football. |
 
 Key mappings: **Throw** (Right Button, no modifier) and **Cancel throw** (Left Button, only while charging; swallows that attack press).
 
@@ -140,6 +143,7 @@ Key mappings: **Throw** (Right Button, no modifier) and **Cancel throw** (Left B
 - [ ] 14 Config values change the throw live (impulse, gravity, max speed).
 - [ ] 15 Trajectory preview grows with charge and the mob lands on the marker (open field, against a wall, off a cliff).
 - [ ] 16 `show_trajectory = false` hides it for that player; server `allow_trajectory = false` hides it for everyone.
-- [ ] 17 Cancel throw while charging: no throw, no punch, bar and preview gone; holding Throw doesn't restart the charge until pressed again.
-- [ ] 18 Charge bar follows `charge_bar_anchor` / offsets / size, and shows even with `show_prompt = false`.
-- [ ] 19 Each `trajectory_style` draws as described.
+- [x] 17 Cancel throw while charging: no throw, no punch, bar and preview gone; holding Throw doesn't restart the charge until pressed again.
+- [x] 18 Charge bar follows `charge_bar_anchor` / offsets / size, and shows even with `show_prompt = false`.
+- [x] 19 Each `trajectory_style` draws as described.
+- [x] 20 Each `flight_pose` looks as described (head leads with `HEAD_FIRST`, nose up then down with `TILT`); `spiral_speed` spins it; the mob looks normal after landing.

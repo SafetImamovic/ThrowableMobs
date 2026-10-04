@@ -4,6 +4,7 @@ import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.carry.ThrowState;
 import io.github.safetimamovic.throwablemobs.platform.services.IThrowStateAccess;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
@@ -13,7 +14,8 @@ public final class FabricThrowStateAccess implements IThrowStateAccess
         // Registered when Services loads this class during mod init.
         private static final AttachmentType<ThrowState> THROW_STATE = AttachmentRegistry.create(
                 Constants.id("throw_state"),
-                builder -> builder.persistent(ThrowState.CODEC));
+                builder -> builder.persistent(ThrowState.CODEC)
+                        .syncWith(ThrowState.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
         @Override
         public @Nullable ThrowState get(Entity entity)

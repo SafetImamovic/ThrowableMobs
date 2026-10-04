@@ -5,10 +5,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 /**
  * Attached to a mob while it flies after a throw. Saved with the mob, so a mob that loads mid-flight (chunk unload,
- * server stop) gets its original state back. Not synced: clients just see the server move the mob.
+ * server stop) gets its original state back. Synced to tracking clients, which draw flying mobs in their flight pose.
  *
  * @param thrower           UUID of the throwing player, credited for kills
  * @param originalNoAi      the mob's {@code NoAI} flag before it was picked up, restored when the flight ends
@@ -25,4 +28,11 @@ public record ThrowState(UUID thrower, boolean originalNoAi, boolean originalNoG
                 .apply(instance, ThrowState::new));
 
         public static final Codec<ThrowState> CODEC = MAP_CODEC.codec();
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ThrowState> STREAM_CODEC = StreamCodec.composite(
+                UUIDUtil.STREAM_CODEC, ThrowState::thrower,
+                ByteBufCodecs.BOOL, ThrowState::originalNoAi,
+                ByteBufCodecs.BOOL, ThrowState::originalNoGravity,
+                ByteBufCodecs.VAR_LONG, ThrowState::launchTick,
+                ThrowState::new);
 }

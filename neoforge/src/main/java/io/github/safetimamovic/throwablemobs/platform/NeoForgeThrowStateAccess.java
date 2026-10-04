@@ -13,6 +13,7 @@ public final class NeoForgeThrowStateAccess implements IThrowStateAccess
         private static final Supplier<AttachmentType<ThrowState>> THROW_STATE = NeoForgeCarryStateAccess.ATTACHMENT_TYPES
                 .register("throw_state", () -> AttachmentType.<ThrowState>builder(() -> null)
                         .serialize(ThrowState.MAP_CODEC)
+                        .sync(ThrowState.STREAM_CODEC)
                         .build());
 
         @Override

@@ -53,6 +53,19 @@ public final class ThrowableMobsConfig
                 LANDING_ONLY
         }
 
+        /** How a thrown mob looks in the air. Visual only: the hitbox stays upright. */
+        public enum FlightPoseStyle
+        {
+                /** As vanilla: it keeps facing wherever it faced. */
+                NONE,
+                /** Turns to face where it flies, staying upright. */
+                FACE_DIRECTION,
+                /** Faces where it flies and tilts with the arc: nose up on the way up, nose down on the way down. */
+                TILT,
+                /** Like an arrow: the body lies along the path, head first. */
+                HEAD_FIRST
+        }
+
         /** Which way a carried mob faces. */
         public enum CarriedFacing
         {
@@ -152,7 +165,9 @@ public final class ThrowableMobsConfig
                 int chargeBarWidth,
                 int chargeBarHeight,
                 boolean showTrajectory,
-                TrajectoryStyle trajectoryStyle)
+                TrajectoryStyle trajectoryStyle,
+                FlightPoseStyle flightPose,
+                float spiralSpeed)
         {
         }
 }

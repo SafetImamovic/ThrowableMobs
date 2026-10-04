@@ -73,5 +73,7 @@
     "throwablemobs.configuration.charge_bar_height": "Height",
     "throwablemobs.configuration.trajectory": "Trajectory Preview",
     "throwablemobs.configuration.show_trajectory": "Show Trajectory Preview",
-    "throwablemobs.configuration.trajectory_style": "Style"
+    "throwablemobs.configuration.trajectory_style": "Style",
+    "throwablemobs.configuration.flight_pose": "Flight Pose",
+    "throwablemobs.configuration.spiral_speed": "Spiral Speed"
 }

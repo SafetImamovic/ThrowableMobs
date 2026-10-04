@@ -1,11 +1,13 @@
 package io.github.safetimamovic.throwablemobs.config;
 
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.FlightPoseStyle;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudAnchor;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.TrajectoryStyle;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
 import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
 import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
 
@@ -33,6 +35,9 @@ public final class PlayerConfig
 
         private static final BooleanValue SHOW_TRAJECTORY;
         private static final EnumValue<TrajectoryStyle> TRAJECTORY_STYLE;
+
+        private static final EnumValue<FlightPoseStyle> FLIGHT_POSE;
+        private static final DoubleValue SPIRAL_SPEED;
 
         static
         {
@@ -77,6 +82,17 @@ public final class PlayerConfig
                         .defineEnum("trajectory_style", TrajectoryStyle.LINE);
                 builder.pop();
 
+                builder.comment("How thrown mobs look in the air. Visual only: hitboxes and hits don't change.")
+                        .push("flight_pose");
+                FLIGHT_POSE = builder.comment("NONE: as vanilla. FACE_DIRECTION: turns to face where it flies.",
+                                "TILT: also tilts with the arc, nose up then nose down. HEAD_FIRST: like an arrow,",
+                                "the body lies along the path with the head leading.")
+                        .defineEnum("flight_pose", FlightPoseStyle.HEAD_FIRST);
+                SPIRAL_SPEED = builder.comment("Spin around the flight direction with TILT or HEAD_FIRST, like a",
+                                "thrown football, in degrees per tick (36 = one turn every half second, 0 = no spin).")
+                        .defineInRange("spiral_speed", 0.0, 0.0, 360.0);
+                builder.pop();
+
                 SPEC = builder.build();
         }
 
@@ -98,7 +114,9 @@ public final class PlayerConfig
                         get(CHARGE_BAR_WIDTH),
                         get(CHARGE_BAR_HEIGHT),
                         get(SHOW_TRAJECTORY),
-                        get(TRAJECTORY_STYLE));
+                        get(TRAJECTORY_STYLE),
+                        get(FLIGHT_POSE),
+                        get(SPIRAL_SPEED).floatValue());
         }
 
         /** Not loaded on a dedicated server, which has no client config; the defaults apply there. */
