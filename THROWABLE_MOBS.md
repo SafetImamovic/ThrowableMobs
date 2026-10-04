@@ -842,10 +842,10 @@ Hand-written reference tables rot. Generate them:
 |---|---|
 | **M0 — Setup** | JDK 25, MultiLoader-Template on 26.3 (or 26.2 if loaders lag), Neovim + jdtls + DAP working, `runClient` on both loaders. **Follow-up:** split `physics/` into its own MC-free Gradle module. |
 | **M1 — Pick up & drop** | Carry (follow model, §7), sneak+right-click, on-screen prompt, restore state, `unthrowable` tag (incl. `c:` defaults), dedicated server test. |
-| **M2 — Throw** | Charge, impulse launch, flight sim, block/entity collision, energy damage, knockback, damage type, config file. |
+| **M2 — Throw** | Charge + charge bar, impulse launch, flight sim, trajectory preview, block/entity collision, energy damage, knockback, damage type. Config files + screens done before M2 (`docs/plans/config-files.md`). |
 | **M3 — Behavior system** | `ThrowBehavior` API, registry, 6 vanilla behaviors (creeper, enderman, slime, chicken, blaze, cat), datapack loader, heuristics. |
 | **M4 — Catching** | Server catch check, recoil, self-catch, glow highlight, latency compensation. |
-| **M5 — Polish** | Trajectory preview, HUD, sounds/particles, full vanilla roster, advancements, config screens. |
+| **M5 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
 | **M6 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. |
 | **M7 — Reach** | Stonecutter + 1.21.1 backport, KubeJS integration. |
 | **M8 — Paper plugin** | `paper/` module on shared `physics/`, item-based / sneak+swing controls, action-bar HUD, particle trajectory preview, minigame events API, permissions, Folia decision, docs pages for admins/plugin devs, Hangar + Modrinth + SpigotMC release. |
