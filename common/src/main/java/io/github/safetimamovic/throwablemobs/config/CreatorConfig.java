@@ -61,6 +61,7 @@ public final class CreatorConfig
         private static final DoubleValue MIN_IMPACT_ENERGY;
         private static final DoubleValue MAX_IMPACT_DAMAGE;
         private static final DoubleValue RESTITUTION;
+        private static final BooleanValue VANILLA_FALL_DAMAGE;
 
         static
         {
@@ -130,8 +131,8 @@ public final class CreatorConfig
                         .defineInRange("max_charge_ticks", 20, 1, 200);
                 MIN_CHARGE_TICKS = builder.comment("Letting go sooner than this cancels the throw.")
                         .defineInRange("min_charge_ticks", 3, 0, 200);
-                INHERIT_VELOCITY = builder.comment("Share of the thrower's own movement added to the throw (1 = all of",
-                                "it, so sprint-throws go further).")
+                INHERIT_VELOCITY = builder.comment("Share of the thrower's own movement added to the throw: 1 = all of",
+                                "it, so sprint-throws go further; 0 = no running bonus; 2 = double.")
                         .defineInRange("inherit_velocity", 1.0, 0.0, 2.0);
                 THROWER_GRACE_TICKS = builder.comment("Ticks after the throw during which the mob can't hit its",
                                 "thrower.")
@@ -166,6 +167,10 @@ public final class CreatorConfig
                 RESTITUTION = builder.comment("Bounciness: 0 = the bodies stick together, 1 = perfectly elastic.",
                                 "Sets how much momentum the hit entity gets as knockback.")
                         .defineInRange("restitution", 0.3, 0.0, 1.0);
+                VANILLA_FALL_DAMAGE = builder.comment("Thrown mobs also take vanilla fall damage when they land, on top",
+                                "of the impact damage (measured from the top of the arc; mobs immune to fall damage",
+                                "stay immune). Off: impact damage replaces fall damage during the flight.")
+                        .define("vanilla_fall_damage", false);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -212,7 +217,8 @@ public final class CreatorConfig
                         get(DAMAGE_PER_ENERGY),
                         get(MIN_IMPACT_ENERGY),
                         get(MAX_IMPACT_DAMAGE),
-                        get(RESTITUTION));
+                        get(RESTITUTION),
+                        get(VANILLA_FALL_DAMAGE));
         }
 
         /** A server config isn't loaded on a client outside a world; the defaults apply there. */

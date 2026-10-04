@@ -146,7 +146,8 @@ public final class ThrowableMobsConfig
                 double damagePerEnergy,
                 double minImpactEnergy,
                 double maxImpactDamage,
-                double restitution)
+                double restitution,
+                boolean vanillaFallDamage)
         {
         }
 

@@ -162,7 +162,10 @@ public final class ThrowManager
                         new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), config.gravity(), config.drag());
                 velocity = new Vec3(next.x(), next.y(), next.z());
                 mob.setDeltaMovement(velocity);
-                mob.resetFallDistance();
+                if (!config.vanillaFallDamage())
+                {
+                        mob.resetFallDistance();
+                }
                 return new Flight(flight.thrower(), velocity, mob.position(), ticks);
         }
 
@@ -295,10 +298,15 @@ public final class ThrowManager
                 }
         }
 
-        /** Damage hook (server): no vanilla fall damage in the air; impact damage replaces it. */
+        /**
+         * Damage hook (server): no vanilla fall damage in the air, impact damage replaces it, unless
+         * {@code vanilla_fall_damage} stacks the two. Vanilla applies it inside the landing {@link Entity#move}, while
+         * the mob still has its ThrowState.
+         */
         public static boolean allowDamage(LivingEntity entity, DamageSource source)
         {
-                return !(source.is(DamageTypeTags.IS_FALL) && Services.THROW_STATE.get(entity) != null);
+                return !(source.is(DamageTypeTags.IS_FALL) && Services.THROW_STATE.get(entity) != null
+                        && !ThrowableMobsConfig.throwing().vanillaFallDamage());
         }
 
         public static void onLogout(ServerPlayer player)
