@@ -29,6 +29,7 @@ public class ThrowableMobsNeoForgeClient
                         event.register(CarryKeys.MODIFIER);
                         event.register(CarryKeys.PICK_UP);
                         event.register(CarryKeys.PUT_DOWN);
+                        event.register(CarryKeys.THROW);
                 });
                 NeoForge.EVENT_BUS
                         .addListener((ClientTickEvent.Pre event) -> CarryClient.tickInput(Minecraft.getInstance()));

@@ -17,6 +17,12 @@ public final class ThrowableMobsConfig
                 return CreatorConfig.read();
         }
 
+        /** Current creator settings for throwing, flight and impacts. */
+        public static ThrowConfig throwing()
+        {
+                return CreatorConfig.readThrow();
+        }
+
         /** Current player settings; changes in the config screen apply right away. */
         public static PromptConfig prompt()
         {
@@ -96,13 +102,36 @@ public final class ThrowableMobsConfig
         }
 
         /**
+         * Creator settings for throwing, see {@link CreatorConfig} for what each one does. Units: blocks, ticks,
+         * blocks/tick, game-kg.
+         */
+        public record ThrowConfig(
+                double throwImpulse,
+                double maxThrowSpeed,
+                int maxChargeTicks,
+                int minChargeTicks,
+                double inheritVelocity,
+                int throwerGraceTicks,
+                double gravity,
+                double drag,
+                int maxFlightTicks,
+                boolean aiInFlight,
+                double damagePerEnergy,
+                double minImpactEnergy,
+                double maxImpactDamage,
+                double restitution)
+        {
+        }
+
+        /**
          * Player settings, see {@link PlayerConfig} for what each one does.
          */
         public record PromptConfig(
                 boolean showPrompt,
                 PromptAnchor anchor,
                 int offsetX,
-                int offsetY)
+                int offsetY,
+                boolean showChargeBar)
         {
         }
 }

@@ -5,11 +5,13 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierL
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.GroundFilter;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
 import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
+import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
 
 /**
  * The creator file, {@code config/throwablemobs-server.toml}: gameplay rules for pack devs and server admins. Synced to
@@ -41,6 +43,23 @@ public final class CreatorConfig
 
         private static final BooleanValue PUT_DOWN_NEEDS_GROUND;
         private static final EnumValue<GroundFilter> GROUND_FILTER;
+
+        private static final DoubleValue THROW_IMPULSE;
+        private static final DoubleValue MAX_THROW_SPEED;
+        private static final IntValue MAX_CHARGE_TICKS;
+        private static final IntValue MIN_CHARGE_TICKS;
+        private static final DoubleValue INHERIT_VELOCITY;
+        private static final IntValue THROWER_GRACE_TICKS;
+
+        private static final DoubleValue GRAVITY;
+        private static final DoubleValue DRAG;
+        private static final IntValue MAX_FLIGHT_TICKS;
+        private static final BooleanValue AI_IN_FLIGHT;
+
+        private static final DoubleValue DAMAGE_PER_ENERGY;
+        private static final DoubleValue MIN_IMPACT_ENERGY;
+        private static final DoubleValue MAX_IMPACT_DAMAGE;
+        private static final DoubleValue RESTITUTION;
 
         static
         {
@@ -98,6 +117,53 @@ public final class CreatorConfig
                         .defineEnum("ground_filter", GroundFilter.DENY_LIST);
                 builder.pop();
 
+                builder.comment("Throwing a carried mob: hold the Throw key to charge, let go to throw.").push("throw");
+                THROW_IMPULSE = builder.comment("Strength of a full-charge throw. Launch speed = impulse × charge / mass,",
+                                "so light mobs fly fast and heavy ones barely leave your hands (150 throws a cow at",
+                                "about 0.33 blocks/tick).")
+                        .defineInRange("throw_impulse", 150.0, 0.0, 1_000_000.0);
+                MAX_THROW_SPEED = builder.comment("Launch speed cap in blocks/tick, so light mobs don't fly forever",
+                                "(a full-charge arrow is about 3).")
+                        .defineInRange("max_throw_speed", 2.0, 0.0, 10.0);
+                MAX_CHARGE_TICKS = builder.comment("Ticks to reach full charge (20 ticks = 1 second, same as a bow).")
+                        .defineInRange("max_charge_ticks", 20, 1, 200);
+                MIN_CHARGE_TICKS = builder.comment("Letting go sooner than this cancels the throw.")
+                        .defineInRange("min_charge_ticks", 3, 0, 200);
+                INHERIT_VELOCITY = builder.comment("Share of the thrower's own movement added to the throw (1 = all of",
+                                "it, so sprint-throws go further).")
+                        .defineInRange("inherit_velocity", 1.0, 0.0, 2.0);
+                THROWER_GRACE_TICKS = builder.comment("Ticks after the throw during which the mob can't hit its",
+                                "thrower.")
+                        .defineInRange("thrower_grace_ticks", 5, 0, 100);
+                builder.pop();
+
+                builder.comment("A thrown mob in the air.").push("flight");
+                GRAVITY = builder.comment("Downward acceleration in blocks/tick² (arrows use 0.05).")
+                        .defineInRange("gravity", 0.05, 0.0, 1.0);
+                DRAG = builder.comment("Share of the speed kept each tick (arrows use 0.99; lower = more air drag).")
+                        .defineInRange("drag", 0.99, 0.0, 1.0);
+                MAX_FLIGHT_TICKS = builder.comment("Flights end after this many ticks; the mob then falls normally.")
+                        .defineInRange("max_flight_ticks", 200, 1, 6000);
+                AI_IN_FLIGHT = builder.comment("Thrown mobs get their AI back at launch instead of when they land",
+                                "(chickens flap, skeletons turn). Their own movement can then bend the flight a",
+                                "little away from the trajectory preview.")
+                        .define("ai_in_flight", false);
+                builder.pop();
+
+                builder.comment("When a thrown mob hits a block or another entity. Damage comes from the collision",
+                        "energy, ½ × reduced mass × speed², in game-kg × (blocks/tick)².").push("impact");
+                DAMAGE_PER_ENERGY = builder.comment("Damage per unit of collision energy above min_impact_energy.")
+                        .defineInRange("damage_per_energy", 0.1, 0.0, 100.0);
+                MIN_IMPACT_ENERGY = builder.comment("Collisions below this energy do no damage.")
+                        .defineInRange("min_impact_energy", 10.0, 0.0, 1_000_000.0);
+                MAX_IMPACT_DAMAGE = builder.comment("Damage cap for one impact, before it is split between the two",
+                                "bodies (the lighter one takes more).")
+                        .defineInRange("max_impact_damage", 20.0, 0.0, 1000.0);
+                RESTITUTION = builder.comment("Bounciness: 0 = the bodies stick together, 1 = perfectly elastic.",
+                                "Sets how much momentum the hit entity gets as knockback.")
+                        .defineInRange("restitution", 0.3, 0.0, 1.0);
+                builder.pop();
+
                 SPEC = builder.build();
         }
 
@@ -123,6 +189,25 @@ public final class CreatorConfig
                         get(ON_CARRIER_LOGOUT),
                         get(PUT_DOWN_NEEDS_GROUND),
                         get(GROUND_FILTER));
+        }
+
+        static ThrowConfig readThrow()
+        {
+                return new ThrowConfig(
+                        get(THROW_IMPULSE),
+                        get(MAX_THROW_SPEED),
+                        get(MAX_CHARGE_TICKS),
+                        get(MIN_CHARGE_TICKS),
+                        get(INHERIT_VELOCITY),
+                        get(THROWER_GRACE_TICKS),
+                        get(GRAVITY),
+                        get(DRAG),
+                        get(MAX_FLIGHT_TICKS),
+                        get(AI_IN_FLIGHT),
+                        get(DAMAGE_PER_ENERGY),
+                        get(MIN_IMPACT_ENERGY),
+                        get(MAX_IMPACT_DAMAGE),
+                        get(RESTITUTION));
         }
 
         /** A server config isn't loaded on a client outside a world; the defaults apply there. */

@@ -3,6 +3,7 @@ package io.github.safetimamovic.throwablemobs.platform;
 import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.platform.services.ICarryStateAccess;
 import io.github.safetimamovic.throwablemobs.platform.services.IPlatformHelper;
+import io.github.safetimamovic.throwablemobs.platform.services.IThrowStateAccess;
 
 import java.util.ServiceLoader;
 
@@ -19,6 +20,9 @@ public class Services
 
         // Carry state attachment (persistent + synced to tracking clients).
         public static final ICarryStateAccess CARRY_STATE = load(ICarryStateAccess.class);
+
+        // Throw state attachment (persistent, not synced).
+        public static final IThrowStateAccess THROW_STATE = load(IThrowStateAccess.class);
 
         // This code is used to load a service for the current environment. Your implementation of the service must be defined
         // manually by including a text file in META-INF/services named with the fully qualified class name of the service.

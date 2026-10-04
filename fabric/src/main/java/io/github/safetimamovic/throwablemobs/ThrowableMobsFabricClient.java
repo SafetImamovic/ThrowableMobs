@@ -31,6 +31,7 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                 KeyMappingHelper.registerKeyMapping(CarryKeys.MODIFIER);
                 KeyMappingHelper.registerKeyMapping(CarryKeys.PICK_UP);
                 KeyMappingHelper.registerKeyMapping(CarryKeys.PUT_DOWN);
+                KeyMappingHelper.registerKeyMapping(CarryKeys.THROW);
                 ClientTickEvents.START_CLIENT_TICK.register(CarryClient::tickInput);
                 ClientTickEvents.END_CLIENT_TICK.register(CarryClient::tick);
                 HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, Constants.id("carry_prompt"),

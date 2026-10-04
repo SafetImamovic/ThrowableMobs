@@ -6,7 +6,7 @@ import net.minecraft.client.KeyMapping;
 
 /**
  * Key mappings, in their own Controls category; each loader registers them. Picking up and putting down need the
- * modifier held, unless it is unbound. Defaults: Left Shift + Right Button for both, the same input as Carry On; they
+ * modifier held, unless it is unbound; throwing is the same key without the modifier. Defaults: Left Shift + Right Button for both, the same input as Carry On; they
  * share keys with Sneak and Use, which still work (see {@code CarryClient#tickInput}).
  */
 public final class CarryKeys
@@ -16,6 +16,8 @@ public final class CarryKeys
         public static final KeyMapping MODIFIER = new KeyMapping(name("modifier"), InputConstants.KEY_LSHIFT, CATEGORY);
         public static final KeyMapping PICK_UP = rightButton("pick_up");
         public static final KeyMapping PUT_DOWN = rightButton("put_down");
+        /** Hold to charge, let go to throw. No modifier: Modifier + the same key is Put down. */
+        public static final KeyMapping THROW = rightButton("throw");
 
         private CarryKeys()
         {

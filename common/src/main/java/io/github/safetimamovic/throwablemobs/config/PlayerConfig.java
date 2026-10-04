@@ -22,12 +22,13 @@ public final class PlayerConfig
         private static final EnumValue<PromptAnchor> PROMPT_ANCHOR;
         private static final IntValue PROMPT_OFFSET_X;
         private static final IntValue PROMPT_OFFSET_Y;
+        private static final BooleanValue SHOW_CHARGE_BAR;
 
         static
         {
                 ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
-                builder.comment("The pick-up / put-down prompt.").push("prompt");
+                builder.comment("The pick-up / put-down / throw prompt.").push("prompt");
                 SHOW_PROMPT = builder.comment("Show the prompt when looking at a mob or while carrying one.")
                         .define("show_prompt", true);
                 PROMPT_ANCHOR = builder.comment("Where the prompt is drawn from: CROSSHAIR (screen centre), TOP or",
@@ -37,6 +38,8 @@ public final class PlayerConfig
                         .defineInRange("prompt_offset_x", 0, -4096, 4096);
                 PROMPT_OFFSET_Y = builder.comment("Vertical offset from the anchor, in GUI pixels (positive = down).")
                         .defineInRange("prompt_offset_y", 12, -4096, 4096);
+                SHOW_CHARGE_BAR = builder.comment("Show a charge bar under the prompt while charging a throw.")
+                        .define("show_charge_bar", true);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -48,7 +51,8 @@ public final class PlayerConfig
 
         static PromptConfig read()
         {
-                return new PromptConfig(get(SHOW_PROMPT), get(PROMPT_ANCHOR), get(PROMPT_OFFSET_X), get(PROMPT_OFFSET_Y));
+                return new PromptConfig(get(SHOW_PROMPT), get(PROMPT_ANCHOR), get(PROMPT_OFFSET_X), get(PROMPT_OFFSET_Y),
+                        get(SHOW_CHARGE_BAR));
         }
 
         /** Not loaded on a dedicated server, which has no client config; the defaults apply there. */
