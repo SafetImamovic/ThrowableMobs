@@ -1,10 +1,13 @@
 package io.github.safetimamovic.throwablemobs;
 
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
+import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.CreatorConfig;
 import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
+import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
+import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import io.github.safetimamovic.throwablemobs.platform.NeoForgeCarryStateAccess;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -36,23 +39,33 @@ public class ThrowableMobsNeoForge
                                 (payload, context) -> CarryManager.onDropRequest((ServerPlayer) context.player()))
                         .playToServer(PickUpPayload.TYPE, PickUpPayload.STREAM_CODEC,
                                 (payload, context) -> CarryManager.onPickUpRequest((ServerPlayer) context.player(),
-                                        payload.entityId())));
+                                        payload.entityId()))
+                        .playToServer(ChargeThrowPayload.TYPE, ChargeThrowPayload.STREAM_CODEC,
+                                (payload, context) -> ThrowManager.onChargeRequest((ServerPlayer) context.player()))
+                        .playToServer(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC,
+                                (payload, context) -> ThrowManager.onThrowRequest((ServerPlayer) context.player())));
 
                 IEventBus bus = NeoForge.EVENT_BUS;
                 bus.addListener(ThrowableMobsNeoForge::onEntityInteract);
                 bus.addListener((LivingIncomingDamageEvent event) ->
                 {
-                        if (!CarryManager.allowDamage(event.getEntity(), event.getSource()))
+                        if (!CarryManager.allowDamage(event.getEntity(), event.getSource())
+                                || !ThrowManager.allowDamage(event.getEntity(), event.getSource()))
                         {
                                 event.setCanceled(true);
                         }
                 });
-                bus.addListener((ServerTickEvent.Post event) -> CarryManager.tick(event.getServer()));
+                bus.addListener((ServerTickEvent.Post event) ->
+                {
+                        CarryManager.tick(event.getServer());
+                        ThrowManager.tick(event.getServer());
+                });
                 bus.addListener((EntityJoinLevelEvent event) ->
                 {
                         if (!event.getLevel().isClientSide())
                         {
                                 CarryManager.onEntityLoad(event.getEntity());
+                                ThrowManager.onEntityLoad(event.getEntity());
                         }
                 });
                 bus.addListener((PlayerEvent.PlayerLoggedInEvent event) ->
@@ -67,9 +80,14 @@ public class ThrowableMobsNeoForge
                         if (event.getEntity() instanceof ServerPlayer player)
                         {
                                 CarryManager.onLogout(player);
+                                ThrowManager.onLogout(player);
                         }
                 });
-                bus.addListener((ServerStoppingEvent event) -> CarryManager.dropAll());
+                bus.addListener((ServerStoppingEvent event) ->
+                {
+                        CarryManager.dropAll();
+                        ThrowManager.clear();
+                });
         }
 
         private static void onEntityInteract(PlayerInteractEvent.EntityInteract event)

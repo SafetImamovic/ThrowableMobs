@@ -194,6 +194,24 @@ public final class CarryManager
         }
 
         /**
+         * Ends the carry without placing the mob: it stays where it is with its original flags back. Returns the state it
+         * had, or {@code null} if the player carries nothing.
+         */
+        static @Nullable CarryState letGo(ServerPlayer player)
+        {
+                Mob mob = carriedBy(player);
+                CARRIED.remove(player.getUUID());
+                removeSlowdown(player);
+                if (mob == null)
+                {
+                        return null;
+                }
+                CarryState state = Services.CARRY_STATE.get(mob);
+                release(mob, mob.position());
+                return state;
+        }
+
+        /**
          * Moves a carried mob to its carrier's new dimension. Vanilla replaces the entity with a copy there; the copy
          * loads as an orphan and gets released by {@link #onEntityLoad}, so the carry resumes with the state captured
          * here, which still holds the mob's original flags.

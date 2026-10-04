@@ -2,10 +2,13 @@ package io.github.safetimamovic.throwablemobs;
 
 import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
+import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.CreatorConfig;
 import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
+import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
+import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -35,17 +38,37 @@ public class ThrowableMobsFabric implements ModInitializer
                 PayloadTypeRegistry.serverboundPlay().register(PickUpPayload.TYPE, PickUpPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(PickUpPayload.TYPE,
                         (payload, context) -> CarryManager.onPickUpRequest(context.player(), payload.entityId()));
+                PayloadTypeRegistry.serverboundPlay().register(ChargeThrowPayload.TYPE,
+                        ChargeThrowPayload.STREAM_CODEC);
+                ServerPlayNetworking.registerGlobalReceiver(ChargeThrowPayload.TYPE,
+                        (payload, context) -> ThrowManager.onChargeRequest(context.player()));
+                PayloadTypeRegistry.serverboundPlay().register(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC);
+                ServerPlayNetworking.registerGlobalReceiver(ThrowPayload.TYPE,
+                        (payload, context) -> ThrowManager.onThrowRequest(context.player()));
 
                 UseEntityCallback.EVENT.register(
                         (player, level, hand, entity, hitResult) -> CarryManager.onUseEntity(entity));
                 ServerTickEvents.END_SERVER_TICK.register(CarryManager::tick);
-                ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> CarryManager.onEntityLoad(entity));
-                ServerLivingEntityEvents.ALLOW_DAMAGE.register(
-                        (entity, source, amount) -> CarryManager.allowDamage(entity, source));
+                ServerTickEvents.END_SERVER_TICK.register(ThrowManager::tick);
+                ServerEntityEvents.ENTITY_LOAD.register((entity, level) ->
+                {
+                        CarryManager.onEntityLoad(entity);
+                        ThrowManager.onEntityLoad(entity);
+                });
+                ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+                        CarryManager.allowDamage(entity, source) && ThrowManager.allowDamage(entity, source));
                 ServerPlayConnectionEvents.JOIN
                         .register((listener, sender, server) -> CarryManager.onLogin(listener.getPlayer()));
                 ServerPlayConnectionEvents.DISCONNECT
-                        .register((listener, server) -> CarryManager.onLogout(listener.getPlayer()));
-                ServerLifecycleEvents.SERVER_STOPPING.register(server -> CarryManager.dropAll());
+                        .register((listener, server) ->
+                        {
+                                CarryManager.onLogout(listener.getPlayer());
+                                ThrowManager.onLogout(listener.getPlayer());
+                        });
+                ServerLifecycleEvents.SERVER_STOPPING.register(server ->
+                {
+                        CarryManager.dropAll();
+                        ThrowManager.clear();
+                });
         }
 }
