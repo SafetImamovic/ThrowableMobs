@@ -6,7 +6,7 @@ import io.github.safetimamovic.throwablemobs.carry.DropTarget;
 import io.github.safetimamovic.throwablemobs.carry.LocalCarry;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
-import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.PromptConfig;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.platform.Services;
@@ -159,7 +159,7 @@ public final class CarryClient
         {
                 Minecraft minecraft = Minecraft.getInstance();
                 LocalPlayer player = minecraft.player;
-                if (!ThrowableMobsConfig.CARRY.showPrompt() || player == null || player.isSpectator())
+                if (!ThrowableMobsConfig.prompt().showPrompt() || player == null || player.isSpectator())
                 {
                         return;
                 }
@@ -168,7 +168,7 @@ public final class CarryClient
                 Component reason = null;
                 if (LocalCarry.get() instanceof Mob carried)
                 {
-                        if (ThrowableMobsConfig.CARRY.dropNeedsGround() && DropTarget.find(player, carried) == null)
+                        if (ThrowableMobsConfig.carry().putDownNeedsGround() && DropTarget.find(player, carried) == null)
                         {
                                 prompt = Component.translatable("throwablemobs.carry.need_ground");
                         }
@@ -205,15 +205,15 @@ public final class CarryClient
                         return;
                 }
 
-                CarryConfig config = ThrowableMobsConfig.CARRY;
-                int anchorY = switch (config.promptAnchor())
+                PromptConfig config = ThrowableMobsConfig.prompt();
+                int anchorY = switch (config.anchor())
                 {
                         case CROSSHAIR -> graphics.guiHeight() / 2;
                         case TOP -> 0;
                         case BOTTOM -> graphics.guiHeight();
                 };
-                int x = graphics.guiWidth() / 2 + config.promptOffsetX();
-                int y = anchorY + config.promptOffsetY();
+                int x = graphics.guiWidth() / 2 + config.offsetX();
+                int y = anchorY + config.offsetY();
                 graphics.centeredText(minecraft.font, prompt, x, y, PROMPT_COLOR);
                 if (reason != null)
                 {
@@ -254,7 +254,7 @@ public final class CarryClient
                 entity.yOld = entity.yo;
                 entity.zOld = entity.zo;
                 entity.setDeltaMovement(Vec3.ZERO);
-                if (ThrowableMobsConfig.CARRY.carriedFacing() == CarriedFacing.CARRIER
+                if (ThrowableMobsConfig.carry().carriedFacing() == CarriedFacing.CARRIER
                         && entity instanceof LivingEntity living)
                 {
                         // Previous rotations from the carrier's too, so turning interpolates like the position.

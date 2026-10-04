@@ -1,6 +1,9 @@
 package io.github.safetimamovic.throwablemobs;
 
+import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
+import io.github.safetimamovic.throwablemobs.config.CreatorConfig;
+import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import net.fabricmc.api.ModInitializer;
@@ -12,6 +15,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.neoforged.fml.config.ModConfig;
 
 public class ThrowableMobsFabric implements ModInitializer
 {
@@ -19,6 +23,10 @@ public class ThrowableMobsFabric implements ModInitializer
         public void onInitialize()
         {
                 ThrowableMobs.init();
+                ConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.SERVER, CreatorConfig.SPEC,
+                        CreatorConfig.FILE_NAME);
+                ConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.CLIENT, PlayerConfig.SPEC,
+                        PlayerConfig.FILE_NAME);
 
                 PayloadTypeRegistry.serverboundPlay().register(DropCarriedPayload.TYPE,
                         DropCarriedPayload.STREAM_CODEC);

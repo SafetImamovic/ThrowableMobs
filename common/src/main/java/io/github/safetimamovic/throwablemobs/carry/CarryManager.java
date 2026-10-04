@@ -133,7 +133,7 @@ public final class CarryManager
                 Vec3 at = DropTarget.find(player, mob);
                 if (at == null)
                 {
-                        if (ThrowableMobsConfig.CARRY.dropNeedsGround())
+                        if (ThrowableMobsConfig.carry().putDownNeedsGround())
                         {
                                 player.sendOverlayMessage(Component.translatable("throwablemobs.carry.need_ground"));
                                 return;
@@ -173,7 +173,7 @@ public final class CarryManager
                         if (carrier.level() != mob.level())
                         {
                                 it.remove();
-                                if (ThrowableMobsConfig.CARRY.onDimensionChange() == DimensionChange.TRAVEL)
+                                if (ThrowableMobsConfig.carry().onDimensionChange() == DimensionChange.TRAVEL)
                                 {
                                         // Teleporting adds entities to the other level, so not while iterating.
                                         travelling.add(Map.entry(carrier, mob));
@@ -293,7 +293,7 @@ public final class CarryManager
 
         private static boolean keepsCarryOnLogout()
         {
-                return ThrowableMobsConfig.CARRY.onCarrierLogout() == CarrierLogout.KEEP_CARRYING;
+                return ThrowableMobsConfig.carry().onCarrierLogout() == CarrierLogout.KEEP_CARRYING;
         }
 
         /**
@@ -307,7 +307,7 @@ public final class CarryManager
                 {
                         return true;
                 }
-                CarryConfig config = ThrowableMobsConfig.CARRY;
+                CarryConfig config = ThrowableMobsConfig.carry();
                 boolean fromCarrier = source.getEntity() != null
                         && source.getEntity().getUUID().equals(state.carrier());
                 return !(config.protectFromSuffocation() && source.is(DamageTypes.IN_WALL)
@@ -320,7 +320,7 @@ public final class CarryManager
                 mob.setPos(carrier.getX(), carrier.getY() + carrier.getBbHeight(), carrier.getZ());
                 mob.setDeltaMovement(Vec3.ZERO);
                 mob.resetFallDistance();
-                if (ThrowableMobsConfig.CARRY.carriedFacing() == CarriedFacing.CARRIER)
+                if (ThrowableMobsConfig.carry().carriedFacing() == CarriedFacing.CARRIER)
                 {
                         mob.setYRot(carrier.getYRot());
                         mob.setYHeadRot(carrier.getYRot());
@@ -371,7 +371,7 @@ public final class CarryManager
         /** Transient modifier: not saved, so a crash can't leave a player permanently slowed. */
         private static void applySlowdown(ServerPlayer player, Mob mob)
         {
-                CarryConfig config = ThrowableMobsConfig.CARRY;
+                CarryConfig config = ThrowableMobsConfig.carry();
                 double slowdown = ThrowPhysics.carrySlowdown(CarryRules.mass(mob), config.maxMass(),
                         config.slowdownFactor(), config.maxSlowdown());
                 AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);

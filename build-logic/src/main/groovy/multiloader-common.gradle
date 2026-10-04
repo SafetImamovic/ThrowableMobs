@@ -13,6 +13,31 @@ java {
     withJavadocJar()
 }
 
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Fuzs'
+                url = 'https://raw.githubusercontent.com/Fuzss/modresources/main/maven/'
+            }
+        }
+        filter {
+            includeGroup('fuzs.forgeconfigapiport')
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup('maven.modrinth')
+        }
+    }
+}
+
 tasks.withType(Jar).configureEach {
     from(rootProject.file('LICENSE')) {
         rename { "${it}_${mod_name}" }
@@ -42,6 +67,7 @@ processResources {
             'minecraft_version_range'      : minecraft_version_range,
             'fabric_version'               : fabric_version,
             'fabric_loader_version'        : fabric_loader_version,
+            'forgeconfigapiport_version'   : forgeconfigapiport_version,
             'mod_name'                     : mod_name,
             'mod_author'                   : mod_author,
             'mod_id'                       : mod_id,

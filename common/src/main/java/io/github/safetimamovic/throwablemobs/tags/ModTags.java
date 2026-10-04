@@ -19,10 +19,10 @@ public final class ModTags
         public static final TagKey<EntityType<?>> OWNER_ONLY = entity("owner_only");
 
         /** Never ground to put a carried mob down on (with the default deny-list filter). */
-        public static final TagKey<Block> DROP_GROUND_DENIED = block("drop_ground_denied");
+        public static final TagKey<Block> PUT_DOWN_GROUND_DENIED = block("put_down_ground_denied");
 
         /** The only ground to put a carried mob down on, when the allow-list filter is on. */
-        public static final TagKey<Block> DROP_GROUND_ALLOWED = block("drop_ground_allowed");
+        public static final TagKey<Block> PUT_DOWN_GROUND_ALLOWED = block("put_down_ground_allowed");
 
         private ModTags()
         {

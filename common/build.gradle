@@ -24,6 +24,10 @@ dependencies {
     // Pure-Java physics math. `api` so loader projects see it through their compileOnly(':common').
     // Its unit tests live in :physics; in-game behavior is covered by GameTests.
     api(project(':physics'))
+
+    // NeoForge's config API (ModConfigSpec). NeoForge has it built in; on Fabric, Forge Config API Port provides the
+    // same classes, so config specs can live in common.
+    compileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${forgeconfigapiport_version}")
 }
 
 configurations {
