@@ -23,10 +23,11 @@ On a **dedicated server**, on both **Fabric and NeoForge**, a player who carries
 | Charge | Server measures it: `StartChargePayload` on press, `ThrowPayload` on release (C2S, no charge value sent). Charge time clamped to `max_charge_ticks`; release before `min_charge_ticks` cancels (no throw). `c = ease(t / max)` with the bow curve `(x² + 2x) / 3`. |
 | Launch | `ThrowPhysics.launchSpeed` (exists) × look direction + carrier velocity × `inherit_velocity`. Starts at the carried position (on the head). |
 | Flight state | `ThrowState` attachment on the mob: thrower UUID, launch tick, launch position, original flags (moved over from `CarryState`). **Persistent** (so a mob loaded mid-flight is restored), not synced yet (clients just see server movement). |
-| Flight sim | Own integration (§8.3, linear drag only in M2) so the trajectory preview can use the same code from `physics/`. How the mob is moved is the spike (below). |
+| Flight sim | Own integration (§8.3, linear drag only in M2) so the trajectory preview can use the same code from `physics/`. Each tick: `mob.move(MoverType.SELF, v)`, check collisions, then `v = ThrowPhysics.stepVelocity(v)`. The preview repeats exactly this order. |
 | Damage model | `energy` only. `momentum` / `force` modes and `damage_model` key come later; key names for them reserved, not added. |
 | Damage split | Target takes `dmg × m_self / (m_self + m_target)`, thrown mob the rest (chicken loses vs cow). Block hit → thrown mob takes full `dmg`. Respect `#minecraft:fall_damage_immune`-style immunity via the mob's own fall-damage logic. |
 | Damage type | `throwablemobs:thrown_mob` in data (thrower = attacker, mob = direct entity), with death messages in `en_us.json`. PvP gamerule applies for free because the attacker is a player. |
+| AI in flight | Creator key `ai_in_flight` (default `false`): AI stays off until the flight ends. `true` gives the AI back at launch (chickens flap, skeletons turn); vanilla `travel` then moves the mob and we only overwrite its velocity each tick, so AI input can bend the path slightly off the preview. |
 | Thrower | Excluded from entity hits for `thrower_grace_ticks`. |
 | Fall damage | Fall distance reset at launch and at flight end; vanilla fall damage blocked during flight (impact damage replaces it). |
 | Trajectory preview | Client-only, while charging. Runs the same `ThrowPhysics` step as the server tick by tick (not the drag-free oblique-throw formula, which lands short with drag), from the carried position with the client's own charge, look direction and velocity. Mass from hitbox × synced `default_density`. Each step clips against blocks; stops at the first block or entity hit and draws a landing marker there. Player toggle `show_trajectory`; creator toggle `allow_trajectory` (synced) lets servers turn it off. |
@@ -42,6 +43,17 @@ On a **dedicated server**, on both **Fabric and NeoForge**, a player who carries
 | Landing | "Landed" = on ground and speed below `land_speed`. Bounces (restitution) can loop; cap bounces at 1 in M2. |
 
 Spike = throwaway code, Fabric only, fixed throw speed, `runServer` + 2 clients. Gate: chicken thrown at full speed flies smooth on both clients, lands, no wall clipping.
+
+## Spike findings (2026-10-04)
+
+Gate passed: smooth on both clients, stops at walls, AI back on landing.
+
+| Finding | Consequence |
+|---|---|
+| Vanilla skips `travel` for NoAI mobs (`Mob#isEffectiveAi` returns false), so a NoAI mob with a velocity just hangs in the air. Option (a) as written doesn't work. | We call `mob.move(MoverType.SELF, v)` ourselves each tick. Still vanilla block collision, no own sweep needed (option (b) not needed). |
+| `onGround` / `horizontalCollision` are stale until the mob has moved once (left over from carrying). | Check collisions only right after our own `move`, never before the first one. |
+| Default entity tracking is smooth enough for a chicken at 2 b/t. | No velocity sync / extrapolation work. |
+| Distances with impulse 150, max speed 2.0, drag 0.99: cow ~5 blocks, skeleton ~7, chicken ~43. | Chicken too far; tune `throw_impulse` / `max_throw_speed` in the manual pass. |
 
 ## Steps
 
@@ -71,6 +83,7 @@ Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "g
 | throw | `min_charge_ticks` | `3` | Shorter release cancels. |
 | throw | `inherit_velocity` | `1.0` | Share of the carrier's velocity added. |
 | throw | `thrower_grace_ticks` | `5` | |
+| flight | `ai_in_flight` | `false` | AI back at launch instead of on landing. |
 | flight | `gravity` | `0.05` | Arrow value. |
 | flight | `drag` | `0.99` | Per tick, linear. |
 | flight | `max_flight_ticks` | `200` | Then flight ends wherever the mob is. |
