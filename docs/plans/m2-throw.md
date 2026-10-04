@@ -67,7 +67,7 @@ Gate passed: smooth on both clients, stops at walls, AI back on landing.
 | 5 | **`ThrowManager`** (server) | `throwMob`: end carry (without the put-down placement), keep AI off, set `ThrowState`, launch velocity. `tick`: integrate, move, block / entity collision, impact → damage + knockback, end flight. `endFlight`: restore flags, remove state, zero fall distance. Invariants each tick like `CarryManager.tick`. |
 | 6 | **Impact** | `ImpactResolver`: reduced mass, relative velocity, energy → damage split → `hurtServer` with `thrown_mob` source, knockback scaled by knockback resistance. |
 | 7 | **Charge bar** (client) | Small bar under the prompt (same anchor/offsets). Prompt while carrying shows "[Throw] to throw" next to the put-down line. |
-| 7b | **Trajectory preview** (client) | While charging: simulate up to `max_flight_ticks` steps, draw dots along the path (world render event per loader) and a marker at the landing block or hit entity. Hidden when `show_trajectory` or `allow_trajectory` is off. |
+| 7b | **Trajectory preview** (client) | While charging: simulate up to `max_flight_ticks` steps, draw the path with vanilla gizmos (`Gizmos.line` / `Gizmos.cuboid`) from the client tick, no render code per loader and a marker at the landing block or hit entity. Hidden when `show_trajectory` or `allow_trajectory` is off. |
 | 8 | **Loader events** | Reuse M1 wiring; add fall-damage cancel during flight and entity-load orphan fix for `ThrowState`. |
 | 9 | **Tests** | Unit tests for step 0. Manual matrix below. |
 
@@ -79,11 +79,12 @@ Gate passed: smooth on both clients, stops at walls, AI back on landing.
 | 1 spike | Done, findings above. |
 | 2–6, 8 | Done on both loaders: config, `ThrowState`, `thrown_mob` damage type (in `#minecraft:no_knockback`, our own push replaces vanilla knockback), Throw key + `ChargeThrowPayload` / `ThrowPayload`, `ThrowManager` with impacts inside it (no separate `ImpactResolver`). Tested in game on Fabric. |
 | 7 charge bar | Done. |
-| 7b trajectory preview | Next. |
+| 7b trajectory preview | Done. Tested in game on Fabric: visible without debug mode, grows with charge, mob lands in the marker. |
 
 Implementation notes:
 - Block impacts use only the blocked part of the velocity (`v − actual movement`), so skimming the ground hurts less than hitting a wall head-on.
 - The thrown mob's own damage uses vanilla `fly_into_wall`; the hit entity gets `thrown_mob` with the thrower as attacker. Both set the thrower as last player attacker, so kills give XP and player-only loot.
+- The preview moves with `Entity.collideBoundingBox`, the collision `Entity#move` uses on the server, so it lands where the real throw lands. Vanilla collects gizmos per client tick and draws them every frame, so it updates at 20 Hz.
 - With the modifier unbound, Put down and Throw share the same input and Put down wins; Throw then needs its own key.
 
 ## Config (creator file)
