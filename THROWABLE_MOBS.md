@@ -611,12 +611,13 @@ Split into what belongs where:
 
 | Kind | Where | Synced? | Example |
 |---|---|---|---|
-| **Gameplay (server)** | `config/throwablemobs-server.toml` (per-world copy possible) | Server → client on join | impulse, damage model, catching rules |
-| **Client** | `config/throwablemobs-client.toml` | No | HUD position, trajectory preview, carry render offset, keybinds |
+| **Creator file** (pack devs, admins) | `config/throwablemobs-server.toml`; a copy in the world's `syncedconfig/` (NeoForge) or `serverconfig/` (Fabric) overrides it per world | Server → client on join | mass limit, slowdown, put-down rules, later impulse, damage model, catching rules |
+| **Player file** | `config/throwablemobs-client.toml`, editable in game (mod list on NeoForge, Mod Menu on Fabric), applies right away | No | prompt position, later HUD, trajectory preview |
+| **Key mappings** | Controls → Throwable Mobs | No | Modifier, Pick up, Put down |
 | **Per-mob** | Datapacks (§10) | Yes (datapack sync) | creeper behavior |
 | **Per-world toggles** | **Gamerules** | Yes | `throwableMobsEnabled`, `throwableMobsPvp`, `throwableMobsGriefing` |
 
-**Cross-loader config library:** easiest is **Forge Config API Port** (Fuzss) — NeoForge's config spec on Fabric too, so one config definition in `common`, TOML files, comments, value ranges, server sync, and NeoForge's built-in config screen. Alternatives: YACL (nice screens, needs per-loader glue), or your own codec-based JSON5 (no dependency, more work). Add a **Mod Menu** (Fabric) / NeoForge config screen integration.
+**Cross-loader config library: Forge Config API Port** (Fuzss, decided 2026-10-03). NeoForge's config API on Fabric too, so both specs live in `common/config` (`CreatorConfig`, `PlayerConfig`): TOML with comments and ranges, server sync, and NeoForge's `ConfigurationScreen`, which the port also ships, so both loaders get the same in-game screen. Fabric players need the port installed; NeoForge has it built in. NeoForge 26.x calls the synced type `SYNCED`, the port still `SERVER`; file names are set explicitly so they match. Code reads settings only through `ThrowableMobsConfig`.
 
 Sketch of the server config:
 
@@ -675,7 +676,7 @@ disabled = []                         # e.g. ["throwablemobs:split"]
 
 Every number in §8 is in here. Validate ranges, and document each key in a comment.
 
-**Naming: one spelling per concept.** Vanilla's `server.properties` is the cautionary tale: `white-list` (turns the list on) sits next to `enforce-whitelist` (kicks players not on it). `white-list` is the old key, kept so existing servers don't break; `enforce-whitelist` came later with the other spelling, and now admins have to remember both. Our config keys, tags and translation keys use `snake_case` with one term per concept (e.g. `drop_ground_allowed` / `drop_ground_denied`, never mixing allow/white). Pick names before 1.0: renaming a key later means keeping the old one forever.
+**Naming: one spelling per concept.** Vanilla's `server.properties` is the cautionary tale: `white-list` (turns the list on) sits next to `enforce-whitelist` (kicks players not on it). `white-list` is the old key, kept so existing servers don't break; `enforce-whitelist` came later with the other spelling, and now admins have to remember both. Our config keys, tags and translation keys use `snake_case` with one term per concept (e.g. `put_down_ground_allowed` / `put_down_ground_denied`, never mixing allow/white). Pick names before 1.0: renaming a key later means keeping the old one forever.
 
 ---
 
@@ -868,6 +869,7 @@ Settled 2026-10-02:
 | License | **MIT** |
 | Server plugin | **Paper port planned (M8)**, Paper API only (no Spigot). Shares the `physics/` module + mob profile JSON schema. |
 | Common tags | Code checks only our own tags; `c:` tags are default *contents* of them (pack devs can remove). No hardcoded `c:` checks. |
+| Config | Forge Config API Port: creator file (synced) + player file (in-game screen). Which mobs can be carried stays in tags; per-mob weight comes with mob profiles (M3). |
 | Public docs | VitePress site on GitHub Pages, versioned per major. Config/defaults/tags/atoms/JSON Schema **generated from code**, CI fails on drift. |
 
 ### Current setup state (M0 done)
