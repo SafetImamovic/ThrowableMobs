@@ -109,6 +109,19 @@ Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "g
 | impact | `restitution` | `0.3` | Bounce + knockback. |
 | throw | `allow_trajectory` | `true` | Synced. Off → no preview for anyone. |
 
+## Config (player file)
+
+| Section | Key | Default | Note |
+|---|---|---|---|
+| charge_bar | `show_charge_bar` | `true` | |
+| charge_bar | `charge_bar_anchor` | `BOTTOM` | Same anchors as the prompt (`CROSSHAIR`, `TOP`, `BOTTOM`). |
+| charge_bar | `charge_bar_offset_x` / `_y` | `0` / `-90` | Top edge; the default sits above the hotbar. |
+| charge_bar | `charge_bar_width` / `_height` | `120` / `10` | GUI pixels. |
+| trajectory | `show_trajectory` | `true` | Also needs the server's `allow_trajectory`. |
+| trajectory | `trajectory_style` | `LINE` | `LINE`, `DASHED`, `DOTS` (one per tick), `LANDING_ONLY`. The landing box shows in every style. |
+
+Key mappings: **Throw** (Right Button, no modifier) and **Cancel throw** (Left Button, only while charging; swallows that attack press).
+
 ## Manual test matrix (dedicated server, 2 clients, both loaders)
 
 - [ ] 1 Charge bar fills while holding Throw, empties on release; short tap does nothing.
@@ -127,3 +140,6 @@ Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "g
 - [ ] 14 Config values change the throw live (impulse, gravity, max speed).
 - [ ] 15 Trajectory preview grows with charge and the mob lands on the marker (open field, against a wall, off a cliff).
 - [ ] 16 `show_trajectory = false` hides it for that player; server `allow_trajectory = false` hides it for everyone.
+- [ ] 17 Cancel throw while charging: no throw, no punch, bar and preview gone; holding Throw doesn't restart the charge until pressed again.
+- [ ] 18 Charge bar follows `charge_bar_anchor` / offsets / size, and shows even with `show_prompt = false`.
+- [ ] 19 Each `trajectory_style` draws as described.

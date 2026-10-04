@@ -4,6 +4,7 @@ import io.github.safetimamovic.throwablemobs.carry.CarryRules;
 import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.TrajectoryStyle;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import java.util.List;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -28,6 +29,7 @@ final class TrajectoryPreview
 {
         private static final int PATH_COLOR = 0xFFFFFFFF;
         private static final float PATH_WIDTH = 2.0F;
+        private static final float DOT_SIZE = 4.0F;
         private static final int BLOCK_MARKER_COLOR = 0xFFFFFFFF;
         private static final int ENTITY_MARKER_COLOR = 0xFFFF5555;
         private static final float MARKER_WIDTH = 2.0F;
@@ -41,6 +43,7 @@ final class TrajectoryPreview
         static void draw(ClientLevel level, LocalPlayer player, Mob mob, int chargeTicks)
         {
                 ThrowConfig config = ThrowableMobsConfig.throwing();
+                TrajectoryStyle style = ThrowableMobsConfig.hud().trajectoryStyle();
                 if (chargeTicks < config.minChargeTicks())
                 {
                         return;
@@ -64,7 +67,7 @@ final class TrajectoryPreview
                         }
                         Vec3 allowed = Entity.collideBoundingBox(mob, velocity, box, level, List.of());
                         AABB next = box.move(allowed);
-                        Gizmos.line(box.getCenter(), next.getCenter(), PATH_COLOR, PATH_WIDTH);
+                        drawSegment(style, tick, box.getCenter(), next.getCenter());
                         box = next;
                         if (allowed.distanceToSqr(velocity) > EPSILON || inWater(level, box))
                         {
@@ -75,6 +78,25 @@ final class TrajectoryPreview
                                 new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), config.gravity(),
                                 config.drag());
                         velocity = new Vec3(step.x(), step.y(), step.z());
+                }
+        }
+
+        private static void drawSegment(TrajectoryStyle style, int tick, Vec3 from, Vec3 to)
+        {
+                switch (style)
+                {
+                        case LINE -> Gizmos.line(from, to, PATH_COLOR, PATH_WIDTH);
+                        case DASHED ->
+                        {
+                                if (tick % 2 == 1)
+                                {
+                                        Gizmos.line(from, to, PATH_COLOR, PATH_WIDTH);
+                                }
+                        }
+                        case DOTS -> Gizmos.point(to, PATH_COLOR, DOT_SIZE);
+                        case LANDING_ONLY ->
+                        {
+                        }
                 }
         }
 

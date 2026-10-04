@@ -18,6 +18,9 @@ public final class CarryKeys
         public static final KeyMapping PUT_DOWN = rightButton("put_down");
         /** Hold to charge, let go to throw. No modifier: Modifier + the same key is Put down. */
         public static final KeyMapping THROW = rightButton("throw");
+        /** While charging: drop the charge without throwing. Shares Left Button with Attack, which it swallows. */
+        public static final KeyMapping CANCEL_THROW = new KeyMapping(name("cancel_throw"), InputConstants.Type.MOUSE,
+                InputConstants.MOUSE_BUTTON_LEFT, CATEGORY);
 
         private CarryKeys()
         {

@@ -6,7 +6,8 @@ import io.github.safetimamovic.throwablemobs.carry.DropTarget;
 import io.github.safetimamovic.throwablemobs.carry.LocalCarry;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
-import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.PromptConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudAnchor;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudConfig;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
@@ -38,8 +39,6 @@ public final class CarryClient
 {
         private static final int PROMPT_COLOR = 0xFFFFFFFF;
         private static final int REASON_COLOR = 0xFFAAAAAA;
-        private static final int BAR_WIDTH = 60;
-        private static final int BAR_HEIGHT = 3;
         private static final int BAR_BACKGROUND = 0x80000000;
         private static final int BAR_FILL = 0xFFFFFFFF;
 
@@ -48,6 +47,8 @@ public final class CarryClient
         };
         /** Our key that swallowed a use press; vanilla's use stays released until this key is let go. */
         private static @Nullable KeyMapping suppressingUse;
+        /** Same for attack, swallowed by Cancel throw so cancelling doesn't punch. */
+        private static boolean suppressingAttack;
         /** Ticks the Throw key has been held while carrying, for the charge bar; -1 when not charging. */
         private static int chargeTicks = -1;
 
@@ -90,7 +91,7 @@ public final class CarryClient
                         }
                 }
                 LocalCarry.set(localCarried);
-                if (chargeTicks >= 0 && localCarried instanceof Mob mob && ThrowableMobsConfig.prompt().showTrajectory()
+                if (chargeTicks >= 0 && localCarried instanceof Mob mob && ThrowableMobsConfig.hud().showTrajectory()
                         && ThrowableMobsConfig.throwing().allowTrajectory())
                 {
                         TrajectoryPreview.draw(level, player, mob, chargeTicks);
@@ -107,9 +108,11 @@ public final class CarryClient
         public static void tickInput(Minecraft minecraft)
         {
                 keepUseSuppressed(minecraft);
+                keepAttackSuppressed(minecraft);
                 boolean pickUpPressed = consumeAll(CarryKeys.PICK_UP);
                 boolean putDownPressed = consumeAll(CarryKeys.PUT_DOWN);
                 boolean throwPressed = consumeAll(CarryKeys.THROW);
+                boolean cancelPressed = consumeAll(CarryKeys.CANCEL_THROW);
                 LocalPlayer player = minecraft.player;
                 if (player == null || LocalCarry.get() == null)
                 {
@@ -122,7 +125,14 @@ public final class CarryClient
                 }
                 if (chargeTicks >= 0)
                 {
-                        if (CarryKeys.THROW.isDown())
+                        if (cancelPressed)
+                        {
+                                // No ThrowPayload: the server only throws on one, and the next charge replaces its
+                                // record of this one.
+                                chargeTicks = -1;
+                                suppressAttack(minecraft);
+                        }
+                        else if (CarryKeys.THROW.isDown())
                         {
                                 chargeTicks++;
                         }
@@ -171,6 +181,34 @@ public final class CarryClient
                 }
         }
 
+        private static void suppressAttack(Minecraft minecraft)
+        {
+                KeyMapping attack = minecraft.options.keyAttack;
+                if (CarryKeys.CANCEL_THROW.same(attack))
+                {
+                        consumeAll(attack);
+                        attack.setDown(false);
+                        suppressingAttack = true;
+                }
+        }
+
+        /** Holding attack keeps mining, so keep it released until Cancel throw is let go. */
+        private static void keepAttackSuppressed(Minecraft minecraft)
+        {
+                if (!suppressingAttack)
+                {
+                        return;
+                }
+                if (CarryKeys.CANCEL_THROW.isDown())
+                {
+                        minecraft.options.keyAttack.setDown(false);
+                }
+                else
+                {
+                        suppressingAttack = false;
+                }
+        }
+
         /** Vanilla repeats use every few ticks while the key is held, so keep it released until ours is let go. */
         private static void keepUseSuppressed(Minecraft minecraft)
         {
@@ -206,23 +244,31 @@ public final class CarryClient
         {
                 Minecraft minecraft = Minecraft.getInstance();
                 LocalPlayer player = minecraft.player;
-                if (!ThrowableMobsConfig.prompt().showPrompt() || player == null || player.isSpectator())
+                HudConfig config = ThrowableMobsConfig.hud();
+                if (player == null || player.isSpectator())
+                {
+                        return;
+                }
+                if (chargeTicks >= 0 && config.showChargeBar() && LocalCarry.get() != null)
+                {
+                        renderChargeBar(graphics, config);
+                }
+                if (!config.showPrompt())
                 {
                         return;
                 }
 
                 Component prompt;
                 Component reason = null;
-                boolean charging = false;
                 if (LocalCarry.get() instanceof Mob carried)
                 {
-                        if (!CarryKeys.THROW.isUnbound())
+                        KeyMapping hint = chargeTicks >= 0 ? CarryKeys.CANCEL_THROW : CarryKeys.THROW;
+                        if (!hint.isUnbound())
                         {
-                                reason = Component.translatable("throwablemobs.prompt.throw",
-                                        Component.translatable("throwablemobs.prompt.key",
-                                                CarryKeys.THROW.getTranslatedKeyMessage()));
+                                reason = Component.translatable(chargeTicks >= 0 ? "throwablemobs.prompt.cancel_throw"
+                                        : "throwablemobs.prompt.throw", Component.translatable(
+                                                "throwablemobs.prompt.key", hint.getTranslatedKeyMessage()));
                         }
-                        charging = chargeTicks >= 0 && ThrowableMobsConfig.prompt().showChargeBar();
                         if (ThrowableMobsConfig.carry().putDownNeedsGround() && DropTarget.find(player, carried) == null)
                         {
                                 prompt = Component.translatable("throwablemobs.carry.need_ground");
@@ -257,30 +303,37 @@ public final class CarryClient
                         return;
                 }
 
-                PromptConfig config = ThrowableMobsConfig.prompt();
-                int anchorY = switch (config.anchor())
+                int x = graphics.guiWidth() / 2 + config.promptOffsetX();
+                int y = anchorY(graphics, config.promptAnchor()) + config.promptOffsetY();
+                graphics.centeredText(minecraft.font, prompt, x, y, PROMPT_COLOR);
+                if (reason != null)
+                {
+                        graphics.centeredText(minecraft.font, reason, x, y + minecraft.font.lineHeight + 1,
+                                REASON_COLOR);
+                }
+        }
+
+        /** Fills like a bow's pull: same ease curve as the charge the server measures. */
+        private static void renderChargeBar(GuiGraphicsExtractor graphics, HudConfig config)
+        {
+                int max = ThrowableMobsConfig.throwing().maxChargeTicks();
+                double charge = ThrowPhysics.chargeFraction(Math.min(chargeTicks, max), max);
+                int width = config.chargeBarWidth();
+                int left = graphics.guiWidth() / 2 + config.chargeBarOffsetX() - width / 2;
+                int top = anchorY(graphics, config.chargeBarAnchor()) + config.chargeBarOffsetY();
+                int bottom = top + config.chargeBarHeight();
+                graphics.fill(left, top, left + width, bottom, BAR_BACKGROUND);
+                graphics.fill(left, top, left + (int) Math.round(width * charge), bottom, BAR_FILL);
+        }
+
+        private static int anchorY(GuiGraphicsExtractor graphics, HudAnchor anchor)
+        {
+                return switch (anchor)
                 {
                         case CROSSHAIR -> graphics.guiHeight() / 2;
                         case TOP -> 0;
                         case BOTTOM -> graphics.guiHeight();
                 };
-                int x = graphics.guiWidth() / 2 + config.offsetX();
-                int y = anchorY + config.offsetY();
-                graphics.centeredText(minecraft.font, prompt, x, y, PROMPT_COLOR);
-                int line = minecraft.font.lineHeight + 1;
-                if (reason != null)
-                {
-                        graphics.centeredText(minecraft.font, reason, x, y + line, REASON_COLOR);
-                }
-                if (charging)
-                {
-                        int max = ThrowableMobsConfig.throwing().maxChargeTicks();
-                        double charge = ThrowPhysics.chargeFraction(Math.min(chargeTicks, max), max);
-                        int left = x - BAR_WIDTH / 2;
-                        int top = y + 2 * line + 1;
-                        graphics.fill(left, top, left + BAR_WIDTH, top + BAR_HEIGHT, BAR_BACKGROUND);
-                        graphics.fill(left, top, left + (int) Math.round(BAR_WIDTH * charge), top + BAR_HEIGHT, BAR_FILL);
-                }
         }
 
         /** Current key names, so the text follows rebinding; {@code null} if the action's key is unbound. */

@@ -24,13 +24,13 @@ public final class ThrowableMobsConfig
         }
 
         /** Current player settings; changes in the config screen apply right away. */
-        public static PromptConfig prompt()
+        public static HudConfig hud()
         {
                 return PlayerConfig.read();
         }
 
-        /** Where the pick-up / put-down prompt is drawn from; the offsets move it from there. */
-        public enum PromptAnchor
+        /** Where a HUD element (prompt, charge bar) is drawn from; its offsets move it from there. */
+        public enum HudAnchor
         {
                 /** Screen centre, where the crosshair is. */
                 CROSSHAIR,
@@ -38,6 +38,19 @@ public final class ThrowableMobsConfig
                 TOP,
                 /** Bottom centre of the screen (use a negative Y offset to sit above the hotbar). */
                 BOTTOM
+        }
+
+        /** How the trajectory preview draws the path. The landing box shows in every style. */
+        public enum TrajectoryStyle
+        {
+                /** A solid line. */
+                LINE,
+                /** Every other tick's segment, so the line is broken up. */
+                DASHED,
+                /** One dot per tick, so the spacing shows the speed. */
+                DOTS,
+                /** No path, just where it lands. */
+                LANDING_ONLY
         }
 
         /** Which way a carried mob faces. */
@@ -127,13 +140,19 @@ public final class ThrowableMobsConfig
         /**
          * Player settings, see {@link PlayerConfig} for what each one does.
          */
-        public record PromptConfig(
+        public record HudConfig(
                 boolean showPrompt,
-                PromptAnchor anchor,
-                int offsetX,
-                int offsetY,
+                HudAnchor promptAnchor,
+                int promptOffsetX,
+                int promptOffsetY,
                 boolean showChargeBar,
-                boolean showTrajectory)
+                HudAnchor chargeBarAnchor,
+                int chargeBarOffsetX,
+                int chargeBarOffsetY,
+                int chargeBarWidth,
+                int chargeBarHeight,
+                boolean showTrajectory,
+                TrajectoryStyle trajectoryStyle)
         {
         }
 }
