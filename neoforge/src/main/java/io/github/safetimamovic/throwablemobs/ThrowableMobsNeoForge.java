@@ -1,13 +1,17 @@
 package io.github.safetimamovic.throwablemobs;
 
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
+import io.github.safetimamovic.throwablemobs.config.CreatorConfig;
+import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.platform.NeoForgeCarryStateAccess;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -20,9 +24,12 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 @Mod(Constants.MOD_ID)
 public class ThrowableMobsNeoForge
 {
-        public ThrowableMobsNeoForge(IEventBus modEventBus)
+        public ThrowableMobsNeoForge(IEventBus modEventBus, ModContainer container)
         {
                 ThrowableMobs.init();
+                // SYNCED: NeoForge's synced-to-clients config (called SERVER on Fabric's port); same file names on both.
+                container.registerConfig(ModConfig.Type.SYNCED, CreatorConfig.SPEC, CreatorConfig.FILE_NAME);
+                container.registerConfig(ModConfig.Type.CLIENT, PlayerConfig.SPEC, PlayerConfig.FILE_NAME);
                 NeoForgeCarryStateAccess.ATTACHMENT_TYPES.register(modEventBus);
                 modEventBus.addListener((RegisterPayloadHandlersEvent event) -> event.registrar("1")
                         .playToServer(DropCarriedPayload.TYPE, DropCarriedPayload.STREAM_CODEC,

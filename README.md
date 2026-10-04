@@ -4,6 +4,8 @@ Pick up mobs and throw them. Creepers explode on impact, endermen blink away, sl
 
 Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT
 
+Requires [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) on Fabric (NeoForge needs nothing extra). Settings: `config/throwablemobs-server.toml` (gameplay, synced from the server) and `config/throwablemobs-client.toml` (personal, editable in game).
+
 > Early development. Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_MOBS.md).
 
 ## Building

@@ -173,7 +173,7 @@ PRs are merged once CI is green and a maintainer has approved. We prefer **rebas
 - **Java 25**, 8-space indentation, braces on their own line (Allman), ≤ 120 characters per line.
 - Follow the style of the surrounding code. Use Mojang's names (the game is unobfuscated since 26.1).
 - Names: `PascalCase` classes, `camelCase` methods/fields, `UPPER_SNAKE_CASE` constants.
-- Keep `common` free of loader imports. No `net.fabricmc` or `net.neoforged` imports outside the loader modules.
+- Keep `common` free of loader imports. No `net.fabricmc` or `net.neoforged` imports outside the loader modules. One exception: NeoForge's config API (`ModConfigSpec`) in `common/config`, which Forge Config API Port provides on Fabric.
 - Keep client-only code (`net.minecraft.client.*`) out of code that runs on dedicated servers. Always test with `runServer`.
 - Prefer loader events over mixins. If a mixin is necessary, use [MixinExtras](https://github.com/LlamaLad7/MixinExtras) (`@WrapOperation`, `@ModifyExpressionValue`) instead of `@Redirect` or `@Overwrite`, for compatibility with other mods.
 - Every gameplay number belongs in the config or a mob profile, not hard-coded.

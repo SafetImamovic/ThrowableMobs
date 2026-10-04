@@ -73,9 +73,9 @@ public final class DropTarget
                 {
                         return false;
                 }
-                return ThrowableMobsConfig.CARRY.dropGroundFilter() == GroundFilter.ALLOW_LIST
-                        ? state.is(ModTags.DROP_GROUND_ALLOWED)
-                        : !state.is(ModTags.DROP_GROUND_DENIED);
+                return ThrowableMobsConfig.carry().groundFilter() == GroundFilter.ALLOW_LIST
+                        ? state.is(ModTags.PUT_DOWN_GROUND_ALLOWED)
+                        : !state.is(ModTags.PUT_DOWN_GROUND_DENIED);
         }
 
         /** Top of the block's collision shape, so slabs, carpets and snow layers work. */
