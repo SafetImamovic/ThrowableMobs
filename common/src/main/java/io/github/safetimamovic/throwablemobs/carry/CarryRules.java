@@ -47,13 +47,13 @@ public final class CarryRules
         public static boolean canUseHands(Player player)
         {
                 return !player.isSpectator()
-                        && (!ThrowableMobsConfig.CARRY.requireEmptyHand() || player.getMainHandItem().isEmpty());
+                        && (!ThrowableMobsConfig.carry().requireEmptyHand() || player.getMainHandItem().isEmpty());
         }
 
         /** Why {@code player} can't pick up {@code mob}, or {@code null} if they can. Ignores input and reach. */
         public static @Nullable Denial check(Player player, Mob mob)
         {
-                CarryConfig config = ThrowableMobsConfig.CARRY;
+                CarryConfig config = ThrowableMobsConfig.carry();
                 if (!mob.isAlive())
                 {
                         return Denial.UNAVAILABLE;
@@ -91,7 +91,7 @@ public final class CarryRules
         public static double mass(Mob mob)
         {
                 return ThrowPhysics.massFromHitbox(mob.getBbWidth(), mob.getBbHeight(),
-                        ThrowableMobsConfig.CARRY.defaultDensity());
+                        ThrowableMobsConfig.carry().defaultDensity());
         }
 
         private static boolean isSomeoneElsesPet(Player player, Mob mob)
@@ -100,7 +100,7 @@ public final class CarryRules
                 {
                         return false;
                 }
-                boolean ownerOnly = ThrowableMobsConfig.CARRY.ownerOnlyForTamed() || mob.is(ModTags.OWNER_ONLY);
+                boolean ownerOnly = ThrowableMobsConfig.carry().ownerOnlyForTamed() || mob.is(ModTags.OWNER_ONLY);
                 EntityReference<LivingEntity> owner = ownable.getOwnerReference();
                 return ownerOnly && owner != null && !owner.getUUID().equals(player.getUUID());
         }

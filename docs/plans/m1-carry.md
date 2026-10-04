@@ -79,7 +79,7 @@ Spike = throwaway code, Fabric only, hardcoded pickup, `runServer` + 2 clients. 
 | Change | Why |
 |---|---|
 | Input via key mappings **Modifier** (Left Shift, can be unbound), **Pick up** and **Put down** (both right-click) in their own Controls category, replacing hardcoded sneak + use (`require_sneak` removed). Pick up goes through a `PickUpPayload`; when our key acts, vanilla use is swallowed for that press. Carried mobs can't be interacted with. | Rebindable in game, and no trade screen when picking up a villager. |
-| Put down only on valid ground the carrier looks at (`drop_needs_ground`), deny/allow list via `#throwablemobs:drop_ground_denied` / `drop_ground_allowed`. | Void / skyblock packs: no dropping mobs off the platform. |
+| Put down only on valid ground the carrier looks at (`drop_needs_ground`), deny/allow list via `#throwablemobs:put_down_ground_denied` / `put_down_ground_allowed`. | Void / skyblock packs: no dropping mobs off the platform. |
 | Creeper swell reset while carried. | NoAI stops the swell goal, not `Creeper#tick`: hissing creepers exploded on the carrier's head. |
 | Carried mobs on portal cooldown; dimension change → `TRAVEL` (default) or `DROP`. | Mob sometimes went through the portal on its own. |
 | Logout → `KEEP_CARRYING` (default) or `DROP`. | Carry survives reconnects and restarts. |
