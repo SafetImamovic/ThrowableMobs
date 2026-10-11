@@ -63,7 +63,7 @@ What changed since you last modded (assuming you left somewhere around 1.16–1.
 | **NeoForge** | Very active, dominant for large modpacks. | Big kitchen-sink modpacks (ATM, etc.). | ✅ Yes |
 | **MinecraftForge** | Still releases (26.1 builds exist), but many mods skipped it for 26.2/26.3. | Legacy packs, older versions. | ⚠️ Optional. Only if you backport to ≤1.20.1, where Forge still rules. |
 | **Quilt** | Fabric-compatible, tiny share. | Runs most Fabric mods. | Free via Fabric build — don't target explicitly. |
-| **Paper** (server plugins) | Plugins, not mods. Hard-forked from Spigot (announced Dec 2024), API diverging. | Public servers & minigame networks with **vanilla clients** — the biggest audience for this mechanic. | ✅ **Later (M8)**, as a separate plugin sharing the `physics` module. See §16. |
+| **Paper** (server plugins) | Plugins, not mods. Hard-forked from Spigot (announced Dec 2024), API diverging. | Public servers & minigame networks with **vanilla clients** — the biggest audience for this mechanic. | ✅ **Later (M10)**, as a separate plugin sharing the `physics` module. See §16. |
 | **Spigot / Bukkit** | Legacy, falling behind Paper. | Older servers. | ❌ Target Paper API only. |
 
 **Recommendation:** Fabric + NeoForge, latest version (26.3) first. Paper plugin after 1.0. Consider a backport to **1.21.1** later — that's where a huge chunk of NeoForge modpacks still live (verify on CurseForge's version stats when you decide).
@@ -272,7 +272,7 @@ ThrowableMobs/
 │     └─ platform/                 # Services interface (ServiceLoader) for loader-specific stuff
 ├─ fabric/                         # entrypoints, Fabric events, Fabric networking reg
 ├─ neoforge/                       # @Mod class, NeoForge events, payload reg
-├─ paper/                          # LATER (M8): Paper plugin, Bukkit API glue, depends on physics/
+├─ paper/                          # LATER (M10): Paper plugin, Bukkit API glue, depends on physics/
 ├─ docs/                           # public docs site source (§17)
 │  ├─ generated/                   # config/defaults/schema reference, written by Gradle — don't hand-edit
 │  └─ example-datapack/
@@ -462,7 +462,7 @@ Behaviors are composable "atoms" (see §10). Default vanilla roster:
 
 ### Heuristic resolver (unknown modded mobs)
 
-> **As built (M3, 2026-10-11):** guesses cover creeper, cube mobs (slime / magma cube: bounce + split), enderman and fire-immune mobs, and only apply to non-vanilla mobs; the flying, ranged and escape rows come with those atoms in M5. They're the lowest profile layer, so any profile merges on top. Reference: `docs/guide/modded-mobs.md`.
+> **As built (M3, 2026-10-11):** guesses cover creeper, cube mobs (slime / magma cube: bounce + split), enderman and fire-immune mobs, and only apply to non-vanilla mobs; the flying, ranged and escape rows come with those atoms in M7. They're the lowest profile layer, so any profile merges on top. Reference: `docs/guide/modded-mobs.md`.
 When a mob has no profile, guess from its class hierarchy and properties (toggle `behaviors.auto_detect = true`):
 
 | Detected | Behavior |
@@ -574,7 +574,7 @@ Rules for referencing tags we don't own:
 
 ### Layer 3 — Java API (mod devs)
 
-> **As built (M3, 2026-10-11):** `onImpact(ImpactContext ctx, ImpactResult current)` takes the result so far (behaviors chain); `registerBehaviorType(BehaviorType)` takes a record of id + `MapCodec`; `registerProfile` merges with earlier registrations; `onCaught` and the events come later (M4 / M5); no `-api` artifact before M6. Reference: `docs/guide/java-api.md`.
+> **As built (M3, 2026-10-11):** `onImpact(ImpactContext ctx, ImpactResult current)` takes the result so far (behaviors chain); `registerBehaviorType(BehaviorType)` takes a record of id + `MapCodec`; `registerProfile` merges with earlier registrations; `onCaught` and the events come later (M4 / M7); no `-api` artifact before M8. Reference: `docs/guide/java-api.md`.
 
 Published as a separate `-api` artifact (Maven) so other mods can `compileOnly` against it without a hard dependency.
 
@@ -853,11 +853,13 @@ Hand-written reference tables rot. Generate them:
 | **M2 — Throw** | Charge + charge bar, impulse launch, flight sim, trajectory preview, block/entity collision, energy damage, knockback, damage type. Config files + screens done before M2 (`docs/plans/config-files.md`). |
 | **M3 — Behavior system** | `ThrowBehavior` API, registry, 6 vanilla behaviors (creeper, enderman, slime, chicken, blaze, cat), datapack loader, heuristics. |
 | **M4 — Catching** | Server catch check, recoil, self-catch, glow highlight, latency compensation. |
-| **M5 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
-| **M6 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. |
-| **M7 — Reach** | Stonecutter + 1.21.1 backport, KubeJS integration. |
-| **M8 — Paper plugin** | `paper/` module on shared `physics/`, item-based / sneak+swing controls, action-bar HUD, particle trajectory preview, minigame events API, permissions, Folia decision, docs pages for admins/plugin devs, Hangar + Modrinth + SpigotMC release. |
-| **M9 — Hybrid** (optional) | Optional client mod enhances Paper servers via plugin-messaging channel (real HUD, preview, keybinds). |
+| **M5 — Backport 1.21.1** | Stonecutter multi-version build, 1.21.1 on Fabric + NeoForge next to 26.3. Moved up from "Reach" (2026-10-11): most modpacks run 1.21.1 / 1.20.1. |
+| **M6 — Carry+** | Carry blocks with their contents (chests, furnaces, spawners, modded machines) and throw them; carry and throw players (opt-in); stack mobs (small on big, thrown as a stack); holding animation in first and third person; Carry On compatibility. Goal: the best carry mod, not just the best throw mod. |
+| **M7 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
+| **M8 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. |
+| **M9 — Reach** | 1.20.1 backport, KubeJS integration. |
+| **M10 — Paper plugin** | `paper/` module on shared `physics/`, item-based / sneak+swing controls, action-bar HUD, particle trajectory preview, minigame events API, permissions, Folia decision, docs pages for admins/plugin devs, Hangar + Modrinth + SpigotMC release. |
+| **M11 — Hybrid** (optional) | Optional client mod enhances Paper servers via plugin-messaging channel (real HUD, preview, keybinds). |
 
 ---
 
@@ -868,14 +870,16 @@ Settled 2026-10-02:
 | Topic | Decision |
 |---|---|
 | Mod id / name | `throwablemobs` / "Throwable Mobs", package `io.github.safetimamovic.throwablemobs` |
-| Versions | **26.3 first**, then a **backport** (target: 1.21.1) via Stonecutter once M3 is done — the core needs to be stable before the build gets multi-version complexity. |
+| Versions | **26.3 first**, then a **backport** (target: 1.21.1) via Stonecutter once M3 is done — the core needs to be stable before the build gets multi-version complexity. 2026-10-11: 1.21.1 right after catching (M5), 1.20.1 later (M9). |
+| Goal | **The best carry mod and the best carry + throw mod** (2026-10-11): match Carry On on carrying (blocks with contents, players, stacking, animation, M6) and stay ahead on throwing. |
+| Thrown blocks (M6 sketch) | **Energy-based landing, highly configurable** (2026-10-11). Soft landing: the block is placed where it lands, facing its flight direction, contents and data kept. Hard landing (collision energy over `block_break_energy`): breaks like mining, block item drops and contents spill. Hitting a mob: damage from mass and speed like a thrown mob, then it falls on. Can't be placed (no space, claim, `mobGriefing` off): drops as an item that keeps its contents, never loses data. Valuable blocks in `#throwablemobs:never_break_on_impact` (spawners and similar by default) always place or drop with their data. Mass from the block, plus its contents. Knobs to expect: a global landing mode (energy / always place / always break), `block_break_energy`, whether contents spill, and per-block overrides through block profiles (like mob profiles) and tags. Own thrown-block entity: vanilla's falling block drops the plain block and loses contents when it can't place. |
 | Loaders | Fabric + NeoForge. **No MinecraftForge.** |
 | Defaults | **Balanced survival.** But every number is configurable and per-mob behavior is data-driven, so goofy packs can crank it (explosion power, impulse, `max_mass`, unthrowable list). Consider shipping a built-in "chaos" datapack/config preset players can enable. |
 | Players throwable | Config option, **off by default**. |
 | Villagers | **Throwable by default.** |
 | Pick-up input | Key mappings **Modifier** (Left Shift) + **Pick up** / **Put down** (right-click), all rebindable in Controls; Modifier can be unbound. Same default as Carry On (clash accepted for now). |
 | License | **MIT** |
-| Server plugin | **Paper port planned (M8)**, Paper API only (no Spigot). Shares the `physics/` module + mob profile JSON schema. |
+| Server plugin | **Paper port planned (M10)**, Paper API only (no Spigot). Shares the `physics/` module + mob profile JSON schema. |
 | Common tags | Code checks only our own tags; `c:` tags are default *contents* of them (pack devs can remove). No hardcoded `c:` checks. |
 | Config | Forge Config API Port: creator file (synced) + player file (in-game screen). Which mobs can be carried stays in tags; per-mob weight comes with mob profiles (M3). |
 | Public docs | VitePress site on GitHub Pages, versioned per major. Config/defaults/tags/atoms/JSON Schema **generated from code**, CI fails on drift. |
