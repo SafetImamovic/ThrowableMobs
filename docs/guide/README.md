@@ -1,7 +1,7 @@
 # Throwable Mobs guide (draft)
 
 Draft of the docs for pack devs, server admins and mod devs. It's written next to the code during M3 so it stays in
-sync, and becomes the docs site in M6 (THROWABLE_MOBS.md §17), with the config reference generated from code.
+sync, and becomes the docs site in M8 (THROWABLE_MOBS.md §17), with the config reference generated from code.
 
 | Page | For | What's in it |
 |---|---|---|
