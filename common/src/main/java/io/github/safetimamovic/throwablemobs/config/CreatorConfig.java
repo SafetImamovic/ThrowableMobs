@@ -1,5 +1,6 @@
 package io.github.safetimamovic.throwablemobs.config;
 
+import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
@@ -56,6 +57,10 @@ public final class CreatorConfig
         private static final DoubleValue DRAG;
         private static final IntValue MAX_FLIGHT_TICKS;
         private static final BooleanValue AI_IN_FLIGHT;
+        private static final DoubleValue BLOCK_RESTITUTION;
+        private static final IntValue MAX_BOUNCES;
+        private static final DoubleValue MIN_BOUNCE_SPEED;
+        private static final EnumValue<BounceImpacts> BOUNCE_IMPACTS;
 
         private static final DoubleValue DAMAGE_PER_ENERGY;
         private static final DoubleValue MIN_IMPACT_ENERGY;
@@ -153,6 +158,17 @@ public final class CreatorConfig
                                 "(chickens flap, skeletons turn). Their own movement can then bend the flight a",
                                 "little away from the trajectory preview.")
                         .define("ai_in_flight", false);
+                BLOCK_RESTITUTION = builder.comment("Bounciness off blocks for every mob: 0 = no bounce, the flight ends",
+                                "at the first block; 1 = keeps all its speed. Mob profiles can override it per mob.")
+                        .defineInRange("block_restitution", 0.0, 0.0, 2.0);
+                MAX_BOUNCES = builder.comment("Bounces off blocks before the flight ends. Mob profiles can override it.")
+                        .defineInRange("max_bounces", 3, 0, 100);
+                MIN_BOUNCE_SPEED = builder.comment("A bounce slower than this (blocks/tick, away from the block) ends the",
+                                "flight, so mobs stop instead of skipping along the ground forever.")
+                        .defineInRange("min_bounce_speed", 0.15, 0.0, 10.0);
+                BOUNCE_IMPACTS = builder.comment("Whether bounces after the first impact deal damage too: EVERY or",
+                                "FIRST_ONLY. Mob profiles can override it.")
+                        .defineEnum("bounce_impacts", BounceImpacts.EVERY);
                 builder.pop();
 
                 builder.comment("When a thrown mob hits a block or another entity. Damage comes from the collision",
@@ -214,6 +230,10 @@ public final class CreatorConfig
                         get(DRAG),
                         get(MAX_FLIGHT_TICKS),
                         get(AI_IN_FLIGHT),
+                        get(BLOCK_RESTITUTION),
+                        get(MAX_BOUNCES),
+                        get(MIN_BOUNCE_SPEED),
+                        get(BOUNCE_IMPACTS),
                         get(DAMAGE_PER_ENERGY),
                         get(MIN_IMPACT_ENERGY),
                         get(MAX_IMPACT_DAMAGE),

@@ -1,5 +1,7 @@
 package io.github.safetimamovic.throwablemobs.config;
 
+import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
+
 /**
  * Settings, read through this class only. Two files: the creator file ({@link CreatorConfig}, server side, per world,
  * synced to clients) for pack devs and server admins, and the player file ({@link PlayerConfig}, client side, editable
@@ -143,6 +145,10 @@ public final class ThrowableMobsConfig
                 double drag,
                 int maxFlightTicks,
                 boolean aiInFlight,
+                double blockRestitution,
+                int maxBounces,
+                double minBounceSpeed,
+                BounceImpacts bounceImpacts,
                 double damagePerEnergy,
                 double minImpactEnergy,
                 double maxImpactDamage,

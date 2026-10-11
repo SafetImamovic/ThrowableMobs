@@ -1,6 +1,7 @@
 package io.github.safetimamovic.throwablemobs.carry;
 
 import io.github.safetimamovic.throwablemobs.Constants;
+import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.behavior.ProfilePhysics;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
@@ -97,7 +98,7 @@ public final class ThrowManager
                 Vec3 velocity = player.getLookAngle().scale(speed)
                         .add(player.getKnownMovement().scale(config.inheritVelocity()));
                 mob.setDeltaMovement(velocity);
-                FLYING.put(mob, new Flight(player.getUUID(), velocity, mob.position(), 0));
+                FLYING.put(mob, new Flight(player.getUUID(), velocity, mob.position(), 0, 0));
         }
 
         /** Once per server tick, after entities ticked: move every mob in the air one step. */
@@ -146,17 +147,25 @@ public final class ThrowManager
                 if (vanillaMoves && ticks == 1 && moved.lengthSqr() == 0.0)
                 {
                         // The throw arrived after the mob ticked: no move yet, so its collision flags are stale.
-                        return new Flight(flight.thrower(), velocity, flight.position(), ticks);
+                        return new Flight(flight.thrower(), velocity, flight.position(), ticks, flight.bounces());
                 }
 
+                int bounces = flight.bounces();
+                boolean bounced = false;
                 if (mob.horizontalCollision || mob.verticalCollision)
                 {
-                        hitBlock(level, mob, flight, moved, config);
-                        return null;
+                        Vec3 bounce = hitBlock(level, mob, flight, moved, config);
+                        if (bounce == null)
+                        {
+                                return null;
+                        }
+                        velocity = bounce;
+                        bounces++;
+                        bounced = true;
                 }
                 if (mob.isInWater() || ticks >= config.maxFlightTicks())
                 {
-                        land(mob, moved);
+                        land(mob, bounced ? velocity : moved);
                         return null;
                 }
 
@@ -171,7 +180,7 @@ public final class ThrowManager
                 {
                         mob.resetFallDistance();
                 }
-                return new Flight(flight.thrower(), velocity, mob.position(), ticks);
+                return new Flight(flight.thrower(), velocity, mob.position(), ticks, bounces);
         }
 
         /** Nearest entity in the mob's path this tick. The thrower is safe for the first few ticks. */
@@ -238,21 +247,66 @@ public final class ThrowManager
 
         /**
          * Mob-vs-block: the block doesn't move (infinite mass), so the mob takes all the damage. Only the speed into the
-         * block counts: skimming along the ground hurts less than hitting a wall head-on. The mob keeps its speed along
-         * the free axes.
+         * block counts: skimming along the ground hurts less than hitting a wall head-on. Then the mob either bounces
+         * off ({@link #bounceVelocity}) or lands, keeping its speed along the free axes. Bounces after the first impact
+         * only hurt with {@code bounce_impacts = EVERY}.
+         *
+         * @return the velocity to keep flying with, or {@code null} when the flight ended
          */
-        private static void hitBlock(ServerLevel level, Mob mob, Flight flight, Vec3 moved, ThrowConfig config)
+        private static @Nullable Vec3 hitBlock(ServerLevel level, Mob mob, Flight flight, Vec3 moved,
+                ThrowConfig config)
         {
                 ThrowPhysics.Vector wanted = vector(flight.velocity());
                 ThrowPhysics.Vector actual = vector(moved);
-                double speed = ThrowPhysics.impactVelocity(wanted, actual).length();
-                double damage = ThrowPhysics.impactDamage(
-                        ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY, speed),
-                        config.damagePerEnergy(), config.minImpactEnergy(), config.maxImpactDamage());
-                ThrowPhysics.Vector left = ThrowPhysics.bounce(wanted, actual, 0.0).velocity();
-                land(mob, new Vec3(left.x(), left.y(), left.z()));
+                double damage = 0.0;
+                if (flight.bounces() == 0 || bounceImpacts(mob, config) == BounceImpacts.EVERY)
+                {
+                        double speed = ThrowPhysics.impactVelocity(wanted, actual).length();
+                        damage = ThrowPhysics.impactDamage(
+                                ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY, speed),
+                                config.damagePerEnergy(), config.minImpactEnergy(), config.maxImpactDamage());
+                }
+                Vec3 bounce = bounceVelocity(MobProfiles.physics(mob), config, flight.bounces(), flight.velocity(),
+                        moved);
+                if (bounce == null)
+                {
+                        ThrowPhysics.Vector left = ThrowPhysics.bounce(wanted, actual, 0.0).velocity();
+                        land(mob, new Vec3(left.x(), left.y(), left.z()));
+                }
                 hurt(level, mob, level.damageSources().flyIntoWall(),
                         damage, level.getServer().getPlayerList().getPlayer(flight.thrower()));
+                return bounce;
+        }
+
+        /**
+         * Velocity after bouncing off a block, or {@code null} when the mob doesn't bounce: no bounciness, out of
+         * bounces, or too slow away from the block ({@code min_bounce_speed}). Shared with the client's trajectory
+         * preview, so it bounces where the real throw does.
+         *
+         * @param bounces bounces so far in this flight
+         * @param wanted  the velocity the mob tried to move by this tick
+         * @param moved   how far it really moved
+         */
+        public static @Nullable Vec3 bounceVelocity(ProfilePhysics physics, ThrowConfig config, int bounces,
+                Vec3 wanted, Vec3 moved)
+        {
+                double restitution = physics.blockRestitution(config);
+                if (restitution <= 0.0 || bounces >= physics.maxBounces(config))
+                {
+                        return null;
+                }
+                ThrowPhysics.Bounce bounce = ThrowPhysics.bounce(vector(wanted), vector(moved), restitution);
+                if (bounce.reboundSpeed() < config.minBounceSpeed())
+                {
+                        return null;
+                }
+                return new Vec3(bounce.velocity().x(), bounce.velocity().y(), bounce.velocity().z());
+        }
+
+        private static BounceImpacts bounceImpacts(Mob mob, ThrowConfig config)
+        {
+                BounceImpacts profile = MobProfiles.resolve(mob.getType()).bounceImpacts();
+                return profile != null ? profile : config.bounceImpacts();
         }
 
         private static void hurt(ServerLevel level, Entity entity, DamageSource source, double amount,
@@ -338,8 +392,9 @@ public final class ThrowManager
 
         /**
          * @param position where the mob was at the end of the last flight tick, to tell how far it really moved
+         * @param bounces  bounces off blocks so far
          */
-        private record Flight(UUID thrower, Vec3 velocity, Vec3 position, int ticks)
+        private record Flight(UUID thrower, Vec3 velocity, Vec3 position, int ticks, int bounces)
         {
         }
 }

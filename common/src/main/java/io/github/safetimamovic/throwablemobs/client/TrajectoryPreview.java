@@ -25,8 +25,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * Dotted path of the throw being charged, from the client's own charge, look direction and movement. It runs the
  * server's flight tick by tick: move with vanilla collision ({@link Entity#collideBoundingBox}, what
- * {@link Entity#move} uses), stop at the first block, entity or water, then {@link ThrowPhysics#stepVelocity}. Drawn
- * with vanilla gizmos from the client tick, which vanilla collects per tick and draws every frame until the next one.
+ * {@link Entity#move} uses), bounce off blocks like {@link ThrowManager#bounceVelocity} or stop there, stop at the
+ * first entity or water, then {@link ThrowPhysics#stepVelocity}. Drawn with vanilla gizmos from the client tick,
+ * which vanilla collects per tick and draws every frame until the next one.
  */
 final class TrajectoryPreview
 {
@@ -36,6 +37,8 @@ final class TrajectoryPreview
         private static final int BLOCK_MARKER_COLOR = 0xFFFFFFFF;
         private static final int ENTITY_MARKER_COLOR = 0xFFFF5555;
         private static final float MARKER_WIDTH = 2.0F;
+        private static final int BOUNCE_COLOR = 0xFFFFFF55;
+        private static final float BOUNCE_SIZE = 6.0F;
         /** Landing on the ground: filled footprint just above the surface, so it reads as "lands here". */
         private static final int FOOTPRINT_FILL = 0x50FFFFFF;
         private static final int GHOST_BOX_COLOR = 0x60FFFFFF;
@@ -69,6 +72,7 @@ final class TrajectoryPreview
                 double gravity = config.gravity() * physics.gravityMultiplier();
                 double drag = ThrowPhysics.scaledDrag(config.drag(), physics.dragMultiplier());
                 AABB box = mob.getBoundingBox();
+                int bounces = 0;
                 for (int tick = 1; tick <= config.maxFlightTicks(); tick++)
                 {
                         Entity target = findTarget(level, player, mob, box, velocity, tick, config);
@@ -81,9 +85,21 @@ final class TrajectoryPreview
                         AABB next = box.move(allowed);
                         drawSegment(style, tick, box.getCenter(), next.getCenter());
                         box = next;
-                        if (allowed.distanceToSqr(velocity) > EPSILON || inWater(level, box))
+                        if (allowed.distanceToSqr(velocity) > EPSILON)
                         {
-                                drawLanding(box, allowed.y > velocity.y + EPSILON);
+                                Vec3 bounce = ThrowManager.bounceVelocity(physics, config, bounces, velocity, allowed);
+                                if (bounce == null)
+                                {
+                                        drawLanding(box, allowed.y > velocity.y + EPSILON);
+                                        return;
+                                }
+                                Gizmos.point(box.getCenter(), BOUNCE_COLOR, BOUNCE_SIZE);
+                                velocity = bounce;
+                                bounces++;
+                        }
+                        if (inWater(level, box))
+                        {
+                                drawLanding(box, false);
                                 return;
                         }
                         ThrowPhysics.Vector step = ThrowPhysics.stepVelocity(
