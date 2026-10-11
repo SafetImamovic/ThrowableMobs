@@ -81,7 +81,7 @@ Gate passed: smooth on both clients, stops at walls, AI back on landing.
 | 7 charge bar | Done. |
 | 7b trajectory preview | Done. Tested in game on Fabric: visible without debug mode, grows with charge, mob lands in the marker. |
 | Extras | Cancel throw key, charge bar layout, trajectory styles, flight poses. Tested on Fabric. |
-| 9 manual matrix | 19 of 20 passed (2026-10-04). Open: 4, needs two NeoForge clients (`runClient2` added). |
+| 9 manual matrix | All passed, including 4 (NeoForge, two clients) and 10b (`vanilla_fall_damage`) on 2026-10-11. |
 
 Implementation notes:
 - Block impacts use only the blocked part of the velocity (`v − actual movement`), so skimming the ground hurts less than hitting a wall head-on.
@@ -133,14 +133,14 @@ Key mappings: **Throw** (Right Button, no modifier) and **Cancel throw** (Left B
 - [x] 1 Charge bar fills while holding Throw, empties on release; short tap does nothing.
 - [x] 2 Chicken flies far, creeper medium, cow barely leaves the hands.
 - [x] 3 Sprint-throw goes further than a standing throw (`inherit_velocity = 0` removes the bonus).
-- [ ] 4 Flight looks smooth on the thrower's and the other client. On NeoForge use `runClient` + `runClient2` (`Dev` / `Dev2`).
+- [x] 4 Flight looks smooth on the thrower's and the other client. On NeoForge use `runClient` + `runClient2` (`Dev` / `Dev2`).
 - [x] 5 Mob hits a wall → takes damage, stops, gets its AI back.
 - [x] 6 Mob hits another mob → both take damage by mass, target knocked back.
 - [x] 7 Kill by throw → loot drops, XP, death message names the thrower.
 - [x] 8 Thrown mob doesn't hit the thrower right after the throw.
 - [x] 9 Throw into water → flight ends, mob swims.
 - [x] 10 Throw off a cliff → no extra vanilla fall damage on top of impact damage.
-- [ ] 10b `vanilla_fall_damage = true` → a mob thrown high takes fall damage on landing too; a chicken still doesn't.
+- [x] 10b `vanilla_fall_damage = true` → a mob thrown high takes fall damage on landing too; a chicken still doesn't.
 - [x] 11 Thrower logs out mid-flight → flight still ends normally.
 - [x] 12 Server stop mid-flight → mob restored with AI on next start.
 - [x] 13 PvP off → throwing a mob at a player does no damage to them.
