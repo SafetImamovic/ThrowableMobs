@@ -47,6 +47,7 @@
     "throwablemobs.configuration.max_charge_ticks": "Full Charge Ticks",
     "throwablemobs.configuration.min_charge_ticks": "Min Charge Ticks",
     "throwablemobs.configuration.inherit_velocity": "Inherit Thrower Movement",
+    "throwablemobs.configuration.strength_effect_bonus": "Strength Effect Bonus",
     "throwablemobs.configuration.thrower_grace_ticks": "Thrower Grace Ticks",
     "throwablemobs.configuration.allow_trajectory": "Allow Trajectory Preview",
     "throwablemobs.configuration.flight": "Flight",

@@ -152,6 +152,7 @@ public final class ThrowableMobsConfig
          */
         public record ThrowConfig(
                 double throwImpulse,
+                double strengthEffectBonus,
                 double maxThrowSpeed,
                 int maxChargeTicks,
                 int minChargeTicks,

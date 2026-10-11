@@ -62,8 +62,8 @@ final class TrajectoryPreview
                 }
                 double charge = ThrowPhysics.chargeFraction(Math.min(chargeTicks, config.maxChargeTicks()),
                         config.maxChargeTicks());
-                double speed = ThrowPhysics.launchSpeed(config.throwImpulse(), charge, CarryRules.mass(mob),
-                        config.maxThrowSpeed());
+                double speed = ThrowPhysics.launchSpeed(ThrowManager.impulse(player, config), charge,
+                        CarryRules.mass(mob), config.maxThrowSpeed());
                 // What the server knows of the player's movement: last tick's change in position.
                 Vec3 movement = player.position().subtract(player.xo, player.yo, player.zo);
                 Vec3 velocity = player.getLookAngle().scale(speed).add(movement.scale(config.inheritVelocity()));

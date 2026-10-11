@@ -24,6 +24,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -97,13 +99,24 @@ public final class ThrowManager
                 Services.THROW_STATE.set(mob, state);
                 mob.setNoAi(!config.aiInFlight() || state.originalNoAi());
                 mob.setNoGravity(true);
-                double speed = ThrowPhysics.launchSpeed(config.throwImpulse(), charge, CarryRules.mass(mob),
+                double speed = ThrowPhysics.launchSpeed(impulse(player, config), charge, CarryRules.mass(mob),
                         config.maxThrowSpeed());
                 Vec3 velocity = player.getLookAngle().scale(speed)
                         .add(player.getKnownMovement().scale(config.inheritVelocity()));
                 mob.setDeltaMovement(velocity);
                 FLYING.put(mob, new Flight(player.getUUID(), velocity, mob.position(), 0, 0));
                 Hooks.thrown(mob, player, velocity);
+        }
+
+        /**
+         * How hard {@code player} throws: {@code throw_impulse}, plus {@code strength_effect_bonus} per level of the
+         * Strength effect. Shared with the client's trajectory preview; a player's own effects are synced to them.
+         */
+        public static double impulse(Player player, ThrowConfig config)
+        {
+                MobEffectInstance strength = player.getEffect(MobEffects.STRENGTH);
+                int level = strength != null ? strength.getAmplifier() + 1 : 0;
+                return config.throwImpulse() * (1.0 + config.strengthEffectBonus() * level);
         }
 
         /** Once per server tick, after entities ticked: move every mob in the air one step. */

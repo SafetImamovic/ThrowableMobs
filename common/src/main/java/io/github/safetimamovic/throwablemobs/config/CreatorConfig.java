@@ -52,6 +52,7 @@ public final class CreatorConfig
         private static final EnumValue<GroundFilter> GROUND_FILTER;
 
         private static final DoubleValue THROW_IMPULSE;
+        private static final DoubleValue STRENGTH_EFFECT_BONUS;
         private static final DoubleValue MAX_THROW_SPEED;
         private static final IntValue MAX_CHARGE_TICKS;
         private static final IntValue MIN_CHARGE_TICKS;
@@ -140,6 +141,9 @@ public final class CreatorConfig
                                 "so light mobs fly fast and heavy ones barely leave your hands (150 throws a cow at",
                                 "about 0.33 blocks/tick).")
                         .defineInRange("throw_impulse", 150.0, 0.0, 1_000_000.0);
+                STRENGTH_EFFECT_BONUS = builder.comment("Extra impulse per level of the Strength effect: 0.25 makes",
+                                "Strength II throw 50 % harder. 0 = the effect doesn't help.")
+                        .defineInRange("strength_effect_bonus", 0.25, 0.0, 10.0);
                 MAX_THROW_SPEED = builder.comment("Launch speed cap in blocks/tick, so light mobs don't fly forever",
                                 "(a full-charge arrow is about 3; 1.0 throws a chicken about 19 blocks).")
                         .defineInRange("max_throw_speed", 1.0, 0.0, 10.0);
@@ -251,6 +255,7 @@ public final class CreatorConfig
         {
                 return new ThrowConfig(
                         get(THROW_IMPULSE),
+                        get(STRENGTH_EFFECT_BONUS),
                         get(MAX_THROW_SPEED),
                         get(MAX_CHARGE_TICKS),
                         get(MIN_CHARGE_TICKS),
