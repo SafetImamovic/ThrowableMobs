@@ -51,6 +51,15 @@ public final class CarryRules
                         && (!ThrowableMobsConfig.carry().requireEmptyHand() || player.getMainHandItem().isEmpty());
         }
 
+        /**
+         * Free to throw: main hand empty if {@code require_empty_hand} is on, the same rule as picking up. Switching to
+         * a full slot while charging cancels the throw.
+         */
+        public static boolean canThrow(Player player)
+        {
+                return canUseHands(player);
+        }
+
         /** Why {@code player} can't pick up {@code mob}, or {@code null} if they can. Ignores input and reach. */
         public static @Nullable Denial check(Player player, Mob mob)
         {

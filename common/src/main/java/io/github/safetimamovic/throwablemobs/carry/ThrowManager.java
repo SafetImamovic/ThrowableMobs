@@ -60,7 +60,7 @@ public final class ThrowManager
         /** {@link io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload} from a client. */
         public static void onChargeRequest(ServerPlayer player)
         {
-                if (!player.isSpectator() && CarryManager.carriedBy(player) != null)
+                if (CarryRules.canThrow(player) && CarryManager.carriedBy(player) != null)
                 {
                         CHARGING.put(player.getUUID(), player.level().getGameTime());
                 }
@@ -71,7 +71,7 @@ public final class ThrowManager
         {
                 Long start = CHARGING.remove(player.getUUID());
                 Mob mob = CarryManager.carriedBy(player);
-                if (start == null || mob == null || player.isSpectator())
+                if (start == null || mob == null || !CarryRules.canThrow(player))
                 {
                         return;
                 }
