@@ -125,8 +125,8 @@ public final class CreatorConfig
                                 "about 0.33 blocks/tick).")
                         .defineInRange("throw_impulse", 150.0, 0.0, 1_000_000.0);
                 MAX_THROW_SPEED = builder.comment("Launch speed cap in blocks/tick, so light mobs don't fly forever",
-                                "(a full-charge arrow is about 3).")
-                        .defineInRange("max_throw_speed", 2.0, 0.0, 10.0);
+                                "(a full-charge arrow is about 3; 1.0 throws a chicken about 19 blocks).")
+                        .defineInRange("max_throw_speed", 1.0, 0.0, 10.0);
                 MAX_CHARGE_TICKS = builder.comment("Ticks to reach full charge (20 ticks = 1 second, same as a bow).")
                         .defineInRange("max_charge_ticks", 20, 1, 200);
                 MIN_CHARGE_TICKS = builder.comment("Letting go sooner than this cancels the throw.")

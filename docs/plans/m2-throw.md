@@ -97,7 +97,7 @@ Starting values, tuned in the manual pass. Units: blocks, ticks, blocks/tick, "g
 | Section | Key | Default | Note |
 |---|---|---|---|
 | throw | `throw_impulse` | `150.0` | Chicken (45) hits the cap, creeper (245) ≈ 0.6 b/t, cow (454) ≈ 0.33 b/t. |
-| throw | `max_throw_speed` | `2.0` | b/t. Bow arrow at full charge ≈ 3. |
+| throw | `max_throw_speed` | `1.0` | b/t. Bow arrow at full charge ≈ 3. Tuned from 2.0: full charge at 30° throws a chicken ~19 blocks, creeper ~9, cow ~4. |
 | throw | `max_charge_ticks` | `20` | Same as a bow. |
 | throw | `min_charge_ticks` | `3` | Shorter release cancels. |
 | throw | `inherit_velocity` | `1.0` | Share of the carrier's movement added: the sprint bonus. `0` = none, `2` = double. |
@@ -158,4 +158,3 @@ Key mappings: **Throw** (Right Button, no modifier) and **Cancel throw** (Left B
 |---|---|
 | Impact self-damage ignores fall immunity (chickens die hitting walls). Decide per mob: behaviors or a `#throwablemobs:impact_immune`-style tag. | M3 |
 | Charge isn't cancelled when the carrier switches to a non-empty hand; `require_empty_hand` only applies to picking up. Decide whether throwing should need it too. | M3 |
-| Tune `throw_impulse` / `max_throw_speed` (chicken ~43 blocks at full charge). | Before release |
