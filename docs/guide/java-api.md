@@ -4,7 +4,7 @@ For mod devs who want their mobs to behave well when thrown, or to add new behav
 is in `io.github.safetimamovic.throwablemobs.api` and works the same on Fabric and NeoForge; call it from your common
 init. Datapack profiles merge on top of anything registered here, so pack devs keep the final say.
 
-> **Dependency:** a separate `-api` artifact on Maven comes with the 1.0 release (M6). Until then, depend on the mod
+> **Dependency:** a separate `-api` artifact on Maven comes with the 1.0 release (M8). Until then, depend on the mod
 > jar `compileOnly` and treat the API as subject to change.
 
 ## Three entry points

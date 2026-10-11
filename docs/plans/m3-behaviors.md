@@ -4,6 +4,8 @@ Plan for milestone M3 from [THROWABLE_MOBS.md §18](../../THROWABLE_MOBS.md#18-r
 Branch: `feature/behaviors` (from `develop`, after M2 is merged).
 Spec: §9 (mob behaviors), §10 (behavior API), §8.4 (damage split and fall immunity).
 
+> Milestone numbers below are from before the 2026-10-11 roadmap change: polish (M5) is now **M7**, release 1.0 (M6) is now **M8**. See THROWABLE_MOBS.md §18.
+
 ## Goal / definition of done
 
 On a **dedicated server**, on both **Fabric and NeoForge**:
