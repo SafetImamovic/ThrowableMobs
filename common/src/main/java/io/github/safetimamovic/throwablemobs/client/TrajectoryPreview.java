@@ -10,6 +10,7 @@ import java.util.List;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.gizmos.Gizmos;
 import net.minecraft.tags.FluidTags;
@@ -33,6 +34,12 @@ final class TrajectoryPreview
         private static final int BLOCK_MARKER_COLOR = 0xFFFFFFFF;
         private static final int ENTITY_MARKER_COLOR = 0xFFFF5555;
         private static final float MARKER_WIDTH = 2.0F;
+        /** Landing on the ground: filled footprint just above the surface, so it reads as "lands here". */
+        private static final int FOOTPRINT_FILL = 0x50FFFFFF;
+        private static final int GHOST_BOX_COLOR = 0x60FFFFFF;
+        private static final float GHOST_BOX_WIDTH = 1.0F;
+        /** Lifts the footprint off the ground so it doesn't flicker through the block top. */
+        private static final double FOOTPRINT_LIFT = 0.01;
         /** Below this, two movements count as equal; anything else means a collision cut the move short. */
         private static final double EPSILON = 1.0E-7;
 
@@ -71,7 +78,7 @@ final class TrajectoryPreview
                         box = next;
                         if (allowed.distanceToSqr(velocity) > EPSILON || inWater(level, box))
                         {
-                                Gizmos.cuboid(box, GizmoStyle.stroke(BLOCK_MARKER_COLOR, MARKER_WIDTH));
+                                drawLanding(box, allowed.y > velocity.y + EPSILON);
                                 return;
                         }
                         ThrowPhysics.Vector step = ThrowPhysics.stepVelocity(
@@ -79,6 +86,20 @@ final class TrajectoryPreview
                                 config.drag());
                         velocity = new Vec3(step.x(), step.y(), step.z());
                 }
+        }
+
+        /** On the ground: footprint plus a faint box for the mob's size. Against a wall or in water: the box. */
+        private static void drawLanding(AABB box, boolean onGround)
+        {
+                if (!onGround)
+                {
+                        Gizmos.cuboid(box, GizmoStyle.stroke(BLOCK_MARKER_COLOR, MARKER_WIDTH));
+                        return;
+                }
+                double y = box.minY + FOOTPRINT_LIFT;
+                Gizmos.rect(new Vec3(box.minX, y, box.minZ), new Vec3(box.maxX, y, box.maxZ), Direction.UP,
+                        GizmoStyle.strokeAndFill(BLOCK_MARKER_COLOR, MARKER_WIDTH, FOOTPRINT_FILL));
+                Gizmos.cuboid(box, GizmoStyle.stroke(GHOST_BOX_COLOR, GHOST_BOX_WIDTH));
         }
 
         private static void drawSegment(TrajectoryStyle style, int tick, Vec3 from, Vec3 to)
