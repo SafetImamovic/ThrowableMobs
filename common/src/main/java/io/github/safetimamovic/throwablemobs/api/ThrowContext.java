@@ -20,7 +20,7 @@ public interface ThrowContext
          */
         @Nullable ServerPlayer player();
 
-        /** The mob's velocity in blocks/tick: launch velocity on throw, current velocity in flight, zero while carried. */
+        /** Velocity in blocks/tick: launch velocity on throw, current velocity in flight, zero while carried. */
         Vec3 velocity();
 
         /** Ticks since the throw; 0 before it. */

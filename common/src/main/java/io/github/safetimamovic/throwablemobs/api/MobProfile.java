@@ -32,14 +32,17 @@ public record MobProfile(boolean replace, @Nullable Double mass, @Nullable Doubl
                 behaviors = behaviors == null ? null : List.copyOf(behaviors);
         }
 
-        /** This profile on top of {@code below}: set fields win, unset ones come from below. */
+        /**
+         * This profile on top of {@code below}: set fields win, unset ones come from below. The result drops the layers
+         * under {@code below} if either of them says {@code replace}.
+         */
         public MobProfile over(MobProfile below)
         {
                 if (replace)
                 {
                         return this;
                 }
-                return new MobProfile(false,
+                return new MobProfile(below.replace,
                         pick(mass, below.mass),
                         pick(gravityMultiplier, below.gravityMultiplier),
                         pick(dragMultiplier, below.dragMultiplier),

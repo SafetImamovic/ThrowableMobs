@@ -1,6 +1,8 @@
 package io.github.safetimamovic.throwablemobs.config;
 
 import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
+import java.util.Set;
+import net.minecraft.resources.Identifier;
 
 /**
  * Settings, read through this class only. Two files: the creator file ({@link CreatorConfig}, server side, per world,
@@ -23,6 +25,12 @@ public final class ThrowableMobsConfig
         public static ThrowConfig throwing()
         {
                 return CreatorConfig.readThrow();
+        }
+
+        /** Current creator settings for mob behaviors. */
+        public static BehaviorConfig behaviors()
+        {
+                return CreatorConfig.readBehaviors();
         }
 
         /** Current player settings; changes in the config screen apply right away. */
@@ -164,6 +172,15 @@ public final class ThrowableMobsConfig
                 double restitution,
                 boolean vanillaFallDamage,
                 SelfDamage selfDamage)
+        {
+        }
+
+        /**
+         * Creator settings for mob behaviors, see {@link CreatorConfig} for what each one does.
+         *
+         * @param disabled behavior type ids that never run
+         */
+        public record BehaviorConfig(boolean enabled, boolean autoDetect, Set<Identifier> disabled)
         {
         }
 

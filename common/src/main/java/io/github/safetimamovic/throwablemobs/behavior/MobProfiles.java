@@ -2,6 +2,8 @@ package io.github.safetimamovic.throwablemobs.behavior;
 
 import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.api.MobProfile;
+import io.github.safetimamovic.throwablemobs.api.ThrowBehavior;
+import io.github.safetimamovic.throwablemobs.api.ThrowableMob;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,8 +17,13 @@ import net.minecraft.world.entity.Mob;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Resolved mob profiles. The server stacks the layers (Java registration, then datapack files by priority) per entity
- * type and caches the result; clients only get the physics part through {@link ProfileSyncPayload}.
+ * Resolved mob profiles. Layers, lowest first: defaults, heuristics ({@link Heuristics}), the {@link ThrowableMob}
+ * interface, Java registration, datapack files by priority. Each layer merges on top of the one below
+ * ({@link MobProfile#over}).
+ *
+ * <p>The upper two layers are per entity type: the server stacks and caches them, and sends their physics to clients
+ * ({@link ProfileSyncPayload}). The lower two depend on the mob's class and run on both sides, so the client stacks the
+ * synced physics on top of its own guess and gets the same result as the server.
  *
  * <p>Datapack files arrive from a reload listener before tags are bound, so they wait in {@code pending} until
  * {@link #onTagsLoaded} swaps them in; resolving earlier would match {@code #tag} entries against the old tags.
@@ -29,9 +36,10 @@ public final class MobProfiles
         /** Datapack files, lowest priority first. Server thread only, like the cache. */
         private static List<ProfileFile> files = List.of();
 
+        /** Java and datapack layers per entity type. */
         private static final Map<EntityType<?>, MobProfile> CACHE = new HashMap<>();
 
-        /** What the server sent; read on the client thread. */
+        /** Physics of the Java and datapack layers, from the server; read on the client thread. */
         private static volatile Map<EntityType<?>, ProfilePhysics> clientPhysics = Map.of();
 
         private MobProfiles()
@@ -61,8 +69,14 @@ public final class MobProfiles
                 CACHE.clear();
         }
 
-        /** Resolved profile for {@code type}. Server thread only. */
-        public static MobProfile resolve(EntityType<?> type)
+        /** Resolved profile for {@code mob}, all layers. Server thread only. */
+        public static MobProfile resolve(Mob mob)
+        {
+                return upper(mob.getType()).over(lower(mob));
+        }
+
+        /** Java registration and datapack files for {@code type}, cached. */
+        private static MobProfile upper(EntityType<?> type)
         {
                 return CACHE.computeIfAbsent(type, MobProfiles::stack);
         }
@@ -85,26 +99,54 @@ public final class MobProfiles
                 return profile;
         }
 
-        /** Physics for {@code mob} on either side: resolved on the server, synced on the client. */
+        /** Heuristics, then the {@link ThrowableMob} interface. Works on both sides. */
+        private static MobProfile lower(Mob mob)
+        {
+                MobProfile profile = Heuristics.guess(mob);
+                if (mob instanceof ThrowableMob throwable)
+                {
+                        MobProfile own = throwable.getThrowProfile();
+                        ThrowBehavior behavior = throwable.getThrowBehavior();
+                        if (behavior != null)
+                        {
+                                List<ThrowBehavior> behaviors = new ArrayList<>();
+                                if (own != null && own.behaviors() != null)
+                                {
+                                        behaviors.addAll(own.behaviors());
+                                }
+                                behaviors.add(behavior);
+                                own = MobProfile.builder().behaviors(behaviors).build()
+                                        .over(own != null ? own : MobProfile.EMPTY);
+                        }
+                        if (own != null)
+                        {
+                                profile = own.over(profile);
+                        }
+                }
+                return profile;
+        }
+
+        /** Physics for {@code mob} on either side. */
         public static ProfilePhysics physics(Mob mob)
         {
                 if (mob.level().isClientSide())
                 {
-                        return clientPhysics.getOrDefault(mob.getType(), ProfilePhysics.DEFAULT);
+                        ProfilePhysics synced = clientPhysics.getOrDefault(mob.getType(), ProfilePhysics.EMPTY);
+                        return synced.over(ProfilePhysics.of(lower(mob)));
                 }
-                return ProfilePhysics.of(resolve(mob.getType()));
+                return ProfilePhysics.of(resolve(mob));
         }
 
-        /** Everything that differs from the defaults, for one client. */
+        /** The Java and datapack layers' physics wherever they set something, for one client. */
         public static ProfileSyncPayload syncPayload()
         {
                 Map<EntityType<?>, ProfilePhysics> physics = new HashMap<>();
                 for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE)
                 {
-                        ProfilePhysics resolved = ProfilePhysics.of(resolve(type));
-                        if (!resolved.equals(ProfilePhysics.DEFAULT))
+                        ProfilePhysics upper = ProfilePhysics.of(upper(type));
+                        if (!upper.isEmpty())
                         {
-                                physics.put(type, resolved);
+                                physics.put(type, upper);
                         }
                 }
                 return new ProfileSyncPayload(physics);

@@ -183,8 +183,7 @@ public final class ThrowManager
                 ProfilePhysics physics = MobProfiles.physics(mob);
                 ThrowPhysics.Vector next = ThrowPhysics.stepVelocity(
                         new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z),
-                        config.gravity() * physics.gravityMultiplier(),
-                        ThrowPhysics.scaledDrag(config.drag(), physics.dragMultiplier()));
+                        physics.gravity(config), physics.drag(config));
                 velocity = new Vec3(next.x(), next.y(), next.z());
                 mob.setDeltaMovement(velocity);
                 if (!config.vanillaFallDamage())
@@ -241,9 +240,10 @@ public final class ThrowManager
                         config.maxImpactDamage());
                 double targetShare = ThrowPhysics.targetDamageShare(m1, m2);
                 ServerPlayer thrower = thrower(level, flight);
-                MobProfile profile = MobProfiles.resolve(mob.getType());
+                MobProfile profile = MobProfiles.resolve(mob);
                 ImpactResult result = Hooks.impact(mob, thrower, flight.velocity(), ticks, target, relative, energy,
-                        flight.bounces(), new ImpactResult(damage * targetShare * multiplier(profile.targetMultiplier()),
+                        flight.bounces(),
+                        new ImpactResult(damage * targetShare * multiplier(profile.targetMultiplier()),
                                 damage * (1.0 - targetShare) * selfDamageFactor(mob, profile, config), 1.0, null));
 
                 double resistance = target instanceof LivingEntity living
@@ -270,10 +270,10 @@ public final class ThrowManager
         }
 
         /**
-         * Mob-vs-block: the block doesn't move (infinite mass), so the mob takes all the damage. Only the speed into the
-         * block counts: skimming along the ground hurts less than hitting a wall head-on. Then the mob either bounces
-         * off ({@link #bounceVelocity}) or lands, keeping its speed along the free axes. Bounces after the first impact
-         * only hurt with {@code bounce_impacts = EVERY}.
+         * Mob-vs-block: the block doesn't move (infinite mass), so the mob takes all the damage. Only the speed into
+         * the block counts: skimming along the ground hurts less than hitting a wall head-on. Then the mob either
+         * bounces off ({@link #bounceVelocity}) or lands, keeping its speed along the free axes. Bounces after the
+         * first impact only hurt with {@code bounce_impacts = EVERY}.
          *
          * @return the velocity to keep flying with, or {@code null} when the flight ended
          */
@@ -286,7 +286,7 @@ public final class ThrowManager
                 double energy = ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY,
                         into.length());
                 ServerPlayer thrower = thrower(level, flight);
-                MobProfile profile = MobProfiles.resolve(mob.getType());
+                MobProfile profile = MobProfiles.resolve(mob);
                 ImpactResult result = new ImpactResult(0.0, 0.0, 1.0,
                         bounceVelocity(MobProfiles.physics(mob), config, flight.bounces(), flight.velocity(), moved));
                 if (flight.bounces() == 0 || bounceImpacts(profile, config) == BounceImpacts.EVERY)

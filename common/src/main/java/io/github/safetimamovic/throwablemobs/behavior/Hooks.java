@@ -5,6 +5,8 @@ import io.github.safetimamovic.throwablemobs.api.ImpactContext;
 import io.github.safetimamovic.throwablemobs.api.ImpactResult;
 import io.github.safetimamovic.throwablemobs.api.ThrowBehavior;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.BehaviorConfig;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.server.level.ServerLevel;
@@ -91,10 +93,21 @@ public final class Hooks
                 }
         }
 
+        /** The mob's behaviors, minus {@code disabled_behaviors}; none with {@code behaviors_enabled} off. */
         private static List<ThrowBehavior> behaviors(Mob mob)
         {
-                List<ThrowBehavior> behaviors = MobProfiles.resolve(mob.getType()).behaviors();
-                return behaviors != null ? behaviors : List.of();
+                BehaviorConfig config = ThrowableMobsConfig.behaviors();
+                List<ThrowBehavior> behaviors = MobProfiles.resolve(mob).behaviors();
+                if (!config.enabled() || behaviors == null)
+                {
+                        return List.of();
+                }
+                if (config.disabled().isEmpty())
+                {
+                        return behaviors;
+                }
+                return behaviors.stream().filter(behavior -> !(behavior instanceof DataBehavior data
+                        && config.disabled().contains(data.action().type().id()))).toList();
         }
 
         private static void logFailure(ThrowBehavior behavior, Mob mob, RuntimeException e)

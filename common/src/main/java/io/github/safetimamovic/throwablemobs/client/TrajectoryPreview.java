@@ -69,8 +69,8 @@ final class TrajectoryPreview
                 Vec3 velocity = player.getLookAngle().scale(speed).add(movement.scale(config.inheritVelocity()));
 
                 ProfilePhysics physics = MobProfiles.physics(mob);
-                double gravity = config.gravity() * physics.gravityMultiplier();
-                double drag = ThrowPhysics.scaledDrag(config.drag(), physics.dragMultiplier());
+                double gravity = physics.gravity(config);
+                double drag = physics.drag(config);
                 AABB box = mob.getBoundingBox();
                 int bounces = 0;
                 for (int tick = 1; tick <= config.maxFlightTicks(); tick++)
