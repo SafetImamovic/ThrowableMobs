@@ -1,5 +1,6 @@
 package io.github.safetimamovic.throwablemobs.carry;
 
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
@@ -87,11 +88,13 @@ public final class CarryRules
                 return null;
         }
 
-        /** Mass from the mob's current hitbox, so mods that resize mobs change their weight too. */
+        /**
+         * The mob profile's mass, else from the mob's current hitbox, so mods that resize mobs change their weight too.
+         */
         public static double mass(Mob mob)
         {
-                return ThrowPhysics.massFromHitbox(mob.getBbWidth(), mob.getBbHeight(),
-                        ThrowableMobsConfig.carry().defaultDensity());
+                return MobProfiles.physics(mob).mass().orElseGet(() -> ThrowPhysics.massFromHitbox(mob.getBbWidth(),
+                        mob.getBbHeight(), ThrowableMobsConfig.carry().defaultDensity()));
         }
 
         private static boolean isSomeoneElsesPet(Player player, Mob mob)

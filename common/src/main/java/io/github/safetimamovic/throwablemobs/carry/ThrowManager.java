@@ -1,6 +1,8 @@
 package io.github.safetimamovic.throwablemobs.carry;
 
 import io.github.safetimamovic.throwablemobs.Constants;
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
+import io.github.safetimamovic.throwablemobs.behavior.ProfilePhysics;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
@@ -158,8 +160,11 @@ public final class ThrowManager
                         return null;
                 }
 
+                ProfilePhysics physics = MobProfiles.physics(mob);
                 ThrowPhysics.Vector next = ThrowPhysics.stepVelocity(
-                        new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), config.gravity(), config.drag());
+                        new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z),
+                        config.gravity() * physics.gravityMultiplier(),
+                        ThrowPhysics.scaledDrag(config.drag(), physics.dragMultiplier()));
                 velocity = new Vec3(next.x(), next.y(), next.z());
                 mob.setDeltaMovement(velocity);
                 if (!config.vanillaFallDamage())

@@ -1,5 +1,7 @@
 package io.github.safetimamovic.throwablemobs.client;
 
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
+import io.github.safetimamovic.throwablemobs.behavior.ProfilePhysics;
 import io.github.safetimamovic.throwablemobs.carry.CarryRules;
 import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
@@ -63,6 +65,9 @@ final class TrajectoryPreview
                 Vec3 movement = player.position().subtract(player.xo, player.yo, player.zo);
                 Vec3 velocity = player.getLookAngle().scale(speed).add(movement.scale(config.inheritVelocity()));
 
+                ProfilePhysics physics = MobProfiles.physics(mob);
+                double gravity = config.gravity() * physics.gravityMultiplier();
+                double drag = ThrowPhysics.scaledDrag(config.drag(), physics.dragMultiplier());
                 AABB box = mob.getBoundingBox();
                 for (int tick = 1; tick <= config.maxFlightTicks(); tick++)
                 {
@@ -82,8 +87,7 @@ final class TrajectoryPreview
                                 return;
                         }
                         ThrowPhysics.Vector step = ThrowPhysics.stepVelocity(
-                                new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), config.gravity(),
-                                config.drag());
+                                new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), gravity, drag);
                         velocity = new Vec3(step.x(), step.y(), step.z());
                 }
         }
