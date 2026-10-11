@@ -1,0 +1,6 @@
+{
+    "replace": false,
+    "values": [
+        { "id": "#minecraft:fall_damage_immune", "required": false }
+    ]
+}

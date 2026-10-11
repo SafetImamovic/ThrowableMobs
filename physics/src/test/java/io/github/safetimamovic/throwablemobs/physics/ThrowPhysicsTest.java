@@ -134,4 +134,77 @@ class ThrowPhysicsTest
         {
                 assertTrue(ThrowPhysics.impactDeceleration(2, 0.1, 4) < ThrowPhysics.impactDeceleration(2, 0.1, 1));
         }
+
+        @Test
+        void dragMultiplierScalesSpeedLoss()
+        {
+                assertEquals(0.99, ThrowPhysics.scaledDrag(0.99, 1), EPS);
+                assertEquals(0.99 * 0.99, ThrowPhysics.scaledDrag(0.99, 2), EPS);
+                assertEquals(1.0, ThrowPhysics.scaledDrag(0.99, 0), EPS);
+        }
+
+        @Test
+        void floorBounceReversesOnlyTheFall()
+        {
+                ThrowPhysics.Bounce bounce = ThrowPhysics.bounce(new ThrowPhysics.Vector(0.5, -1.0, 0.2),
+                        new ThrowPhysics.Vector(0.5, -0.3, 0.2), 0.8);
+                assertVector(0.5, 0.8, 0.2, bounce.velocity());
+                assertEquals(0.8, bounce.reboundSpeed(), EPS);
+        }
+
+        @Test
+        void cornerBounceReversesBothBlockedAxes()
+        {
+                ThrowPhysics.Bounce bounce = ThrowPhysics.bounce(new ThrowPhysics.Vector(1.0, 0.0, -1.0),
+                        new ThrowPhysics.Vector(0.4, 0.0, -0.1), 0.5);
+                assertVector(-0.5, 0.0, 0.5, bounce.velocity());
+                assertEquals(Math.sqrt(0.5), bounce.reboundSpeed(), EPS);
+        }
+
+        @Test
+        void zeroRestitutionStopsTheBlockedAxis()
+        {
+                ThrowPhysics.Bounce bounce = ThrowPhysics.bounce(new ThrowPhysics.Vector(1.0, 0.0, 0.0),
+                        new ThrowPhysics.Vector(0.2, 0.0, 0.0), 0.0);
+                assertEquals(0.0, bounce.velocity().x(), EPS);
+                assertEquals(0.0, bounce.reboundSpeed(), EPS);
+        }
+
+        @Test
+        void freeMovementAndStepUpsDontBounce()
+        {
+                ThrowPhysics.Vector wanted = new ThrowPhysics.Vector(0.5, 0.1, 0.0);
+                ThrowPhysics.Bounce free = ThrowPhysics.bounce(wanted, wanted, 0.8);
+                assertVector(0.5, 0.1, 0.0, free.velocity());
+                assertEquals(0.0, free.reboundSpeed(), EPS);
+
+                // Stepping onto a slab moves further up than wanted: not a collision.
+                ThrowPhysics.Bounce step = ThrowPhysics.bounce(wanted, new ThrowPhysics.Vector(0.5, 0.6, 0.0), 0.8);
+                assertVector(0.5, 0.1, 0.0, step.velocity());
+        }
+
+        @Test
+        void impactUsesTheFullSpeedIntoTheBlock()
+        {
+                // Falling at 2 b/t, touched the ground after 1.8: the impact is 2, not the 0.2 left over.
+                ThrowPhysics.Vector impact = ThrowPhysics.impactVelocity(new ThrowPhysics.Vector(0.5, -2.0, 0.0),
+                        new ThrowPhysics.Vector(0.5, -1.8, 0.0));
+                assertVector(0.0, -2.0, 0.0, impact);
+                assertEquals(2.0, impact.length(), EPS);
+        }
+
+        @Test
+        void landingKeepsOnlyTheFreeAxes()
+        {
+                ThrowPhysics.Bounce landing = ThrowPhysics.bounce(new ThrowPhysics.Vector(0.5, -2.0, 0.0),
+                        new ThrowPhysics.Vector(0.5, -1.8, 0.0), 0.0);
+                assertVector(0.5, 0.0, 0.0, landing.velocity());
+        }
+
+        private static void assertVector(double x, double y, double z, ThrowPhysics.Vector actual)
+        {
+                assertEquals(x, actual.x(), EPS);
+                assertEquals(y, actual.y(), EPS);
+                assertEquals(z, actual.z(), EPS);
+        }
 }

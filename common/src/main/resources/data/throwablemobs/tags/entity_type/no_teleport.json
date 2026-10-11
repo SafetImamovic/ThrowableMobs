@@ -1,0 +1,6 @@
+{
+    "replace": false,
+    "values": [
+        { "id": "#c:teleporting_not_supported", "required": false }
+    ]
+}

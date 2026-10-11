@@ -1,5 +1,7 @@
 package io.github.safetimamovic.throwablemobs.client;
 
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
+import io.github.safetimamovic.throwablemobs.behavior.ProfilePhysics;
 import io.github.safetimamovic.throwablemobs.carry.CarryRules;
 import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
@@ -10,6 +12,7 @@ import java.util.List;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.gizmos.Gizmos;
 import net.minecraft.tags.FluidTags;
@@ -22,8 +25,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * Dotted path of the throw being charged, from the client's own charge, look direction and movement. It runs the
  * server's flight tick by tick: move with vanilla collision ({@link Entity#collideBoundingBox}, what
- * {@link Entity#move} uses), stop at the first block, entity or water, then {@link ThrowPhysics#stepVelocity}. Drawn
- * with vanilla gizmos from the client tick, which vanilla collects per tick and draws every frame until the next one.
+ * {@link Entity#move} uses), bounce off blocks like {@link ThrowManager#bounceVelocity} or stop there, stop at the
+ * first entity or water, then {@link ThrowPhysics#stepVelocity}. Drawn with vanilla gizmos from the client tick,
+ * which vanilla collects per tick and draws every frame until the next one.
  */
 final class TrajectoryPreview
 {
@@ -33,6 +37,14 @@ final class TrajectoryPreview
         private static final int BLOCK_MARKER_COLOR = 0xFFFFFFFF;
         private static final int ENTITY_MARKER_COLOR = 0xFFFF5555;
         private static final float MARKER_WIDTH = 2.0F;
+        private static final int BOUNCE_COLOR = 0xFFFFFF55;
+        private static final float BOUNCE_SIZE = 6.0F;
+        /** Landing on the ground: filled footprint just above the surface, so it reads as "lands here". */
+        private static final int FOOTPRINT_FILL = 0x50FFFFFF;
+        private static final int GHOST_BOX_COLOR = 0x60FFFFFF;
+        private static final float GHOST_BOX_WIDTH = 1.0F;
+        /** Lifts the footprint off the ground so it doesn't flicker through the block top. */
+        private static final double FOOTPRINT_LIFT = 0.01;
         /** Below this, two movements count as equal; anything else means a collision cut the move short. */
         private static final double EPSILON = 1.0E-7;
 
@@ -50,13 +62,17 @@ final class TrajectoryPreview
                 }
                 double charge = ThrowPhysics.chargeFraction(Math.min(chargeTicks, config.maxChargeTicks()),
                         config.maxChargeTicks());
-                double speed = ThrowPhysics.launchSpeed(config.throwImpulse(), charge, CarryRules.mass(mob),
-                        config.maxThrowSpeed());
+                double speed = ThrowPhysics.launchSpeed(ThrowManager.impulse(player, config), charge,
+                        CarryRules.mass(mob), config.maxThrowSpeed());
                 // What the server knows of the player's movement: last tick's change in position.
                 Vec3 movement = player.position().subtract(player.xo, player.yo, player.zo);
                 Vec3 velocity = player.getLookAngle().scale(speed).add(movement.scale(config.inheritVelocity()));
 
+                ProfilePhysics physics = MobProfiles.physics(mob);
+                double gravity = physics.gravity(config);
+                double drag = physics.drag(config);
                 AABB box = mob.getBoundingBox();
+                int bounces = 0;
                 for (int tick = 1; tick <= config.maxFlightTicks(); tick++)
                 {
                         Entity target = findTarget(level, player, mob, box, velocity, tick, config);
@@ -69,16 +85,41 @@ final class TrajectoryPreview
                         AABB next = box.move(allowed);
                         drawSegment(style, tick, box.getCenter(), next.getCenter());
                         box = next;
-                        if (allowed.distanceToSqr(velocity) > EPSILON || inWater(level, box))
+                        if (allowed.distanceToSqr(velocity) > EPSILON)
                         {
-                                Gizmos.cuboid(box, GizmoStyle.stroke(BLOCK_MARKER_COLOR, MARKER_WIDTH));
+                                Vec3 bounce = ThrowManager.bounceVelocity(physics, config, bounces, velocity, allowed);
+                                if (bounce == null)
+                                {
+                                        drawLanding(box, allowed.y > velocity.y + EPSILON);
+                                        return;
+                                }
+                                Gizmos.point(box.getCenter(), BOUNCE_COLOR, BOUNCE_SIZE);
+                                velocity = bounce;
+                                bounces++;
+                        }
+                        if (inWater(level, box))
+                        {
+                                drawLanding(box, false);
                                 return;
                         }
                         ThrowPhysics.Vector step = ThrowPhysics.stepVelocity(
-                                new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), config.gravity(),
-                                config.drag());
+                                new ThrowPhysics.Vector(velocity.x, velocity.y, velocity.z), gravity, drag);
                         velocity = new Vec3(step.x(), step.y(), step.z());
                 }
+        }
+
+        /** On the ground: footprint plus a faint box for the mob's size. Against a wall or in water: the box. */
+        private static void drawLanding(AABB box, boolean onGround)
+        {
+                if (!onGround)
+                {
+                        Gizmos.cuboid(box, GizmoStyle.stroke(BLOCK_MARKER_COLOR, MARKER_WIDTH));
+                        return;
+                }
+                double y = box.minY + FOOTPRINT_LIFT;
+                Gizmos.rect(new Vec3(box.minX, y, box.minZ), new Vec3(box.maxX, y, box.maxZ), Direction.UP,
+                        GizmoStyle.strokeAndFill(BLOCK_MARKER_COLOR, MARKER_WIDTH, FOOTPRINT_FILL));
+                Gizmos.cuboid(box, GizmoStyle.stroke(GHOST_BOX_COLOR, GHOST_BOX_WIDTH));
         }
 
         private static void drawSegment(TrajectoryStyle style, int tick, Vec3 from, Vec3 to)

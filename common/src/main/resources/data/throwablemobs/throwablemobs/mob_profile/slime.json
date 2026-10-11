@@ -1,0 +1,11 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:slime"],
+    "physics": {
+        "block_restitution": 0.8,
+        "max_bounces": 5
+    },
+    "behaviors": [
+        { "type": "throwablemobs:split", "trigger": "impact", "min_impact_energy": 15.0 }
+    ]
+}

@@ -1,0 +1,8 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:enderman"],
+    "behaviors": [
+        { "type": "throwablemobs:teleport_random", "trigger": "impact", "range": 16, "cancel_damage": true },
+        { "type": "throwablemobs:anger_thrower", "trigger": "impact" }
+    ]
+}

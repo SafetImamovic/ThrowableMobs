@@ -9,6 +9,8 @@ package io.github.safetimamovic.throwablemobs.physics;
  */
 public final class ThrowPhysics
 {
+        /** Below this, a shorter move along an axis is rounding, not a collision. Vanilla collision uses 1e-7. */
+        private static final double BLOCKED_EPSILON = 1.0E-7;
 
         private ThrowPhysics()
         {
@@ -53,6 +55,55 @@ public final class ThrowPhysics
         public static Vector stepVelocity(Vector velocity, double gravity, double drag)
         {
                 return new Vector(velocity.x() * drag, (velocity.y() - gravity) * drag, velocity.z() * drag);
+        }
+
+        /**
+         * Per-tick drag with a per-mob multiplier: {@code drag ^ multiplier}. A multiplier of 2 loses twice as much
+         * speed per tick in log terms (0.99 → 0.9801), 0 turns drag off.
+         */
+        public static double scaledDrag(double drag, double multiplier)
+        {
+                return Math.pow(drag, multiplier);
+        }
+
+        /**
+         * The part of {@code wanted} that went into blocks during a tick that only got {@code moved}: the full speed
+         * along every blocked axis, zero along the free ones. Impact damage uses this, so hitting a wall head-on hurts
+         * more than skimming along the ground, whatever the distance to the block was at the start of the tick.
+         */
+        public static Vector impactVelocity(Vector wanted, Vector moved)
+        {
+                return new Vector(blocked(wanted.x(), moved.x()) ? wanted.x() : 0.0,
+                        blocked(wanted.y(), moved.y()) ? wanted.y() : 0.0,
+                        blocked(wanted.z(), moved.z()) ? wanted.z() : 0.0);
+        }
+
+        /**
+         * Bounce off blocks after a tick that tried to move by {@code wanted} but only got {@code moved} (block
+         * collision clamps each axis on its own). Every blocked axis is reversed and scaled by the restitution
+         * {@code e}; free axes keep their speed. An axis that moved further than wanted (a step up) isn't blocked.
+         *
+         * With {@code e = 0} this is what's left after a landing: the free axes only.
+         *
+         * @return the velocity after the bounce and the rebound speed along the blocked axes, which the caller compares
+         *         with {@code min_bounce_speed} to end the flight
+         */
+        public static Bounce bounce(Vector wanted, Vector moved, double restitution)
+        {
+                boolean bx = blocked(wanted.x(), moved.x());
+                boolean by = blocked(wanted.y(), moved.y());
+                boolean bz = blocked(wanted.z(), moved.z());
+                Vector velocity = new Vector(bx ? -wanted.x() * restitution : wanted.x(),
+                        by ? -wanted.y() * restitution : wanted.y(), bz ? -wanted.z() * restitution : wanted.z());
+                double rx = bx ? velocity.x() : 0.0;
+                double ry = by ? velocity.y() : 0.0;
+                double rz = bz ? velocity.z() : 0.0;
+                return new Bounce(velocity, Math.sqrt(rx * rx + ry * ry + rz * rz));
+        }
+
+        private static boolean blocked(double wanted, double moved)
+        {
+                return Math.abs(moved) < Math.abs(wanted) - BLOCKED_EPSILON;
         }
 
         /** Reduced mass {@code m₁m₂ / (m₁ + m₂)}. An infinite {@code m2} (a block) yields {@code m1}. */
@@ -116,6 +167,19 @@ public final class ThrowPhysics
 
         /** Plain 3D vector, so this module stays free of Minecraft's {@code Vec3}. */
         public record Vector(double x, double y, double z)
+        {
+                public double length()
+                {
+                        return Math.sqrt(x * x + y * y + z * z);
+                }
+        }
+
+        /**
+         * Result of {@link #bounce}.
+         *
+         * @param reboundSpeed speed along the blocked axes after the bounce; 0 when nothing was blocked
+         */
+        public record Bounce(Vector velocity, double reboundSpeed)
         {
         }
 }

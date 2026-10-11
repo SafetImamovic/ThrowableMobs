@@ -1,8 +1,10 @@
 package io.github.safetimamovic.throwablemobs;
 
 import fuzs.forgeconfigapiport.fabric.api.v5.client.ConfigScreenFactoryRegistry;
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.client.CarryClient;
 import io.github.safetimamovic.throwablemobs.client.CarryKeys;
+import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import net.minecraft.client.KeyMapping;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -25,6 +27,8 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                                 ClientPlayNetworking.send(payload);
                         }
                 });
+                ClientPlayNetworking.registerGlobalReceiver(ProfileSyncPayload.TYPE,
+                        (payload, context) -> MobProfiles.onSync(payload));
                 // Opened from Mod Menu, through Forge Config API Port.
                 ConfigScreenFactoryRegistry.INSTANCE.register(Constants.MOD_ID, ConfigurationScreen::new);
                 KeyMapping.Category.register(CarryKeys.CATEGORY.id());

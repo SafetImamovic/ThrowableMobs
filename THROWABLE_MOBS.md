@@ -461,6 +461,8 @@ Behaviors are composable "atoms" (see §10). Default vanilla roster:
 | **Players** | Off by default. `allow_throwing_players` for PvP servers. | Fun with friends |
 
 ### Heuristic resolver (unknown modded mobs)
+
+> **As built (M3, 2026-10-11):** guesses cover creeper, cube mobs (slime / magma cube: bounce + split), enderman and fire-immune mobs, and only apply to non-vanilla mobs; the flying, ranged and escape rows come with those atoms in M5. They're the lowest profile layer, so any profile merges on top. Reference: `docs/guide/modded-mobs.md`.
 When a mob has no profile, guess from its class hierarchy and properties (toggle `behaviors.auto_detect = true`):
 
 | Detected | Behavior |
@@ -517,6 +519,8 @@ Rules for referencing tags we don't own:
 
 ### Layer 2 — Datapack mob profiles (modpack devs, JSON)
 
+> **As built (M3, 2026-10-11):** the format below is the original sketch. What the code reads is documented in `docs/guide/mob-profiles.md` and `docs/guide/behaviors.md`. Differences: profiles **merge** per field across layers (lists replace, `"replace": true` drops lower layers); `physics` also has `block_restitution`, `max_bounces`, `bounce_impacts`; action fields sit flat next to `type` (`"base"`, `"per_energy"`, `"max"` for `explode`, block damage always follows `mobGriefing`); `trigger` defaults to `impact`. Implemented atoms: `explode`, `teleport_random`, `anger_thrower`, `split`, `ignite`, `drop_item`, `particles`. Conditions: `min_impact_energy`, `chance`, `in_water`, `is_charged`, `first_impact_only`. `carry`, `collision_time_ticks`, `fuse`, the `caught` trigger and the other conditions are reserved for later.
+
 `data/<namespace>/throwablemobs/mob_profile/<name>.json`, loaded with codecs and **reloaded with `/reload`**. Synced to clients (for trajectory preview mass/gravity).
 
 ```json
@@ -570,6 +574,8 @@ Rules for referencing tags we don't own:
 
 ### Layer 3 — Java API (mod devs)
 
+> **As built (M3, 2026-10-11):** `onImpact(ImpactContext ctx, ImpactResult current)` takes the result so far (behaviors chain); `registerBehaviorType(BehaviorType)` takes a record of id + `MapCodec`; `registerProfile` merges with earlier registrations; `onCaught` and the events come later (M4 / M5); no `-api` artifact before M6. Reference: `docs/guide/java-api.md`.
+
 Published as a separate `-api` artifact (Maven) so other mods can `compileOnly` against it without a hard dependency.
 
 ```java
@@ -598,6 +604,8 @@ public class FireDrake extends Monster implements ThrowableMob {
 `PickupEvent`, `ThrowEvent` (modify velocity), `ImpactEvent` (modify damage/knockback), `CatchEvent`. Claim/protection mods hook these.
 
 **Resolution order:** Java registration on the entity class → `ThrowableMob` interface → datapack profile (highest priority) → tags → heuristics → defaults. Datapacks can override Java defaults (`"replace": true`) so pack devs keep final say.
+
+> **As built (M3):** layers from lowest: defaults → heuristics → `ThrowableMob` → Java registration → datapack files by priority. Each merges on top of the one below; tags aren't a profile layer but separate rules (`unthrowable`, `no_self_damage`, `no_teleport`).
 
 **KubeJS:** optional integration later — expose the events to KubeJS scripts. Big modpacks love this.
 

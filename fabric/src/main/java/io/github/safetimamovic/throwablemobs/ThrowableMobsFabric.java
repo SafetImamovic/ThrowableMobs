@@ -1,6 +1,8 @@
 package io.github.safetimamovic.throwablemobs;
 
 import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
+import io.github.safetimamovic.throwablemobs.behavior.MobProfileReloadListener;
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
 import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.CreatorConfig;
@@ -8,9 +10,12 @@ import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
 import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
+import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -18,6 +23,8 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.minecraft.server.packs.PackType;
 import net.neoforged.fml.config.ModConfig;
 
 public class ThrowableMobsFabric implements ModInitializer
@@ -45,6 +52,29 @@ public class ThrowableMobsFabric implements ModInitializer
                 PayloadTypeRegistry.serverboundPlay().register(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(ThrowPayload.TYPE,
                         (payload, context) -> ThrowManager.onThrowRequest(context.player()));
+
+                PayloadTypeRegistry.clientboundPlay().register(ProfileSyncPayload.TYPE,
+                        ProfileSyncPayload.STREAM_CODEC);
+                ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(MobProfileReloadListener.ID,
+                        new MobProfileReloadListener());
+                CommonLifecycleEvents.TAGS_LOADED.register((registries, client) ->
+                {
+                        if (!client)
+                        {
+                                MobProfiles.onTagsLoaded();
+                        }
+                });
+                // On join and after every /reload, once the new tags and profiles are in.
+                ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) ->
+                {
+                        if (ServerPlayNetworking.canSend(player, ProfileSyncPayload.TYPE))
+                        {
+                                ServerPlayNetworking.send(player, MobProfiles.syncPayload());
+                        }
+                });
+
+                CommandRegistrationCallback.EVENT.register(
+                        (dispatcher, registryAccess, environment) -> ThrowableMobsCommand.register(dispatcher));
 
                 UseEntityCallback.EVENT.register(
                         (player, level, hand, entity, hitResult) -> CarryManager.onUseEntity(entity));

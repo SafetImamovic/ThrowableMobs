@@ -1,0 +1,12 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:magma_cube"],
+    "physics": {
+        "block_restitution": 0.8,
+        "max_bounces": 5
+    },
+    "behaviors": [
+        { "type": "throwablemobs:split", "trigger": "impact", "min_impact_energy": 15.0 },
+        { "type": "throwablemobs:ignite", "trigger": "impact_entity", "seconds": 4.0 }
+    ]
+}
