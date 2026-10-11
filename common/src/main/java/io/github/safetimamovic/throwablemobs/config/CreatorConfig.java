@@ -154,8 +154,7 @@ public final class CreatorConfig
                 INHERIT_VELOCITY = builder.comment("Share of the thrower's own movement added to the throw: 1 = all of",
                                 "it, so sprint-throws go further; 0 = no running bonus; 2 = double.")
                         .defineInRange("inherit_velocity", 1.0, 0.0, 2.0);
-                THROWER_GRACE_TICKS = builder.comment("Ticks after the throw during which the mob can't hit its",
-                                "thrower.")
+                THROWER_GRACE_TICKS = builder.comment("Ticks after the throw before the mob can hit its thrower.")
                         .defineInRange("thrower_grace_ticks", 5, 0, 100);
                 ALLOW_TRAJECTORY = builder.comment("Players may see the trajectory preview while charging (each one",
                                 "can still hide it in their own settings). Off for everyone when false.")
@@ -176,8 +175,7 @@ public final class CreatorConfig
                 BLOCK_RESTITUTION = builder.comment("Bounciness off blocks for every mob: 0 = no bounce, the flight",
                                 "ends at the first block; 1 = keeps all its speed. Mob profiles can override it.")
                         .defineInRange("block_restitution", 0.0, 0.0, 2.0);
-                MAX_BOUNCES = builder.comment("Bounces off blocks before the flight ends. Mob profiles can override",
-                                "it.")
+                MAX_BOUNCES = builder.comment("Bounces off blocks before the flight ends. Profiles can override it.")
                         .defineInRange("max_bounces", 3, 0, 100);
                 MIN_BOUNCE_SPEED = builder.comment("A bounce slower than this (blocks/tick, away from the block) ends",
                                 "the flight, so mobs stop instead of skipping along the ground forever.")
@@ -211,15 +209,14 @@ public final class CreatorConfig
 
                 builder.comment("What mobs do when picked up, thrown and when they hit something (creepers explode,",
                         "endermen teleport...). Set per mob with mob profiles in datapacks.").push("behaviors");
-                BEHAVIORS_ENABLED = builder.comment("Off: no mob behaviors run. Mob profile physics (mass, gravity,",
-                                "bounces) still apply.")
+                BEHAVIORS_ENABLED = builder.comment("Off: no mob behaviors run. Mob profile physics",
+                                "(mass, gravity, bounces) still applies.")
                         .define("behaviors_enabled", true);
-                AUTO_DETECT_BEHAVIORS = builder.comment("Guess behaviors for modded mobs from what they are: a modded",
-                                "creeper explodes, a modded slime bounces and splits. Any mob profile for the mob",
-                                "overrides the guess.")
+                AUTO_DETECT_BEHAVIORS = builder.comment("Guess behaviors for modded mobs from what they are: a",
+                                "modded creeper explodes, a modded slime bounces and splits. A mob profile",
+                                "for the mob overrides the guess.")
                         .define("auto_detect_behaviors", true);
-                DISABLED_BEHAVIORS = builder.comment("Behavior types that never run, for example",
-                                "[\"throwablemobs:explode\"].")
+                DISABLED_BEHAVIORS = builder.comment("Behavior types that never run, e.g. [\"throwablemobs:explode\"].")
                         .defineListAllowEmpty("disabled_behaviors", List.of(), () -> "throwablemobs:explode",
                                 value -> value instanceof String id && Identifier.tryParse(id) != null);
                 builder.pop();
