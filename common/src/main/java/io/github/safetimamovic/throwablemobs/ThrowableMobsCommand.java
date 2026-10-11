@@ -9,7 +9,10 @@ import io.github.safetimamovic.throwablemobs.behavior.DataBehavior;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles.Layer;
 import io.github.safetimamovic.throwablemobs.carry.CarryRules;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
@@ -104,13 +107,19 @@ public final class ThrowableMobsCommand
                 return null;
         }
 
+        /** What applies when no layer sets the field: the hitbox mass, a config value, or a neutral multiplier. */
         private static String defaultValue(Field field, Mob mob)
         {
+                ThrowConfig config = ThrowableMobsConfig.throwing();
                 return switch (field.key())
                 {
-                        case "mass" -> String.format("%.1f from hitbox", CarryRules.mass(mob));
+                        case "mass" -> String.format(Locale.ROOT, "%.1f from hitbox", CarryRules.mass(mob));
+                        case "restitution" -> config.restitution() + " from config";
+                        case "block_restitution" -> config.blockRestitution() + " from config";
+                        case "max_bounces" -> config.maxBounces() + " from config";
+                        case "bounce_impacts" -> config.bounceImpacts().getSerializedName() + " from config";
                         case "behaviors" -> "none";
-                        default -> "config";
+                        default -> "1.0";
                 };
         }
 
