@@ -125,7 +125,12 @@ public final class CarryClient
                 }
                 if (chargeTicks >= 0)
                 {
-                        if (cancelPressed)
+                        if (!CarryRules.canThrow(player))
+                        {
+                                // Switched to a full slot with require_empty_hand: the server refuses the throw too.
+                                chargeTicks = -1;
+                        }
+                        else if (cancelPressed)
                         {
                                 // No ThrowPayload: the server only throws on one, and the next charge replaces its
                                 // record of this one.
@@ -145,7 +150,7 @@ public final class CarryClient
                 }
                 if (!CarryKeys.modifierHeld())
                 {
-                        if (throwPressed && LocalCarry.get() != null)
+                        if (throwPressed && LocalCarry.get() != null && CarryRules.canThrow(player))
                         {
                                 sendToServer.accept(ChargeThrowPayload.INSTANCE);
                                 suppressUse(minecraft, CarryKeys.THROW);

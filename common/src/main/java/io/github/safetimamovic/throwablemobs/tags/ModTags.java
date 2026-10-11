@@ -18,6 +18,15 @@ public final class ModTags
         /** Only the owner may pick these up, even when {@code ownerOnlyForTamed} is off. */
         public static final TagKey<EntityType<?>> OWNER_ONLY = entity("owner_only");
 
+        /**
+         * Take no impact damage themselves with {@code self_damage = RESPECT_TAG}. Defaults include
+         * {@code #minecraft:fall_damage_immune}, so chickens and cats survive hitting walls.
+         */
+        public static final TagKey<EntityType<?>> NO_SELF_DAMAGE = entity("no_self_damage");
+
+        /** Never teleported by behaviors. Defaults include {@code #c:teleporting_not_supported}. */
+        public static final TagKey<EntityType<?>> NO_TELEPORT = entity("no_teleport");
+
         /** Never ground to put a carried mob down on (with the default deny-list filter). */
         public static final TagKey<Block> PUT_DOWN_GROUND_DENIED = block("put_down_ground_denied");
 

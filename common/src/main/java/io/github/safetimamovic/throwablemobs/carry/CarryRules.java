@@ -1,5 +1,6 @@
 package io.github.safetimamovic.throwablemobs.carry;
 
+import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
@@ -50,6 +51,15 @@ public final class CarryRules
                         && (!ThrowableMobsConfig.carry().requireEmptyHand() || player.getMainHandItem().isEmpty());
         }
 
+        /**
+         * Free to throw: main hand empty if {@code require_empty_hand} is on, the same rule as picking up. Switching to
+         * a full slot while charging cancels the throw.
+         */
+        public static boolean canThrow(Player player)
+        {
+                return canUseHands(player);
+        }
+
         /** Why {@code player} can't pick up {@code mob}, or {@code null} if they can. Ignores input and reach. */
         public static @Nullable Denial check(Player player, Mob mob)
         {
@@ -87,11 +97,13 @@ public final class CarryRules
                 return null;
         }
 
-        /** Mass from the mob's current hitbox, so mods that resize mobs change their weight too. */
+        /**
+         * The mob profile's mass, else from the mob's current hitbox, so mods that resize mobs change their weight too.
+         */
         public static double mass(Mob mob)
         {
-                return ThrowPhysics.massFromHitbox(mob.getBbWidth(), mob.getBbHeight(),
-                        ThrowableMobsConfig.carry().defaultDensity());
+                return MobProfiles.physics(mob).mass().orElseGet(() -> ThrowPhysics.massFromHitbox(mob.getBbWidth(),
+                        mob.getBbHeight(), ThrowableMobsConfig.carry().defaultDensity()));
         }
 
         private static boolean isSomeoneElsesPet(Player player, Mob mob)

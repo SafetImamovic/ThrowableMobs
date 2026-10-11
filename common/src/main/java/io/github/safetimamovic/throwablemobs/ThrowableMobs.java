@@ -1,5 +1,6 @@
 package io.github.safetimamovic.throwablemobs;
 
+import io.github.safetimamovic.throwablemobs.behavior.builtin.BuiltinBehaviors;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 
 /**
@@ -17,5 +18,6 @@ public final class ThrowableMobs
         {
                 Constants.LOG.info("Throwable Mobs initializing on {} ({})",
                         Services.PLATFORM.getPlatformName(), Services.PLATFORM.getEnvironmentName());
+                BuiltinBehaviors.register();
         }
 }

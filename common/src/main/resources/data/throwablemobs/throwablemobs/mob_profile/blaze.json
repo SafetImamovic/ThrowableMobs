@@ -1,0 +1,8 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:blaze"],
+    "behaviors": [
+        { "type": "throwablemobs:ignite", "trigger": "impact", "seconds": 5.0, "fire_on_block": true },
+        { "type": "throwablemobs:particles", "trigger": "flight_tick", "particle": { "type": "minecraft:flame" }, "count": 2, "spread": 0.2 }
+    ]
+}

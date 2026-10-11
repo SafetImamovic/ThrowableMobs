@@ -1,11 +1,18 @@
 package io.github.safetimamovic.throwablemobs.config;
 
+import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.BehaviorConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.GroundFilter;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfDamage;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
@@ -45,6 +52,7 @@ public final class CreatorConfig
         private static final EnumValue<GroundFilter> GROUND_FILTER;
 
         private static final DoubleValue THROW_IMPULSE;
+        private static final DoubleValue STRENGTH_EFFECT_BONUS;
         private static final DoubleValue MAX_THROW_SPEED;
         private static final IntValue MAX_CHARGE_TICKS;
         private static final IntValue MIN_CHARGE_TICKS;
@@ -56,12 +64,21 @@ public final class CreatorConfig
         private static final DoubleValue DRAG;
         private static final IntValue MAX_FLIGHT_TICKS;
         private static final BooleanValue AI_IN_FLIGHT;
+        private static final DoubleValue BLOCK_RESTITUTION;
+        private static final IntValue MAX_BOUNCES;
+        private static final DoubleValue MIN_BOUNCE_SPEED;
+        private static final EnumValue<BounceImpacts> BOUNCE_IMPACTS;
 
         private static final DoubleValue DAMAGE_PER_ENERGY;
         private static final DoubleValue MIN_IMPACT_ENERGY;
         private static final DoubleValue MAX_IMPACT_DAMAGE;
         private static final DoubleValue RESTITUTION;
         private static final BooleanValue VANILLA_FALL_DAMAGE;
+        private static final EnumValue<SelfDamage> SELF_DAMAGE;
+
+        private static final BooleanValue BEHAVIORS_ENABLED;
+        private static final BooleanValue AUTO_DETECT_BEHAVIORS;
+        private static final ConfigValue<List<? extends String>> DISABLED_BEHAVIORS;
 
         static
         {
@@ -124,9 +141,12 @@ public final class CreatorConfig
                                 "so light mobs fly fast and heavy ones barely leave your hands (150 throws a cow at",
                                 "about 0.33 blocks/tick).")
                         .defineInRange("throw_impulse", 150.0, 0.0, 1_000_000.0);
+                STRENGTH_EFFECT_BONUS = builder.comment("Extra impulse per level of the Strength effect: 0.25 makes",
+                                "Strength II throw 50 % harder. 0 = the effect doesn't help.")
+                        .defineInRange("strength_effect_bonus", 0.25, 0.0, 10.0);
                 MAX_THROW_SPEED = builder.comment("Launch speed cap in blocks/tick, so light mobs don't fly forever",
-                                "(a full-charge arrow is about 3).")
-                        .defineInRange("max_throw_speed", 2.0, 0.0, 10.0);
+                                "(a full-charge arrow is about 3; 1.0 throws a chicken about 19 blocks).")
+                        .defineInRange("max_throw_speed", 1.0, 0.0, 10.0);
                 MAX_CHARGE_TICKS = builder.comment("Ticks to reach full charge (20 ticks = 1 second, same as a bow).")
                         .defineInRange("max_charge_ticks", 20, 1, 200);
                 MIN_CHARGE_TICKS = builder.comment("Letting go sooner than this cancels the throw.")
@@ -153,6 +173,18 @@ public final class CreatorConfig
                                 "(chickens flap, skeletons turn). Their own movement can then bend the flight a",
                                 "little away from the trajectory preview.")
                         .define("ai_in_flight", false);
+                BLOCK_RESTITUTION = builder.comment("Bounciness off blocks for every mob: 0 = no bounce, the flight",
+                                "ends at the first block; 1 = keeps all its speed. Mob profiles can override it.")
+                        .defineInRange("block_restitution", 0.0, 0.0, 2.0);
+                MAX_BOUNCES = builder.comment("Bounces off blocks before the flight ends. Mob profiles can override",
+                                "it.")
+                        .defineInRange("max_bounces", 3, 0, 100);
+                MIN_BOUNCE_SPEED = builder.comment("A bounce slower than this (blocks/tick, away from the block) ends",
+                                "the flight, so mobs stop instead of skipping along the ground forever.")
+                        .defineInRange("min_bounce_speed", 0.15, 0.0, 10.0);
+                BOUNCE_IMPACTS = builder.comment("Whether bounces after the first impact deal damage too: EVERY or",
+                                "FIRST_ONLY. Mob profiles can override it.")
+                        .defineEnum("bounce_impacts", BounceImpacts.EVERY);
                 builder.pop();
 
                 builder.comment("When a thrown mob hits a block or another entity. Damage comes from the collision",
@@ -171,6 +203,25 @@ public final class CreatorConfig
                                 "of the impact damage (measured from the top of the arc; mobs immune to fall damage",
                                 "stay immune). Off: impact damage replaces fall damage during the flight.")
                         .define("vanilla_fall_damage", false);
+                SELF_DAMAGE = builder.comment("Whether thrown mobs take damage from their own impacts: ALL, NONE, or",
+                                "RESPECT_TAG = all but mobs in #throwablemobs:no_self_damage (by default the mobs",
+                                "immune to fall damage, like chickens and cats). Mob profiles scale it per mob.")
+                        .defineEnum("self_damage", SelfDamage.RESPECT_TAG);
+                builder.pop();
+
+                builder.comment("What mobs do when picked up, thrown and when they hit something (creepers explode,",
+                        "endermen teleport...). Set per mob with mob profiles in datapacks.").push("behaviors");
+                BEHAVIORS_ENABLED = builder.comment("Off: no mob behaviors run. Mob profile physics (mass, gravity,",
+                                "bounces) still apply.")
+                        .define("behaviors_enabled", true);
+                AUTO_DETECT_BEHAVIORS = builder.comment("Guess behaviors for modded mobs from what they are: a modded",
+                                "creeper explodes, a modded slime bounces and splits. Any mob profile for the mob",
+                                "overrides the guess.")
+                        .define("auto_detect_behaviors", true);
+                DISABLED_BEHAVIORS = builder.comment("Behavior types that never run, for example",
+                                "[\"throwablemobs:explode\"].")
+                        .defineListAllowEmpty("disabled_behaviors", List.of(), () -> "throwablemobs:explode",
+                                value -> value instanceof String id && Identifier.tryParse(id) != null);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -204,6 +255,7 @@ public final class CreatorConfig
         {
                 return new ThrowConfig(
                         get(THROW_IMPULSE),
+                        get(STRENGTH_EFFECT_BONUS),
                         get(MAX_THROW_SPEED),
                         get(MAX_CHARGE_TICKS),
                         get(MIN_CHARGE_TICKS),
@@ -214,11 +266,30 @@ public final class CreatorConfig
                         get(DRAG),
                         get(MAX_FLIGHT_TICKS),
                         get(AI_IN_FLIGHT),
+                        get(BLOCK_RESTITUTION),
+                        get(MAX_BOUNCES),
+                        get(MIN_BOUNCE_SPEED),
+                        get(BOUNCE_IMPACTS),
                         get(DAMAGE_PER_ENERGY),
                         get(MIN_IMPACT_ENERGY),
                         get(MAX_IMPACT_DAMAGE),
                         get(RESTITUTION),
-                        get(VANILLA_FALL_DAMAGE));
+                        get(VANILLA_FALL_DAMAGE),
+                        get(SELF_DAMAGE));
+        }
+
+        static BehaviorConfig readBehaviors()
+        {
+                Set<Identifier> disabled = new HashSet<>();
+                for (String id : get(DISABLED_BEHAVIORS))
+                {
+                        Identifier parsed = Identifier.tryParse(id);
+                        if (parsed != null)
+                        {
+                                disabled.add(parsed);
+                        }
+                }
+                return new BehaviorConfig(get(BEHAVIORS_ENABLED), get(AUTO_DETECT_BEHAVIORS), Set.copyOf(disabled));
         }
 
         /** A server config isn't loaded on a client outside a world; the defaults apply there. */

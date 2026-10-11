@@ -1,5 +1,9 @@
 package io.github.safetimamovic.throwablemobs.config;
 
+import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
+import java.util.Set;
+import net.minecraft.resources.Identifier;
+
 /**
  * Settings, read through this class only. Two files: the creator file ({@link CreatorConfig}, server side, per world,
  * synced to clients) for pack devs and server admins, and the player file ({@link PlayerConfig}, client side, editable
@@ -21,6 +25,12 @@ public final class ThrowableMobsConfig
         public static ThrowConfig throwing()
         {
                 return CreatorConfig.readThrow();
+        }
+
+        /** Current creator settings for mob behaviors. */
+        public static BehaviorConfig behaviors()
+        {
+                return CreatorConfig.readBehaviors();
         }
 
         /** Current player settings; changes in the config screen apply right away. */
@@ -73,6 +83,15 @@ public final class ThrowableMobsConfig
                 CARRIER,
                 /** Keeps the direction it faced when picked up. */
                 KEEP
+        }
+
+        /** Whether a thrown mob takes damage from its own impacts. */
+        public enum SelfDamage
+        {
+                ALL,
+                /** All but mobs in {@code #throwablemobs:no_self_damage}. */
+                RESPECT_TAG,
+                NONE
         }
 
         /** Which blocks count as ground to put a carried mob down on. Both need a collision shape to stand on. */
@@ -133,6 +152,7 @@ public final class ThrowableMobsConfig
          */
         public record ThrowConfig(
                 double throwImpulse,
+                double strengthEffectBonus,
                 double maxThrowSpeed,
                 int maxChargeTicks,
                 int minChargeTicks,
@@ -143,11 +163,25 @@ public final class ThrowableMobsConfig
                 double drag,
                 int maxFlightTicks,
                 boolean aiInFlight,
+                double blockRestitution,
+                int maxBounces,
+                double minBounceSpeed,
+                BounceImpacts bounceImpacts,
                 double damagePerEnergy,
                 double minImpactEnergy,
                 double maxImpactDamage,
                 double restitution,
-                boolean vanillaFallDamage)
+                boolean vanillaFallDamage,
+                SelfDamage selfDamage)
+        {
+        }
+
+        /**
+         * Creator settings for mob behaviors, see {@link CreatorConfig} for what each one does.
+         *
+         * @param disabled behavior type ids that never run
+         */
+        public record BehaviorConfig(boolean enabled, boolean autoDetect, Set<Identifier> disabled)
         {
         }
 
