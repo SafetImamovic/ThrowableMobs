@@ -84,7 +84,7 @@ Gate passed: smooth on both clients, stops at walls, AI back on landing.
 | 9 manual matrix | All passed, including 4 (NeoForge, two clients) and 10b (`vanilla_fall_damage`) on 2026-10-11. |
 
 Implementation notes:
-- Block impacts use only the blocked part of the velocity (`v − actual movement`), so skimming the ground hurts less than hitting a wall head-on.
+- Block impacts use the velocity along the blocked axes (`ThrowPhysics.impactVelocity`), so skimming the ground hurts less than hitting a wall head-on. After the hit the mob keeps only its speed along the free axes. (Until 2026-10-11 both used `v − actual movement`, which made damage depend on how close to the block the last tick started, and left the mob pushing into the block.)
 - The thrown mob's own damage uses vanilla `fly_into_wall`; the hit entity gets `thrown_mob` with the thrower as attacker. Both set the thrower as last player attacker, so kills give XP and player-only loot.
 - The preview moves with `Entity.collideBoundingBox`, the collision `Entity#move` uses on the server, so it lands where the real throw lands. Vanilla collects gizmos per client tick and draws them every frame, so it updates at 20 Hz.
 - Flight pose: `ThrowState` is synced to tracking clients so they know a mob is flying. A client mixin on `LivingEntityRenderer` takes the direction from the mob's movement since the last tick, sets its facing, and tilts and spins the model around the middle of its hitbox at the end of `setupRotations`. Positive X rotation tips the head backward there, because vanilla flips the model afterwards.

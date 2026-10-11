@@ -149,7 +149,7 @@ public final class ThrowManager
 
                 if (mob.horizontalCollision || mob.verticalCollision)
                 {
-                        hitBlock(level, mob, flight, velocity.subtract(moved), config);
+                        hitBlock(level, mob, flight, moved, config);
                         return null;
                 }
                 if (mob.isInWater() || ticks >= config.maxFlightTicks())
@@ -232,15 +232,20 @@ public final class ThrowManager
         }
 
         /**
-         * Mob-vs-block: the block doesn't move (infinite mass), so the mob takes all the damage. Only the blocked part
-         * of the velocity counts: skimming along the ground hurts less than hitting a wall head-on.
+         * Mob-vs-block: the block doesn't move (infinite mass), so the mob takes all the damage. Only the speed into the
+         * block counts: skimming along the ground hurts less than hitting a wall head-on. The mob keeps its speed along
+         * the free axes.
          */
-        private static void hitBlock(ServerLevel level, Mob mob, Flight flight, Vec3 blocked, ThrowConfig config)
+        private static void hitBlock(ServerLevel level, Mob mob, Flight flight, Vec3 moved, ThrowConfig config)
         {
+                ThrowPhysics.Vector wanted = vector(flight.velocity());
+                ThrowPhysics.Vector actual = vector(moved);
+                double speed = ThrowPhysics.impactVelocity(wanted, actual).length();
                 double damage = ThrowPhysics.impactDamage(
-                        ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY, blocked.length()),
+                        ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY, speed),
                         config.damagePerEnergy(), config.minImpactEnergy(), config.maxImpactDamage());
-                land(mob, flight.velocity().subtract(blocked));
+                ThrowPhysics.Vector left = ThrowPhysics.bounce(wanted, actual, 0.0).velocity();
+                land(mob, new Vec3(left.x(), left.y(), left.z()));
                 hurt(level, mob, level.damageSources().flyIntoWall(),
                         damage, level.getServer().getPlayerList().getPlayer(flight.thrower()));
         }
@@ -264,6 +269,11 @@ public final class ThrowManager
         {
                 return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
                         .getOrThrow(THROWN_MOB), mob, thrower);
+        }
+
+        private static ThrowPhysics.Vector vector(Vec3 v)
+        {
+                return new ThrowPhysics.Vector(v.x, v.y, v.z);
         }
 
         private static double mass(Entity entity)
