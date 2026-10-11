@@ -31,10 +31,10 @@ import org.jspecify.annotations.Nullable;
 public final class MobProfiles
 {
         /** Read by the reload thread, swapped in on the server thread. */
-        private static volatile @Nullable List<ProfileFile> pending;
+        private static volatile @Nullable List<File> pending;
 
         /** Datapack files, lowest priority first. Server thread only, like the cache. */
-        private static List<ProfileFile> files = List.of();
+        private static List<File> files = List.of();
 
         /** Java and datapack layers per entity type. */
         private static final Map<EntityType<?>, MobProfile> CACHE = new HashMap<>();
@@ -46,21 +46,34 @@ public final class MobProfiles
         {
         }
 
+        /**
+         * One layer, for the debug command.
+         *
+         * @param source where it comes from: {@code heuristics}, {@code ThrowableMob}, {@code java} or a file id
+         */
+        public record Layer(String source, MobProfile profile)
+        {
+        }
+
+        private record File(Identifier id, ProfileFile file)
+        {
+        }
+
         /** Reload listener: new datapack files, applied once tags are loaded. */
         static void prepared(Map<Identifier, ProfileFile> loaded)
         {
-                List<Map.Entry<Identifier, ProfileFile>> entries = new ArrayList<>(loaded.entrySet());
+                List<File> sorted = new ArrayList<>();
+                loaded.forEach((id, file) -> sorted.add(new File(id, file)));
                 // Lowest priority first; on a tie, a stable order by file id so every reload resolves the same way.
-                entries.sort(Comparator.comparingInt((Map.Entry<Identifier, ProfileFile> entry) -> entry.getValue()
-                        .priority()).thenComparing(Map.Entry::getKey));
-                pending = entries.stream().map(Map.Entry::getValue).toList();
+                sorted.sort(Comparator.comparingInt((File file) -> file.file().priority()).thenComparing(File::id));
+                pending = List.copyOf(sorted);
                 Constants.LOG.info("Loaded {} mob profile(s)", loaded.size());
         }
 
         /** Server tags loaded (startup or {@code /reload}): new files take effect, every profile resolves again. */
         public static void onTagsLoaded()
         {
-                List<ProfileFile> loaded = pending;
+                List<File> loaded = pending;
                 if (loaded != null)
                 {
                         files = loaded;
@@ -75,34 +88,52 @@ public final class MobProfiles
                 return upper(mob.getType()).over(lower(mob));
         }
 
+        /** Every layer that applies to {@code mob}, lowest first, empty ones left out. Server thread only. */
+        public static List<Layer> layers(Mob mob)
+        {
+                List<Layer> layers = new ArrayList<>(lowerLayers(mob));
+                layers.addAll(upperLayers(mob.getType()));
+                return layers;
+        }
+
         /** Java registration and datapack files for {@code type}, cached. */
         private static MobProfile upper(EntityType<?> type)
         {
-                return CACHE.computeIfAbsent(type, MobProfiles::stack);
+                return CACHE.computeIfAbsent(type, key -> stack(upperLayers(key)));
         }
 
-        private static MobProfile stack(EntityType<?> type)
+        private static List<Layer> upperLayers(EntityType<?> type)
         {
-                MobProfile profile = MobProfile.EMPTY;
+                List<Layer> layers = new ArrayList<>();
                 MobProfile java = BehaviorRegistry.javaProfile(type);
                 if (java != null)
                 {
-                        profile = java.over(profile);
+                        layers.add(new Layer("java", java));
                 }
-                for (ProfileFile file : files)
+                for (File file : files)
                 {
-                        if (file.matches(type))
+                        if (file.file().matches(type))
                         {
-                                profile = file.profile().over(profile);
+                                layers.add(new Layer(file.id().toString(), file.file().profile()));
                         }
                 }
-                return profile;
+                return layers;
         }
 
         /** Heuristics, then the {@link ThrowableMob} interface. Works on both sides. */
         private static MobProfile lower(Mob mob)
         {
-                MobProfile profile = Heuristics.guess(mob);
+                return stack(lowerLayers(mob));
+        }
+
+        private static List<Layer> lowerLayers(Mob mob)
+        {
+                List<Layer> layers = new ArrayList<>();
+                MobProfile guess = Heuristics.guess(mob);
+                if (!guess.equals(MobProfile.EMPTY))
+                {
+                        layers.add(new Layer("heuristics", guess));
+                }
                 if (mob instanceof ThrowableMob throwable)
                 {
                         MobProfile own = throwable.getThrowProfile();
@@ -120,8 +151,18 @@ public final class MobProfiles
                         }
                         if (own != null)
                         {
-                                profile = own.over(profile);
+                                layers.add(new Layer("ThrowableMob", own));
                         }
+                }
+                return layers;
+        }
+
+        private static MobProfile stack(List<Layer> layers)
+        {
+                MobProfile profile = MobProfile.EMPTY;
+                for (Layer layer : layers)
+                {
+                        profile = layer.profile().over(profile);
                 }
                 return profile;
         }

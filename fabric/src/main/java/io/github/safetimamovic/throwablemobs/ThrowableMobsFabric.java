@@ -13,6 +13,7 @@ import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -71,6 +72,9 @@ public class ThrowableMobsFabric implements ModInitializer
                                 ServerPlayNetworking.send(player, MobProfiles.syncPayload());
                         }
                 });
+
+                CommandRegistrationCallback.EVENT.register(
+                        (dispatcher, registryAccess, environment) -> ThrowableMobsCommand.register(dispatcher));
 
                 UseEntityCallback.EVENT.register(
                         (player, level, hand, entity, hitResult) -> CarryManager.onUseEntity(entity));

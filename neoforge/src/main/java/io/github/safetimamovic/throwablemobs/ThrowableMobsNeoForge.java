@@ -21,6 +21,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -56,6 +57,7 @@ public class ThrowableMobsNeoForge
 
                 IEventBus bus = NeoForge.EVENT_BUS;
                 bus.addListener(ThrowableMobsNeoForge::onEntityInteract);
+                bus.addListener((RegisterCommandsEvent event) -> ThrowableMobsCommand.register(event.getDispatcher()));
                 bus.addListener((AddServerReloadListenersEvent event) -> event
                         .addListener(MobProfileReloadListener.ID, new MobProfileReloadListener()));
                 bus.addListener((TagsUpdatedEvent.ServerDataLoad event) -> MobProfiles.onTagsLoaded());
