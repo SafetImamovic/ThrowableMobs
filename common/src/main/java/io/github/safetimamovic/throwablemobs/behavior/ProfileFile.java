@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
 import io.github.safetimamovic.throwablemobs.api.MobProfile;
+import io.github.safetimamovic.throwablemobs.api.ThrowBehavior;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -47,9 +48,11 @@ public record ProfileFile(List<Either<TagKey<EntityType<?>>, Identifier>> entiti
                 Codec.INT.optionalFieldOf("priority", 0).forGetter(ProfileFile::priority),
                 Codec.BOOL.optionalFieldOf("replace", false).forGetter(file -> file.profile().replace()),
                 Physics.CODEC.optionalFieldOf("physics").forGetter(file -> Optional.of(Physics.of(file.profile()))),
-                Damage.CODEC.optionalFieldOf("damage").forGetter(file -> Optional.of(Damage.of(file.profile()))))
-                .apply(instance, (version, entities, priority, replace, physics, damage) -> new ProfileFile(entities,
-                        priority, toProfile(replace, physics.orElse(Physics.EMPTY), damage.orElse(Damage.EMPTY)))));
+                Damage.CODEC.optionalFieldOf("damage").forGetter(file -> Optional.of(Damage.of(file.profile()))),
+                DataBehavior.CODEC.listOf().optionalFieldOf("behaviors").forGetter(ProfileFile::dataBehaviors))
+                .apply(instance, (version, entities, priority, replace, physics, damage, behaviors) -> new ProfileFile(
+                        entities, priority, toProfile(replace, physics.orElse(Physics.EMPTY),
+                                damage.orElse(Damage.EMPTY), behaviors))));
 
         public boolean matches(EntityType<?> type)
         {
@@ -65,13 +68,27 @@ public record ProfileFile(List<Either<TagKey<EntityType<?>>, Identifier>> entiti
                 return false;
         }
 
-        private static MobProfile toProfile(boolean replace, Physics physics, Damage damage)
+        private static MobProfile toProfile(boolean replace, Physics physics, Damage damage,
+                Optional<List<DataBehavior>> behaviors)
         {
                 return new MobProfile(replace, physics.mass.orElse(null), physics.gravityMultiplier.orElse(null),
                         physics.dragMultiplier.orElse(null), physics.restitution.orElse(null),
                         physics.blockRestitution.orElse(null), physics.maxBounces.orElse(null),
                         physics.bounceImpacts.orElse(null), damage.selfMultiplier.orElse(null),
-                        damage.targetMultiplier.orElse(null), null);
+                        damage.targetMultiplier.orElse(null),
+                        behaviors.<List<ThrowBehavior>>map(List::copyOf).orElse(null));
+        }
+
+        /** The behaviors as they'd be written back to JSON; Java behaviors can't be, so they're left out. */
+        private Optional<List<DataBehavior>> dataBehaviors()
+        {
+                List<ThrowBehavior> behaviors = profile.behaviors();
+                if (behaviors == null)
+                {
+                        return Optional.empty();
+                }
+                return Optional.of(behaviors.stream().filter(DataBehavior.class::isInstance)
+                        .map(DataBehavior.class::cast).toList());
         }
 
         private record Physics(Optional<Double> mass, Optional<Double> gravityMultiplier,
@@ -95,9 +112,11 @@ public record ProfileFile(List<Either<TagKey<EntityType<?>>, Identifier>> entiti
                 {
                         return new Physics(Optional.ofNullable(profile.mass()),
                                 Optional.ofNullable(profile.gravityMultiplier()),
-                                Optional.ofNullable(profile.dragMultiplier()), Optional.ofNullable(profile.restitution()),
+                                Optional.ofNullable(profile.dragMultiplier()),
+                                Optional.ofNullable(profile.restitution()),
                                 Optional.ofNullable(profile.blockRestitution()),
-                                Optional.ofNullable(profile.maxBounces()), Optional.ofNullable(profile.bounceImpacts()));
+                                Optional.ofNullable(profile.maxBounces()),
+                                Optional.ofNullable(profile.bounceImpacts()));
                 }
         }
 

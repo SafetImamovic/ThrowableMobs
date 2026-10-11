@@ -2,6 +2,7 @@ package io.github.safetimamovic.throwablemobs.behavior;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import io.github.safetimamovic.throwablemobs.api.BehaviorAction;
 import io.github.safetimamovic.throwablemobs.api.BehaviorType;
 import io.github.safetimamovic.throwablemobs.api.MobProfile;
@@ -26,10 +27,12 @@ public final class BehaviorRegistry
         /** Java layer of profiles, per entity type. */
         private static final Map<EntityType<?>, MobProfile> JAVA_PROFILES = new ConcurrentHashMap<>();
 
-        /** Reads a behavior action by its {@code "type"} field. */
-        public static final Codec<BehaviorAction> ACTION_CODEC = Identifier.CODEC
-                .comapFlatMap(BehaviorRegistry::typeResult, BehaviorType::id)
-                .dispatch("type", BehaviorAction::type, BehaviorType::codec);
+        private static final Codec<BehaviorType<?>> TYPE_CODEC = Identifier.CODEC
+                .comapFlatMap(BehaviorRegistry::typeResult, BehaviorType::id);
+
+        /** Reads a behavior action by its {@code "type"} field, from the same object as the other fields. */
+        public static final MapCodec<BehaviorAction> ACTION_MAP_CODEC = TYPE_CODEC
+                .dispatchMap("type", BehaviorAction::type, BehaviorType::codec);
 
         private BehaviorRegistry()
         {

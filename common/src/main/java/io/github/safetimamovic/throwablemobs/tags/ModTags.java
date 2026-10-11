@@ -24,6 +24,9 @@ public final class ModTags
          */
         public static final TagKey<EntityType<?>> NO_SELF_DAMAGE = entity("no_self_damage");
 
+        /** Never teleported by behaviors. Defaults include {@code #c:teleporting_not_supported}. */
+        public static final TagKey<EntityType<?>> NO_TELEPORT = entity("no_teleport");
+
         /** Never ground to put a carried mob down on (with the default deny-list filter). */
         public static final TagKey<Block> PUT_DOWN_GROUND_DENIED = block("put_down_ground_denied");
 
