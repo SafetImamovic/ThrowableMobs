@@ -77,6 +77,15 @@ public final class ThrowableMobsConfig
                 KEEP
         }
 
+        /** Whether a thrown mob takes damage from its own impacts. */
+        public enum SelfDamage
+        {
+                ALL,
+                /** All but mobs in {@code #throwablemobs:no_self_damage}. */
+                RESPECT_TAG,
+                NONE
+        }
+
         /** Which blocks count as ground to put a carried mob down on. Both need a collision shape to stand on. */
         public enum GroundFilter
         {
@@ -153,7 +162,8 @@ public final class ThrowableMobsConfig
                 double minImpactEnergy,
                 double maxImpactDamage,
                 double restitution,
-                boolean vanillaFallDamage)
+                boolean vanillaFallDamage,
+                SelfDamage selfDamage)
         {
         }
 

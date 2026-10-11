@@ -64,6 +64,7 @@
     "throwablemobs.configuration.max_impact_damage": "Max Impact Damage",
     "throwablemobs.configuration.restitution": "Restitution",
     "throwablemobs.configuration.vanilla_fall_damage": "Vanilla Fall Damage Too",
+    "throwablemobs.configuration.self_damage": "Self Damage",
     "throwablemobs.configuration.prompt": "Prompt",
     "throwablemobs.configuration.show_prompt": "Show Prompt",
     "throwablemobs.configuration.prompt_anchor": "Anchor",

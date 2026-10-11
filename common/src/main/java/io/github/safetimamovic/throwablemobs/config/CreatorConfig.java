@@ -6,6 +6,7 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierL
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.GroundFilter;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfDamage;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
@@ -67,6 +68,7 @@ public final class CreatorConfig
         private static final DoubleValue MAX_IMPACT_DAMAGE;
         private static final DoubleValue RESTITUTION;
         private static final BooleanValue VANILLA_FALL_DAMAGE;
+        private static final EnumValue<SelfDamage> SELF_DAMAGE;
 
         static
         {
@@ -187,6 +189,10 @@ public final class CreatorConfig
                                 "of the impact damage (measured from the top of the arc; mobs immune to fall damage",
                                 "stay immune). Off: impact damage replaces fall damage during the flight.")
                         .define("vanilla_fall_damage", false);
+                SELF_DAMAGE = builder.comment("Whether thrown mobs take damage from their own impacts: ALL, NONE, or",
+                                "RESPECT_TAG = all but mobs in #throwablemobs:no_self_damage (by default the mobs",
+                                "immune to fall damage, like chickens and cats). Mob profiles scale it per mob.")
+                        .defineEnum("self_damage", SelfDamage.RESPECT_TAG);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -238,7 +244,8 @@ public final class CreatorConfig
                         get(MIN_IMPACT_ENERGY),
                         get(MAX_IMPACT_DAMAGE),
                         get(RESTITUTION),
-                        get(VANILLA_FALL_DAMAGE));
+                        get(VANILLA_FALL_DAMAGE),
+                        get(SELF_DAMAGE));
         }
 
         /** A server config isn't loaded on a client outside a world; the defaults apply there. */

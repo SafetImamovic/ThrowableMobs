@@ -91,6 +91,7 @@ Spike = throwaway code, Fabric, one hardcoded profile JSON for chicken (`gravity
 | Bounce math | Done: `ThrowPhysics.bounce`, `scaledDrag`. 19 unit tests pass. |
 | 1 spike | Done, tested on NeoForge (2026-10-11): a chicken profile in a world datapack changes the preview and the throw; editing it + `/reload` changes it live. Built as real code, not throwaway (step 2 physics part + step 3 mass / gravity / drag). |
 | Bounces | Done, tested on NeoForge (2026-10-11, slime profile `0.8` / `5`, preview matches): config `block_restitution`, `max_bounces`, `min_bounce_speed`, `bounce_impacts`; profile overrides; `ThrowManager.bounceVelocity` shared by the server flight and the preview (yellow dot per bounce, marker at the final stop). |
+| 4 hooks | Built, in-game test batched with step 5: `behavior/Hooks` calls every hook from one call site each (pickup, carry tick, throw, flight tick, impact, land) and logs and skips a behavior that throws. Impacts go through `ImpactResult` (damage, knockback, bounce or land). `self_damage` mode, `#throwablemobs:no_self_damage` tag and profile `self_multiplier` / `target_multiplier` are applied. `ThrowableMob` and heuristics come with step 7. |
 | Found while testing | Fixed two M2 bugs in `ThrowManager.hitBlock`: impact damage used the leftover movement instead of the speed into the block, and the mob kept pushing into the block after landing (`ThrowPhysics.impactVelocity`, `bounce` with `e = 0`). Ground landings now draw a filled footprint plus a faint box. |
 
 ## Config (creator file, new keys)

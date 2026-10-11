@@ -1,6 +1,7 @@
 package io.github.safetimamovic.throwablemobs.carry;
 
 import io.github.safetimamovic.throwablemobs.Constants;
+import io.github.safetimamovic.throwablemobs.behavior.Hooks;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
@@ -104,6 +105,7 @@ public final class CarryManager
         {
                 hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
                         mob.level().getGameTime()));
+                Hooks.pickup(mob, player);
         }
 
         /** Starts or resumes a carry with an existing state, keeping the original flags it recorded. */
@@ -186,6 +188,7 @@ public final class CarryManager
                                 continue;
                         }
                         follow(carrier, mob);
+                        Hooks.carryTick(mob, carrier);
                 }
                 for (Map.Entry<ServerPlayer, Mob> entry : travelling)
                 {

@@ -2,12 +2,16 @@ package io.github.safetimamovic.throwablemobs.carry;
 
 import io.github.safetimamovic.throwablemobs.Constants;
 import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
+import io.github.safetimamovic.throwablemobs.api.ImpactResult;
+import io.github.safetimamovic.throwablemobs.api.MobProfile;
+import io.github.safetimamovic.throwablemobs.behavior.Hooks;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.behavior.ProfilePhysics;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
+import io.github.safetimamovic.throwablemobs.tags.ModTags;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -99,6 +103,7 @@ public final class ThrowManager
                         .add(player.getKnownMovement().scale(config.inheritVelocity()));
                 mob.setDeltaMovement(velocity);
                 FLYING.put(mob, new Flight(player.getUUID(), velocity, mob.position(), 0, 0));
+                Hooks.thrown(mob, player, velocity);
         }
 
         /** Once per server tick, after entities ticked: move every mob in the air one step. */
@@ -129,11 +134,17 @@ public final class ThrowManager
                 ServerLevel level = (ServerLevel) mob.level();
                 int ticks = flight.ticks() + 1;
                 Vec3 velocity = flight.velocity();
+                ServerPlayer thrower = thrower(level, flight);
 
+                Hooks.flightTick(mob, thrower, velocity, ticks);
+                if (mob.isRemoved())
+                {
+                        return null;
+                }
                 Entity target = findTarget(mob, flight, ticks, config);
                 if (target != null)
                 {
-                        hitEntity(level, mob, target, flight, config);
+                        hitEntity(level, mob, target, flight, ticks, config);
                         return null;
                 }
 
@@ -154,7 +165,7 @@ public final class ThrowManager
                 boolean bounced = false;
                 if (mob.horizontalCollision || mob.verticalCollision)
                 {
-                        Vec3 bounce = hitBlock(level, mob, flight, moved, config);
+                        Vec3 bounce = hitBlock(level, mob, flight, moved, ticks, config);
                         if (bounce == null)
                         {
                                 return null;
@@ -165,7 +176,7 @@ public final class ThrowManager
                 }
                 if (mob.isInWater() || ticks >= config.maxFlightTicks())
                 {
-                        land(mob, bounced ? velocity : moved);
+                        endFlight(mob, thrower, bounced ? velocity : moved, ticks);
                         return null;
                 }
 
@@ -219,30 +230,43 @@ public final class ThrowManager
          * Mob-vs-entity: collision energy from the relative speed and the reduced mass, damage split so the lighter body
          * takes more, knockback by momentum transfer (§8.4).
          */
-        private static void hitEntity(ServerLevel level, Mob mob, Entity target, Flight flight, ThrowConfig config)
+        private static void hitEntity(ServerLevel level, Mob mob, Entity target, Flight flight, int ticks,
+                ThrowConfig config)
         {
                 double m1 = CarryRules.mass(mob);
                 double m2 = mass(target);
                 Vec3 relative = flight.velocity().subtract(target.getKnownMovement());
-                double damage = ThrowPhysics.impactDamage(ThrowPhysics.collisionEnergy(m1, m2, relative.length()),
-                        config.damagePerEnergy(), config.minImpactEnergy(), config.maxImpactDamage());
+                double energy = ThrowPhysics.collisionEnergy(m1, m2, relative.length());
+                double damage = ThrowPhysics.impactDamage(energy, config.damagePerEnergy(), config.minImpactEnergy(),
+                        config.maxImpactDamage());
                 double targetShare = ThrowPhysics.targetDamageShare(m1, m2);
-                ServerPlayer thrower = level.getServer().getPlayerList().getPlayer(flight.thrower());
+                ServerPlayer thrower = thrower(level, flight);
+                MobProfile profile = MobProfiles.resolve(mob.getType());
+                ImpactResult result = Hooks.impact(mob, thrower, flight.velocity(), ticks, target, relative, energy,
+                        flight.bounces(), new ImpactResult(damage * targetShare * multiplier(profile.targetMultiplier()),
+                                damage * (1.0 - targetShare) * selfDamageFactor(mob, profile, config), 1.0, null));
 
                 double resistance = target instanceof LivingEntity living
                         ? living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)
                         : 0.0;
                 Vec3 push = relative.scale(ThrowPhysics.targetKnockback(m1, m2, config.restitution())
-                        * Math.max(0.0, 1.0 - resistance));
+                        * Math.max(0.0, 1.0 - resistance) * result.knockbackMultiplier());
                 Vec3 bounce = flight.velocity()
                         .add(relative.scale(ThrowPhysics.thrownKnockback(m1, m2, config.restitution())));
 
-                land(mob, bounce);
+                // A behavior may have removed the mob (exploded, split); the target still takes its hit.
+                if (!mob.isRemoved())
+                {
+                        endFlight(mob, thrower, bounce, ticks);
+                }
                 // The damage type is in #minecraft:no_knockback, so this push is the only knockback.
-                hurt(level, target, thrownMob(level, mob, thrower), damage * targetShare, thrower);
+                hurt(level, target, thrownMob(level, mob, thrower), result.targetDamage(), thrower);
                 target.push(push);
                 target.needsSync = true;
-                hurt(level, mob, level.damageSources().flyIntoWall(), damage * (1.0 - targetShare), thrower);
+                if (!mob.isRemoved())
+                {
+                        hurt(level, mob, level.damageSources().flyIntoWall(), result.selfDamage(), thrower);
+                }
         }
 
         /**
@@ -253,29 +277,38 @@ public final class ThrowManager
          *
          * @return the velocity to keep flying with, or {@code null} when the flight ended
          */
-        private static @Nullable Vec3 hitBlock(ServerLevel level, Mob mob, Flight flight, Vec3 moved,
+        private static @Nullable Vec3 hitBlock(ServerLevel level, Mob mob, Flight flight, Vec3 moved, int ticks,
                 ThrowConfig config)
         {
                 ThrowPhysics.Vector wanted = vector(flight.velocity());
                 ThrowPhysics.Vector actual = vector(moved);
-                double damage = 0.0;
-                if (flight.bounces() == 0 || bounceImpacts(mob, config) == BounceImpacts.EVERY)
+                ThrowPhysics.Vector into = ThrowPhysics.impactVelocity(wanted, actual);
+                double energy = ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY,
+                        into.length());
+                ServerPlayer thrower = thrower(level, flight);
+                MobProfile profile = MobProfiles.resolve(mob.getType());
+                ImpactResult result = new ImpactResult(0.0, 0.0, 1.0,
+                        bounceVelocity(MobProfiles.physics(mob), config, flight.bounces(), flight.velocity(), moved));
+                if (flight.bounces() == 0 || bounceImpacts(profile, config) == BounceImpacts.EVERY)
                 {
-                        double speed = ThrowPhysics.impactVelocity(wanted, actual).length();
-                        damage = ThrowPhysics.impactDamage(
-                                ThrowPhysics.collisionEnergy(CarryRules.mass(mob), Double.POSITIVE_INFINITY, speed),
-                                config.damagePerEnergy(), config.minImpactEnergy(), config.maxImpactDamage());
+                        double damage = ThrowPhysics.impactDamage(energy, config.damagePerEnergy(),
+                                config.minImpactEnergy(), config.maxImpactDamage()) * selfDamageFactor(mob, profile,
+                                        config);
+                        result = Hooks.impact(mob, thrower, flight.velocity(), ticks, null,
+                                new Vec3(into.x(), into.y(), into.z()), energy, flight.bounces(),
+                                result.withSelfDamage(damage));
                 }
-                Vec3 bounce = bounceVelocity(MobProfiles.physics(mob), config, flight.bounces(), flight.velocity(),
-                        moved);
-                if (bounce == null)
+                if (mob.isRemoved())
+                {
+                        return null;
+                }
+                if (result.endsFlight())
                 {
                         ThrowPhysics.Vector left = ThrowPhysics.bounce(wanted, actual, 0.0).velocity();
-                        land(mob, new Vec3(left.x(), left.y(), left.z()));
+                        endFlight(mob, thrower, new Vec3(left.x(), left.y(), left.z()), ticks);
                 }
-                hurt(level, mob, level.damageSources().flyIntoWall(),
-                        damage, level.getServer().getPlayerList().getPlayer(flight.thrower()));
-                return bounce;
+                hurt(level, mob, level.damageSources().flyIntoWall(), result.selfDamage(), thrower);
+                return result.bounceVelocity();
         }
 
         /**
@@ -303,10 +336,31 @@ public final class ThrowManager
                 return new Vec3(bounce.velocity().x(), bounce.velocity().y(), bounce.velocity().z());
         }
 
-        private static BounceImpacts bounceImpacts(Mob mob, ThrowConfig config)
+        private static BounceImpacts bounceImpacts(MobProfile profile, ThrowConfig config)
         {
-                BounceImpacts profile = MobProfiles.resolve(mob.getType()).bounceImpacts();
-                return profile != null ? profile : config.bounceImpacts();
+                return profile.bounceImpacts() != null ? profile.bounceImpacts() : config.bounceImpacts();
+        }
+
+        /** Share of its impact damage the thrown mob takes: {@code self_damage} mode, then the profile multiplier. */
+        private static double selfDamageFactor(Mob mob, MobProfile profile, ThrowConfig config)
+        {
+                boolean immune = switch (config.selfDamage())
+                {
+                        case ALL -> false;
+                        case RESPECT_TAG -> mob.is(ModTags.NO_SELF_DAMAGE);
+                        case NONE -> true;
+                };
+                return immune ? 0.0 : multiplier(profile.selfMultiplier());
+        }
+
+        private static double multiplier(@Nullable Double multiplier)
+        {
+                return multiplier != null ? multiplier : 1.0;
+        }
+
+        private static @Nullable ServerPlayer thrower(ServerLevel level, Flight flight)
+        {
+                return level.getServer().getPlayerList().getPlayer(flight.thrower());
         }
 
         private static void hurt(ServerLevel level, Entity entity, DamageSource source, double amount,
@@ -341,6 +395,13 @@ public final class ThrowManager
                         ? CarryRules.mass(mob)
                         : ThrowPhysics.massFromHitbox(entity.getBbWidth(), entity.getBbHeight(),
                                 ThrowableMobsConfig.carry().defaultDensity());
+        }
+
+        /** {@link #land} plus the behaviors' {@code onLand}: the end of a real flight. */
+        private static void endFlight(Mob mob, @Nullable ServerPlayer thrower, Vec3 motion, int ticks)
+        {
+                land(mob, motion);
+                Hooks.land(mob, thrower, motion, ticks);
         }
 
         /** Ends a flight: original flags back, then vanilla takes over with {@code motion}. */
