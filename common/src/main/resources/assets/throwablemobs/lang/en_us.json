@@ -76,6 +76,7 @@
     "throwablemobs.configuration.catching_enabled": "Catching Enabled",
     "throwablemobs.configuration.catch_radius": "Catch Radius",
     "throwablemobs.configuration.catch_cone_degrees": "Catch View Cone",
+    "throwablemobs.configuration.self_catch": "Self Catch",
     "throwablemobs.configuration.self_catch_delay_ticks": "Self Catch Delay Ticks",
     "throwablemobs.configuration.latency_compensation": "Latency Compensation",
     "throwablemobs.configuration.max_latency_ticks": "Max Latency Ticks",

@@ -82,8 +82,8 @@ public final class CatchHighlight
         private static boolean canCatch(ClientLevel level, LocalPlayer player, Mob mob, ThrowState state,
                 CatchConfig config)
         {
-                if (state.thrower().equals(player.getUUID())
-                        && level.getGameTime() - state.launchTick() <= config.selfCatchDelayTicks())
+                if (state.thrower().equals(player.getUUID()) && !config.selfCatch().allows(
+                        level.getGameTime() - state.launchTick(), state.bounced(), config.selfCatchDelayTicks()))
                 {
                         return false;
                 }

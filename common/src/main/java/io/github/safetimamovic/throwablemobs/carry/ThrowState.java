@@ -17,14 +17,17 @@ import net.minecraft.network.codec.StreamCodec;
  * @param originalNoAi      the mob's {@code NoAI} flag before it was picked up, restored when the flight ends
  * @param originalNoGravity the mob's {@code NoGravity} flag before it was picked up, restored when the flight ends
  * @param launchTick        game time of the throw
+ * @param bounced           whether it bounced off a block yet, for {@code self_catch AFTER_BOUNCE}
  */
-public record ThrowState(UUID thrower, boolean originalNoAi, boolean originalNoGravity, long launchTick)
+public record ThrowState(UUID thrower, boolean originalNoAi, boolean originalNoGravity, long launchTick,
+        boolean bounced)
 {
         public static final MapCodec<ThrowState> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 UUIDUtil.CODEC.fieldOf("thrower").forGetter(ThrowState::thrower),
                 Codec.BOOL.fieldOf("original_no_ai").forGetter(ThrowState::originalNoAi),
                 Codec.BOOL.fieldOf("original_no_gravity").forGetter(ThrowState::originalNoGravity),
-                Codec.LONG.fieldOf("launch_tick").forGetter(ThrowState::launchTick))
+                Codec.LONG.fieldOf("launch_tick").forGetter(ThrowState::launchTick),
+                Codec.BOOL.optionalFieldOf("bounced", false).forGetter(ThrowState::bounced))
                 .apply(instance, ThrowState::new));
 
         public static final Codec<ThrowState> CODEC = MAP_CODEC.codec();
@@ -34,5 +37,11 @@ public record ThrowState(UUID thrower, boolean originalNoAi, boolean originalNoG
                 ByteBufCodecs.BOOL, ThrowState::originalNoAi,
                 ByteBufCodecs.BOOL, ThrowState::originalNoGravity,
                 ByteBufCodecs.VAR_LONG, ThrowState::launchTick,
+                ByteBufCodecs.BOOL, ThrowState::bounced,
                 ThrowState::new);
+
+        public ThrowState withBounced()
+        {
+                return new ThrowState(thrower, originalNoAi, originalNoGravity, launchTick, true);
+        }
 }

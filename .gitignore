@@ -26,3 +26,6 @@ runs
 # neovim / jdtls
 .factorypath
 .eclipse
+
+# Local planning notes, not published
+docs/plans/

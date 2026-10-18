@@ -9,6 +9,7 @@ import io.github.safetimamovic.throwablemobs.api.BehaviorType;
 import io.github.safetimamovic.throwablemobs.api.ImpactContext;
 import io.github.safetimamovic.throwablemobs.api.ImpactResult;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Level;
@@ -16,7 +17,8 @@ import net.minecraft.world.level.Level;
 /**
  * {@code throwablemobs:explode}: an explosion at the mob. Power {@code base + per_energy × impact energy}, capped at
  * {@code max}, times {@code charged_multiplier} for a charged creeper. Block damage follows the {@code mobGriefing}
- * gamerule, like a creeper's. With {@code consume_mob} the mob is gone afterwards, like a creeper that blew up.
+ * gamerule, like a creeper's. The blast is blamed on the context's player, so teams without friendly fire are
+ * spared. With {@code consume_mob} the mob is gone afterwards, like a creeper that blew up.
  */
 public record ExplodeAction(float base, float perEnergy, float max, float chargedMultiplier, boolean fire,
         boolean consumeMob) implements BehaviorAction
@@ -60,7 +62,9 @@ public record ExplodeAction(float base, float perEnergy, float max, float charge
                 {
                         power *= chargedMultiplier;
                 }
-                ctx.level().explode(mob, mob.getX(), mob.getY(), mob.getZ(), power, fire,
+                // Blamed on the player, like TNT they lit: kill credit, and vanilla spares their teammates.
+                DamageSource source = ctx.level().damageSources().explosion(mob, ctx.player());
+                ctx.level().explode(mob, source, null, mob.getX(), mob.getY(), mob.getZ(), power, fire,
                         Level.ExplosionInteraction.MOB);
                 if (consumeMob)
                 {
