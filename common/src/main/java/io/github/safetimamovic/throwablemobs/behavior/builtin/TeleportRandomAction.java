@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.safetimamovic.throwablemobs.Constants;
+import io.github.safetimamovic.throwablemobs.advancement.ModTriggers;
+import io.github.safetimamovic.throwablemobs.advancement.ThrowEventTrigger.Event;
 import io.github.safetimamovic.throwablemobs.api.BehaviorAction;
 import io.github.safetimamovic.throwablemobs.api.BehaviorType;
 import io.github.safetimamovic.throwablemobs.api.ImpactContext;
@@ -46,17 +48,31 @@ public record TeleportRandomAction(int range, boolean cancelDamage) implements B
         @Override
         public void run(ThrowContext ctx)
         {
-                teleport(ctx.level(), ctx.mob());
+                teleport(ctx);
         }
 
         @Override
         public ImpactResult onImpact(ImpactContext ctx, ImpactResult current)
         {
-                if (!teleport(ctx.level(), ctx.mob()))
+                if (!teleport(ctx))
                 {
                         return current;
                 }
                 return (cancelDamage ? current.withSelfDamage(0.0) : current).land();
+        }
+
+        /** {@link #teleport(ServerLevel, Mob)}, and Ender Toss for the player when it worked. */
+        private boolean teleport(ThrowContext ctx)
+        {
+                if (!teleport(ctx.level(), ctx.mob()))
+                {
+                        return false;
+                }
+                if (ctx.player() != null)
+                {
+                        ModTriggers.THROW_EVENT.trigger(ctx.player(), Event.TELEPORT, ctx.mob(), 0.0, 0.0);
+                }
+                return true;
         }
 
         private boolean teleport(ServerLevel level, Mob mob)

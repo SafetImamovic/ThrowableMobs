@@ -1,0 +1,38 @@
+{
+    "parent": "throwablemobs:yeet",
+    "criteria": {
+        "kaboom": {
+            "trigger": "minecraft:player_killed_entity",
+            "conditions": {
+                "killing_blow": {
+                    "direct_entity": {
+                        "minecraft:entity_type": "minecraft:creeper"
+                    },
+                    "tags": [
+                        {
+                            "expected": true,
+                            "id": "#minecraft:is_explosion"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:creeper_head"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.kaboom.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.kaboom.description"
+        },
+        "frame": "task"
+    },
+    "requirements": [
+        [
+            "kaboom"
+        ]
+    ]
+}

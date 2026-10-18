@@ -1,0 +1,29 @@
+{
+    "parent": "throwablemobs:nice_catch",
+    "criteria": {
+        "hot_potato": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "catch",
+                "ignited": true
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:baked_potato"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.hot_potato.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.hot_potato.description"
+        },
+        "frame": "goal"
+    },
+    "requirements": [
+        [
+            "hot_potato"
+        ]
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "criteria": {
+        "root": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "pickup"
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:lead"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.root.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.root.description"
+        },
+        "frame": "task",
+        "background": "minecraft:block/hay_block_side",
+        "show_toast": true,
+        "announce_to_chat": false
+    },
+    "requirements": [
+        [
+            "root"
+        ]
+    ]
+}
