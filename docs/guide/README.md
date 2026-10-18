@@ -9,6 +9,7 @@ sync, and becomes the docs site in M8 (THROWABLE_MOBS.md §17), with the config 
 | [Behaviors](behaviors.md) | Pack devs | Triggers, conditions, every built-in action with its fields |
 | [Tags](tags.md) | Pack devs | Which mobs can be carried, who takes impact damage, who can teleport |
 | [Modded mobs](modded-mobs.md) | Pack devs, admins | What the mod guesses for mobs without a profile, and how to override it |
+| [Advancements and sounds](advancements.md) | Pack devs | Our advancements, the `throw_event` criterion, sound events |
 | [Java API](java-api.md) | Mod devs | Behaviors, behavior types and profiles from code |
 | [Cookbook](cookbook.md) | Everyone | Ready-made examples, including Twilight Forest and Alex's Mobs |
 
