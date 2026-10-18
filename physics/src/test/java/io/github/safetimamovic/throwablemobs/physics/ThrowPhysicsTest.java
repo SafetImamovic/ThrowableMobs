@@ -264,6 +264,15 @@ class ThrowPhysicsTest
                 assertEquals(2.0, ThrowPhysics.catchDamage(300.0, 200.0, 0.02), EPS);
         }
 
+        @Test
+        void effectsAreSilentBelowTheFloorAndCapAtFull()
+        {
+                assertEquals(0.0, ThrowPhysics.effectStrength(1.0, 2.0, 42.0), EPS);
+                assertEquals(0.5, ThrowPhysics.effectStrength(22.0, 2.0, 42.0), EPS);
+                assertEquals(1.0, ThrowPhysics.effectStrength(100.0, 2.0, 42.0), EPS);
+                assertEquals(1.0, ThrowPhysics.effectStrength(3.0, 2.0, 2.0), EPS);
+        }
+
         private static void assertVector(double x, double y, double z, ThrowPhysics.Vector actual)
         {
                 assertEquals(x, actual.x(), EPS);

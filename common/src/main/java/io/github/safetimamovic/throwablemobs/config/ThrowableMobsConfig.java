@@ -33,6 +33,12 @@ public final class ThrowableMobsConfig
                 return CreatorConfig.readCatch();
         }
 
+        /** Current creator settings for sounds and particles. */
+        public static EffectsConfig effects()
+        {
+                return CreatorConfig.readEffects();
+        }
+
         /** Current creator settings for mob behaviors. */
         public static BehaviorConfig behaviors()
         {
@@ -228,6 +234,14 @@ public final class ThrowableMobsConfig
         }
 
         /**
+         * Creator settings for sounds and particles, see {@link CreatorConfig} for what each one does. Energy in the
+         * same units as impact damage.
+         */
+        public record EffectsConfig(boolean sounds, boolean particles, double minEnergy, double fullEnergy)
+        {
+        }
+
+        /**
          * Creator settings for mob behaviors, see {@link CreatorConfig} for what each one does.
          *
          * @param disabled behavior type ids that never run
@@ -254,7 +268,8 @@ public final class ThrowableMobsConfig
                 TrajectoryStyle trajectoryStyle,
                 FlightPoseStyle flightPose,
                 float spiralSpeed,
-                boolean catchHighlight)
+                boolean catchHighlight,
+                boolean flightTrail)
         {
         }
 }
