@@ -8,6 +8,7 @@ import io.github.safetimamovic.throwablemobs.behavior.Hooks;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.behavior.ProfilePhysics;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CatchConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
@@ -15,15 +16,19 @@ import io.github.safetimamovic.throwablemobs.tags.ModTags;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.UUID;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -32,6 +37,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -45,6 +51,9 @@ public final class ThrowManager
 {
         public static final ResourceKey<DamageType> THROWN_MOB = ResourceKey.create(Registries.DAMAGE_TYPE,
                 Constants.id("thrown_mob"));
+
+        public static final ResourceKey<DamageType> CAUGHT_MOB = ResourceKey.create(Registries.DAMAGE_TYPE,
+                Constants.id("caught_mob"));
 
         /** How long a throw counts as a player kill (XP, player-only loot), same as a vanilla player attack. */
         private static final int KILL_CREDIT_TICKS = 100;
@@ -154,6 +163,12 @@ public final class ThrowManager
                 {
                         return null;
                 }
+                ServerPlayer catcher = findCatcher(level, mob, flight, ticks);
+                if (catcher != null)
+                {
+                        catchMob(level, mob, catcher, flight, ticks);
+                        return null;
+                }
                 Entity target = findTarget(mob, flight, ticks, config);
                 if (target != null)
                 {
@@ -235,7 +250,144 @@ public final class ThrowManager
                 {
                         return false;
                 }
-                return ticks > config.throwerGraceTicks() || !entity.getUUID().equals(thrower);
+                if (entity.getUUID().equals(thrower))
+                {
+                        return ticks > config.throwerGraceTicks();
+                }
+                return !(entity instanceof Player player) || canHurtPlayer(player, thrower, config);
+        }
+
+        /**
+         * Whether a mob thrown by {@code thrower} may hurt {@code player}: {@code pvp} is on and the thrower could hit
+         * them (scoreboard teams, the server's own pvp setting). A thrower who logged out counts as allowed. Players a
+         * mob can't hurt aren't in its way: it flies past them.
+         */
+        public static boolean canHurtPlayer(Player player, UUID thrower, ThrowConfig config)
+        {
+                if (!config.pvp())
+                {
+                        return false;
+                }
+                Player throwing = player.level().getPlayerByUUID(thrower);
+                return throwing == null || throwing == player || throwing.canHarmPlayer(player);
+        }
+
+        /** The player catching the mob this tick, if any: the first one along its path who can. */
+        private static @Nullable ServerPlayer findCatcher(ServerLevel level, Mob mob, Flight flight, int ticks)
+        {
+                CatchConfig config = ThrowableMobsConfig.catching();
+                if (!config.enabled())
+                {
+                        return null;
+                }
+                // From where the mob was after the last flight tick, also when vanilla moved it already (ai_in_flight).
+                Vec3 start = flight.position().add(0.0, mob.getBbHeight() / 2.0, 0.0);
+                ServerPlayer first = null;
+                double firstFraction = Double.MAX_VALUE;
+                for (ServerPlayer player : level.players())
+                {
+                        if (!canCatch(player, mob, flight.thrower(), ticks, config))
+                        {
+                                continue;
+                        }
+                        OptionalDouble fraction = catchFraction(player, start, flight.velocity(),
+                                player.connection.latency() / 50.0, config);
+                        if (fraction.isPresent() && fraction.getAsDouble() < firstFraction)
+                        {
+                                first = player;
+                                firstFraction = fraction.getAsDouble();
+                        }
+                }
+                return first;
+        }
+
+        /**
+         * Who may catch {@code mob}, wherever it is: same rules as picking it up (empty hand, not carrying, weight,
+         * tags, pets), not riding anything, and the thrower only after {@code self_catch_delay_ticks}.
+         */
+        private static boolean canCatch(ServerPlayer player, Mob mob, UUID thrower, int ticks, CatchConfig config)
+        {
+                if (!player.isAlive() || player.isPassenger() || !CarryRules.canUseHands(player)
+                        || CarryManager.carriedBy(player) != null)
+                {
+                        return false;
+                }
+                if (player.getUUID().equals(thrower) && ticks <= config.selfCatchDelayTicks())
+                {
+                        return false;
+                }
+                return CarryRules.check(player, mob) == null;
+        }
+
+        /**
+         * Whether a mob moving from {@code start} (its centre) by {@code velocity} this tick passes close enough in
+         * front of {@code player} to be caught: coming towards them, within {@code catch_radius} of their eyes, grown
+         * by {@code pingTicks}, and with the mob inside their view cone. Returns how far along this tick's path it gets caught
+         * (0 to 1), empty if it doesn't. Geometry only; shared with the client's catch highlight.
+         */
+        public static OptionalDouble catchFraction(Player player, Vec3 start, Vec3 velocity, double pingTicks,
+                CatchConfig config)
+        {
+                ThrowPhysics.Vector eye = vector(player.getEyePosition());
+                ThrowPhysics.Vector from = vector(start);
+                ThrowPhysics.Vector to = vector(start.add(velocity));
+                if (!ThrowPhysics.approaching(eye, from, vector(velocity)))
+                {
+                        return OptionalDouble.empty();
+                }
+                double radius = ThrowPhysics.catchRadius(config.radius(), velocity.length(), pingTicks,
+                        config.maxLatencyTicks(), config.latencyCompensation());
+                if (ThrowPhysics.segmentDistance(eye, from, to) > radius)
+                {
+                        return OptionalDouble.empty();
+                }
+                // Facing where the mob is now, not the closest point of its path: that one sits right next to the eyes, at
+                // a steep angle, so a long look-ahead path (the client's highlight) would always miss the cone.
+                if (!ThrowPhysics.inViewCone(eye, vector(player.getLookAngle()), from, config.coneDegrees()))
+                {
+                        return OptionalDouble.empty();
+                }
+                return OptionalDouble.of(ThrowPhysics.segmentFraction(eye, from, to));
+        }
+
+        /**
+         * The flight ends in {@code catcher}'s hands: behaviors' {@code onCaught}, then the carry starts with the flags
+         * the mob had before it was first picked up, then the recoil pushes the catcher back along the mob's path.
+         */
+        private static void catchMob(ServerLevel level, Mob mob, ServerPlayer catcher, Flight flight, int ticks)
+        {
+                CatchConfig config = ThrowableMobsConfig.catching();
+                ServerPlayer thrower = thrower(level, flight);
+                Hooks.caught(mob, catcher, thrower, flight.velocity(), ticks);
+                if (mob.isRemoved())
+                {
+                        // A behavior blew it up or split it: nothing left to catch.
+                        return;
+                }
+                ThrowState state = Services.THROW_STATE.get(mob);
+                if (state == null)
+                {
+                        land(mob, flight.velocity());
+                        return;
+                }
+                Services.THROW_STATE.remove(mob);
+                CarryManager.catchMob(catcher, mob, state);
+
+                Vec3 relative = flight.velocity().subtract(catcher.getKnownMovement());
+                double momentum = CarryRules.mass(mob) * relative.length();
+                double resistance = catcher.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+                catcher.push(relative.normalize().scale(momentum * config.recoil() * Math.max(0.0, 1.0 - resistance)));
+                // Players move on their own client; without this the push never reaches it.
+                catcher.syncVelocity = true;
+                if (config.damage() && canHurtPlayer(catcher, flight.thrower(), ThrowableMobsConfig.throwing()))
+                {
+                        hurt(level, catcher, mobSource(level, CAUGHT_MOB, mob, thrower),
+                                ThrowPhysics.catchDamage(momentum, config.absorbMomentum(), config.damageFactor()),
+                                thrower);
+                }
+                level.playSound(null, catcher.getX(), catcher.getY(), catcher.getZ(), SoundEvents.ITEM_PICKUP,
+                        SoundSource.PLAYERS, 0.6F, 0.8F);
+                catcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         }
 
         /**
@@ -273,9 +425,11 @@ public final class ThrowManager
                         endFlight(mob, thrower, bounce, ticks);
                 }
                 // The damage type is in #minecraft:no_knockback, so this push is the only knockback.
-                hurt(level, target, thrownMob(level, mob, thrower), result.targetDamage(), thrower);
+                hurt(level, target, mobSource(level, THROWN_MOB, mob, thrower), result.targetDamage(), thrower);
                 target.push(push);
                 target.needsSync = true;
+                // Players move on their own client; without this the knockback never reaches it.
+                target.syncVelocity = true;
                 if (!mob.isRemoved())
                 {
                         hurt(level, mob, level.damageSources().flyIntoWall(), result.selfDamage(), thrower);
@@ -390,11 +544,15 @@ public final class ThrowManager
                 entity.hurtServer(level, source, (float) amount);
         }
 
-        /** "X was hit by a mob thrown by Y": the thrown mob is the direct entity, the thrower gets the kill. */
-        private static DamageSource thrownMob(ServerLevel level, Mob mob, @Nullable ServerPlayer thrower)
+        /**
+         * Damage from a thrown mob ("X was hit by a mob thrown by Y"): the mob is the direct entity, the thrower gets
+         * the kill.
+         */
+        private static DamageSource mobSource(ServerLevel level, ResourceKey<DamageType> type, Mob mob,
+                @Nullable ServerPlayer thrower)
         {
                 return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
-                        .getOrThrow(THROWN_MOB), mob, thrower);
+                        .getOrThrow(type), mob, thrower);
         }
 
         private static ThrowPhysics.Vector vector(Vec3 v)

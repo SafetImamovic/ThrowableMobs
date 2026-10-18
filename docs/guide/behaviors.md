@@ -31,6 +31,7 @@ may still set the target on fire).
 | `impact_entity` | Only when it hits an entity |
 | `impact_block` | Only when it hits a block |
 | `land` | When the flight ends: landed, in water, or out of time |
+| `caught` | When a player catches the mob in the air. The action's player is the catcher. `pickup` and `land` don't run for a catch |
 
 ## Conditions
 
@@ -135,5 +136,5 @@ Changes apply while the server runs.
 
 ## Coming later
 
-Reserved for later versions, not read yet: the `caught` trigger (with catching, M4), `dimension` and vanilla predicate
+Reserved for later versions, not read yet: `dimension` and vanilla predicate
 conditions, and more actions (`apply_effect`, `spawn_entity`, `run_function`, `wind_burst`, `escape_after`...).

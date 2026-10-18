@@ -91,6 +91,7 @@ public final class CarryClient
                         }
                 }
                 LocalCarry.set(localCarried);
+                CatchHighlight.tick(level, player);
                 if (chargeTicks >= 0 && localCarried instanceof Mob mob && ThrowableMobsConfig.hud().showTrajectory()
                         && ThrowableMobsConfig.throwing().allowTrajectory())
                 {

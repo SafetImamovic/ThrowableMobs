@@ -108,6 +108,16 @@ public final class CarryManager
                 Hooks.pickup(mob, player);
         }
 
+        /**
+         * Starts a carry from a catch, with the flags the mob had before it was first picked up, so they come back
+         * right after any number of passes. No {@code onPickup}: the catch ran {@code onCaught} instead.
+         */
+        static void catchMob(ServerPlayer player, Mob mob, ThrowState thrown)
+        {
+                hold(player, mob, new CarryState(player.getUUID(), thrown.originalNoAi(), thrown.originalNoGravity(),
+                        mob.level().getGameTime()));
+        }
+
         /** Starts or resumes a carry with an existing state, keeping the original flags it recorded. */
         private static void hold(ServerPlayer player, Mob mob, CarryState state)
         {

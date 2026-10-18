@@ -3,6 +3,7 @@ package io.github.safetimamovic.throwablemobs.physics;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ThrowPhysicsTest
@@ -199,6 +200,68 @@ class ThrowPhysicsTest
                 ThrowPhysics.Bounce landing = ThrowPhysics.bounce(new ThrowPhysics.Vector(0.5, -2.0, 0.0),
                         new ThrowPhysics.Vector(0.5, -1.8, 0.0), 0.0);
                 assertVector(0.5, 0.0, 0.0, landing.velocity());
+        }
+
+        @Test
+        void fastMobPassingBetweenTicksIsStillClose()
+        {
+                // 4 blocks per tick past a player at the origin: both ends are 2 away, the path passes at 0.5.
+                ThrowPhysics.Vector player = new ThrowPhysics.Vector(0.0, 0.0, 0.0);
+                ThrowPhysics.Vector start = new ThrowPhysics.Vector(-2.0, 0.5, 0.0);
+                ThrowPhysics.Vector end = new ThrowPhysics.Vector(2.0, 0.5, 0.0);
+                assertEquals(0.5, ThrowPhysics.segmentDistance(player, start, end), EPS);
+                assertEquals(0.5, ThrowPhysics.segmentFraction(player, start, end), EPS);
+        }
+
+        @Test
+        void segmentDistanceClampsToTheEnds()
+        {
+                ThrowPhysics.Vector start = new ThrowPhysics.Vector(0.0, 0.0, 0.0);
+                ThrowPhysics.Vector end = new ThrowPhysics.Vector(1.0, 0.0, 0.0);
+                ThrowPhysics.Vector behind = new ThrowPhysics.Vector(-3.0, 4.0, 0.0);
+                assertEquals(0.0, ThrowPhysics.segmentFraction(behind, start, end), EPS);
+                assertEquals(5.0, ThrowPhysics.segmentDistance(behind, start, end), EPS);
+                assertEquals(5.0, ThrowPhysics.segmentDistance(behind, start, start), EPS);
+        }
+
+        @Test
+        void viewConeSeesAheadButNotBehind()
+        {
+                ThrowPhysics.Vector eye = new ThrowPhysics.Vector(0.0, 0.0, 0.0);
+                ThrowPhysics.Vector look = new ThrowPhysics.Vector(0.0, 0.0, 1.0);
+                assertTrue(ThrowPhysics.inViewCone(eye, look, new ThrowPhysics.Vector(0.0, 0.0, 5.0), 60.0));
+                assertFalse(ThrowPhysics.inViewCone(eye, look, new ThrowPhysics.Vector(0.0, 0.0, -5.0), 60.0));
+                // 45° off the look direction: inside a 60° cone, outside a 30° one.
+                ThrowPhysics.Vector side = new ThrowPhysics.Vector(1.0, 0.0, 1.0);
+                assertTrue(ThrowPhysics.inViewCone(eye, look, side, 60.0));
+                assertFalse(ThrowPhysics.inViewCone(eye, look, side, 30.0));
+        }
+
+        @Test
+        void onlyMobsComingCloserAreApproaching()
+        {
+                ThrowPhysics.Vector player = new ThrowPhysics.Vector(0.0, 0.0, 0.0);
+                ThrowPhysics.Vector mob = new ThrowPhysics.Vector(0.0, 0.0, 2.0);
+                assertTrue(ThrowPhysics.approaching(player, mob, new ThrowPhysics.Vector(0.0, -0.1, -0.3)));
+                // Thrown away from the player, who walks after it.
+                assertFalse(ThrowPhysics.approaching(player, mob, new ThrowPhysics.Vector(0.0, -0.1, 0.3)));
+                assertFalse(ThrowPhysics.approaching(player, mob, new ThrowPhysics.Vector(0.3, 0.0, 0.0)));
+        }
+
+        @Test
+        void catchRadiusGrowsWithPingUpToTheCap()
+        {
+                assertEquals(1.5, ThrowPhysics.catchRadius(1.5, 1.0, 0.0, 6.0, 1.0), EPS);
+                assertEquals(4.5, ThrowPhysics.catchRadius(1.5, 1.0, 3.0, 6.0, 1.0), EPS);
+                assertEquals(7.5, ThrowPhysics.catchRadius(1.5, 1.0, 20.0, 6.0, 1.0), EPS);
+                assertEquals(1.5, ThrowPhysics.catchRadius(1.5, 1.0, 3.0, 6.0, 0.0), EPS);
+        }
+
+        @Test
+        void softCatchesDontHurt()
+        {
+                assertEquals(0.0, ThrowPhysics.catchDamage(150.0, 200.0, 0.02), EPS);
+                assertEquals(2.0, ThrowPhysics.catchDamage(300.0, 200.0, 0.02), EPS);
         }
 
         private static void assertVector(double x, double y, double z, ThrowPhysics.Vector actual)

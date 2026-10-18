@@ -1,6 +1,7 @@
 package io.github.safetimamovic.throwablemobs.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.safetimamovic.throwablemobs.client.CatchHighlight;
 import io.github.safetimamovic.throwablemobs.client.FlightPose;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -10,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Thrown mobs' flight pose, see {@link FlightPose}. */
+/** Thrown mobs' flight pose, see {@link FlightPose}, and the catch outline, see {@link CatchHighlight}. */
 @Mixin(LivingEntityRenderer.class)
 abstract class LivingEntityRendererMixin
 {
@@ -20,6 +21,7 @@ abstract class LivingEntityRendererMixin
                 float partialTick, CallbackInfo ci)
         {
                 FlightPose.extract(entity, state);
+                CatchHighlight.extract(entity, state);
         }
 
         @Inject(method = "setupRotations(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;"

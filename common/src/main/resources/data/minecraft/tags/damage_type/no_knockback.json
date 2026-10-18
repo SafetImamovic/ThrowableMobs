@@ -1,6 +1,7 @@
 {
     "replace": false,
     "values": [
-        "throwablemobs:thrown_mob"
+        "throwablemobs:thrown_mob",
+        "throwablemobs:caught_mob"
     ]
 }

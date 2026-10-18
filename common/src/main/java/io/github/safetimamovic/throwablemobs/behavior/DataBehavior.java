@@ -8,6 +8,8 @@ import io.github.safetimamovic.throwablemobs.api.ImpactResult;
 import io.github.safetimamovic.throwablemobs.api.ThrowBehavior;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
 import io.github.safetimamovic.throwablemobs.api.Trigger;
+import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A behavior from a mob profile's {@code behaviors} list: an action, when it runs, and under which conditions, all in
@@ -49,6 +51,12 @@ public record DataBehavior(Trigger trigger, Conditions conditions, BehaviorActio
         public void onFlightTick(ThrowContext ctx)
         {
                 run(Trigger.FLIGHT_TICK, ctx);
+        }
+
+        @Override
+        public void onCaught(ThrowContext ctx, @Nullable ServerPlayer thrower)
+        {
+                run(Trigger.CAUGHT, ctx);
         }
 
         @Override
