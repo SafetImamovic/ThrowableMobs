@@ -63,7 +63,8 @@ An explosion at the mob. Block damage follows the `mobGriefing` gamerule, like a
 | `fire` | false | Leave fire. |
 | `consume_mob` | true | The mob is gone afterwards, like a creeper that blew up. `false` = it survives (a reusable bomb). |
 
-On an impact it ends the flight.
+On an impact it ends the flight. The blast counts as the player's (the thrower, or the catcher with `caught`), like TNT
+they lit: they get the kill, and teammates without friendly fire take no damage.
 
 ### `throwablemobs:teleport_random`
 
