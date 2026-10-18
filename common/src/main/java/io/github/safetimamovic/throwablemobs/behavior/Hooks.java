@@ -57,6 +57,14 @@ public final class Hooks
                 each(mob, behavior -> behavior.onLand(ctx));
         }
 
+        /** {@code catcher} is the context's player; {@code thrower} is passed on to the hook. */
+        public static void caught(Mob mob, ServerPlayer catcher, @Nullable ServerPlayer thrower, Vec3 velocity,
+                int flightTicks)
+        {
+                ThrowContext ctx = new Context(mob, (ServerLevel) mob.level(), catcher, velocity, flightTicks);
+                each(mob, behavior -> behavior.onCaught(ctx, thrower));
+        }
+
         /** Runs every behavior's {@code onImpact} in order, each on the result of the one before. */
         public static ImpactResult impact(Mob mob, @Nullable ServerPlayer player, Vec3 velocity, int flightTicks,
                 @Nullable Entity target, Vec3 relativeVelocity, double energy, int impactIndex, ImpactResult result)

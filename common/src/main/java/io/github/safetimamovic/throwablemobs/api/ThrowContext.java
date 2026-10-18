@@ -15,8 +15,8 @@ public interface ThrowContext
         ServerLevel level();
 
         /**
-         * The player carrying or throwing the mob. {@code null} in flight when the thrower logged out; check this
-         * before crediting or angering anyone.
+         * The player carrying or throwing the mob, or catching it in {@link ThrowBehavior#onCaught}. {@code null} in
+         * flight when the thrower logged out; check this before crediting or angering anyone.
          */
         @Nullable ServerPlayer player();
 

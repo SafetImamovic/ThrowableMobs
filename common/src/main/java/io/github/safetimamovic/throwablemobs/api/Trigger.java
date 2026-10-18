@@ -15,7 +15,9 @@ public enum Trigger implements StringRepresentable
         IMPACT,
         IMPACT_ENTITY,
         IMPACT_BLOCK,
-        LAND;
+        LAND,
+        /** A player caught the mob in the air; the context's player is the catcher. */
+        CAUGHT;
 
         public static final Codec<Trigger> CODEC = StringRepresentable.fromEnum(Trigger::values);
 

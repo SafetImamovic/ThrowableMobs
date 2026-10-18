@@ -27,6 +27,12 @@ public final class ThrowableMobsConfig
                 return CreatorConfig.readThrow();
         }
 
+        /** Current creator settings for catching thrown mobs. */
+        public static CatchConfig catching()
+        {
+                return CreatorConfig.readCatch();
+        }
+
         /** Current creator settings for mob behaviors. */
         public static BehaviorConfig behaviors()
         {
@@ -172,7 +178,26 @@ public final class ThrowableMobsConfig
                 double maxImpactDamage,
                 double restitution,
                 boolean vanillaFallDamage,
-                SelfDamage selfDamage)
+                SelfDamage selfDamage,
+                boolean pvp)
+        {
+        }
+
+        /**
+         * Creator settings for catching, see {@link CreatorConfig} for what each one does. Units: blocks, degrees,
+         * ticks, game-kg × blocks/tick.
+         */
+        public record CatchConfig(
+                boolean enabled,
+                double radius,
+                double coneDegrees,
+                int selfCatchDelayTicks,
+                double latencyCompensation,
+                int maxLatencyTicks,
+                double recoil,
+                boolean damage,
+                double absorbMomentum,
+                double damageFactor)
         {
         }
 
@@ -202,7 +227,8 @@ public final class ThrowableMobsConfig
                 boolean showTrajectory,
                 TrajectoryStyle trajectoryStyle,
                 FlightPoseStyle flightPose,
-                float spiralSpeed)
+                float spiralSpeed,
+                boolean catchHighlight)
         {
         }
 }

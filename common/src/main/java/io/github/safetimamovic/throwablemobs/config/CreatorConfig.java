@@ -2,6 +2,7 @@ package io.github.safetimamovic.throwablemobs.config;
 
 import io.github.safetimamovic.throwablemobs.api.BounceImpacts;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.BehaviorConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CatchConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
@@ -75,6 +76,18 @@ public final class CreatorConfig
         private static final DoubleValue RESTITUTION;
         private static final BooleanValue VANILLA_FALL_DAMAGE;
         private static final EnumValue<SelfDamage> SELF_DAMAGE;
+        private static final BooleanValue PVP;
+
+        private static final BooleanValue CATCHING_ENABLED;
+        private static final DoubleValue CATCH_RADIUS;
+        private static final DoubleValue CATCH_CONE_DEGREES;
+        private static final IntValue SELF_CATCH_DELAY_TICKS;
+        private static final DoubleValue LATENCY_COMPENSATION;
+        private static final IntValue MAX_LATENCY_TICKS;
+        private static final DoubleValue CATCH_RECOIL;
+        private static final BooleanValue CATCH_DAMAGE;
+        private static final DoubleValue CATCH_ABSORB_MOMENTUM;
+        private static final DoubleValue CATCH_DAMAGE_FACTOR;
 
         private static final BooleanValue BEHAVIORS_ENABLED;
         private static final BooleanValue AUTO_DETECT_BEHAVIORS;
@@ -205,6 +218,37 @@ public final class CreatorConfig
                                 "RESPECT_TAG = all but mobs in #throwablemobs:no_self_damage (by default the mobs",
                                 "immune to fall damage, like chickens and cats). Mob profiles scale it per mob.")
                         .defineEnum("self_damage", SelfDamage.RESPECT_TAG);
+                PVP = builder.comment("Thrown mobs can hurt and knock back players. Off: they don't, and players can",
+                                "still catch them. Scoreboard teams without friendly fire are always safe from",
+                                "their teammates' throws.")
+                        .define("pvp", true);
+                builder.pop();
+
+                builder.comment("Catching a mob someone threw: an empty main hand, not carrying, looking at it, and",
+                        "it comes close enough. The catcher must be allowed to pick the mob up.").push("catch");
+                CATCHING_ENABLED = builder.comment("Off: thrown mobs can't be caught, they hit players as before.")
+                        .define("catching_enabled", true);
+                CATCH_RADIUS = builder.comment("How close the mob's path must pass the catcher's eyes, in blocks.")
+                        .defineInRange("catch_radius", 1.5, 0.0, 16.0);
+                CATCH_CONE_DEGREES = builder.comment("The catcher must look within this many degrees of the mob.")
+                        .defineInRange("catch_cone_degrees", 60.0, 0.0, 180.0);
+                SELF_CATCH_DELAY_TICKS = builder.comment("Ticks after the throw before the thrower can catch their",
+                                "own mob.")
+                        .defineInRange("self_catch_delay_ticks", 10, 0, 200);
+                LATENCY_COMPENSATION = builder.comment("Players with ping see the mob late, so the radius grows by",
+                                "speed × ping in ticks × this. 0 = off.")
+                        .defineInRange("latency_compensation", 1.0, 0.0, 4.0);
+                MAX_LATENCY_TICKS = builder.comment("Ping above this many ticks counts as this much.")
+                        .defineInRange("max_latency_ticks", 6, 0, 40);
+                CATCH_RECOIL = builder.comment("Knockback on the catcher per unit of the mob's momentum",
+                                "(mass × speed, game-kg × blocks/tick).")
+                        .defineInRange("catch_recoil", 0.002, 0.0, 1.0);
+                CATCH_DAMAGE = builder.comment("Hard catches hurt the catcher.")
+                        .define("catch_damage", false);
+                CATCH_ABSORB_MOMENTUM = builder.comment("Momentum a catcher takes without damage.")
+                        .defineInRange("catch_absorb_momentum", 200.0, 0.0, 1_000_000.0);
+                CATCH_DAMAGE_FACTOR = builder.comment("Damage per unit of momentum above catch_absorb_momentum.")
+                        .defineInRange("catch_damage_factor", 0.02, 0.0, 100.0);
                 builder.pop();
 
                 builder.comment("What mobs do when picked up, thrown and when they hit something (creepers explode,",
@@ -272,7 +316,23 @@ public final class CreatorConfig
                         get(MAX_IMPACT_DAMAGE),
                         get(RESTITUTION),
                         get(VANILLA_FALL_DAMAGE),
-                        get(SELF_DAMAGE));
+                        get(SELF_DAMAGE),
+                        get(PVP));
+        }
+
+        static CatchConfig readCatch()
+        {
+                return new CatchConfig(
+                        get(CATCHING_ENABLED),
+                        get(CATCH_RADIUS),
+                        get(CATCH_CONE_DEGREES),
+                        get(SELF_CATCH_DELAY_TICKS),
+                        get(LATENCY_COMPENSATION),
+                        get(MAX_LATENCY_TICKS),
+                        get(CATCH_RECOIL),
+                        get(CATCH_DAMAGE),
+                        get(CATCH_ABSORB_MOMENTUM),
+                        get(CATCH_DAMAGE_FACTOR));
         }
 
         static BehaviorConfig readBehaviors()

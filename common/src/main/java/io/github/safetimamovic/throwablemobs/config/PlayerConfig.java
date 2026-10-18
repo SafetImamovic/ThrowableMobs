@@ -39,6 +39,8 @@ public final class PlayerConfig
         private static final EnumValue<FlightPoseStyle> FLIGHT_POSE;
         private static final DoubleValue SPIRAL_SPEED;
 
+        private static final BooleanValue CATCH_HIGHLIGHT;
+
         static
         {
                 ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -93,6 +95,11 @@ public final class PlayerConfig
                         .defineInRange("spiral_speed", 0.0, 0.0, 360.0);
                 builder.pop();
 
+                builder.comment("Catching mobs other players throw at you.").push("catch");
+                CATCH_HIGHLIGHT = builder.comment("Outline a thrown mob when it's coming your way and you can catch it.")
+                        .define("catch_highlight", true);
+                builder.pop();
+
                 SPEC = builder.build();
         }
 
@@ -116,7 +123,8 @@ public final class PlayerConfig
                         get(SHOW_TRAJECTORY),
                         get(TRAJECTORY_STYLE),
                         get(FLIGHT_POSE),
-                        get(SPIRAL_SPEED).floatValue());
+                        get(SPIRAL_SPEED).floatValue(),
+                        get(CATCH_HIGHLIGHT));
         }
 
         /** Not loaded on a dedicated server, which has no client config; the defaults apply there. */
