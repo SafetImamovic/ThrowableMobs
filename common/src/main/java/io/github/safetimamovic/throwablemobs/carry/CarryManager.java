@@ -1,12 +1,14 @@
 package io.github.safetimamovic.throwablemobs.carry;
 
 import io.github.safetimamovic.throwablemobs.Constants;
+import io.github.safetimamovic.throwablemobs.advancement.ModTriggers;
+import io.github.safetimamovic.throwablemobs.advancement.ThrowEventTrigger.Event;
 import io.github.safetimamovic.throwablemobs.behavior.Hooks;
-import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedFacing;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.ArrayList;
@@ -105,6 +107,8 @@ public final class CarryManager
         {
                 hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
                         mob.level().getGameTime()));
+                ThrowManager.forgetCatch(player);
+                ModTriggers.THROW_EVENT.trigger(player, Event.PICKUP, mob, 0.0, 0.0);
                 Hooks.pickup(mob, player);
         }
 

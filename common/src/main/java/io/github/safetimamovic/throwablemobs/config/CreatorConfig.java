@@ -7,6 +7,7 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarriedF
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierLogout;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.EffectsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.GroundFilter;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfCatch;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfDamage;
@@ -90,6 +91,11 @@ public final class CreatorConfig
         private static final BooleanValue CATCH_DAMAGE;
         private static final DoubleValue CATCH_ABSORB_MOMENTUM;
         private static final DoubleValue CATCH_DAMAGE_FACTOR;
+
+        private static final BooleanValue SOUNDS;
+        private static final BooleanValue PARTICLES;
+        private static final DoubleValue EFFECT_MIN_ENERGY;
+        private static final DoubleValue EFFECT_FULL_ENERGY;
 
         private static final BooleanValue BEHAVIORS_ENABLED;
         private static final BooleanValue AUTO_DETECT_BEHAVIORS;
@@ -257,6 +263,20 @@ public final class CreatorConfig
                         .defineInRange("catch_damage_factor", 0.02, 0.0, 100.0);
                 builder.pop();
 
+                builder.comment("Sounds and particles on throws, bounces, impacts and catches, for everyone nearby.",
+                        "The flight trail is a player setting.").push("effects");
+                SOUNDS = builder.comment("Play our sounds. Resource packs can replace them one by one.")
+                        .define("sounds", true);
+                PARTICLES = builder.comment("Particle bursts: a puff on throws and catches, block dust on impacts.")
+                        .define("particles", true);
+                EFFECT_MIN_ENERGY = builder.comment("Bounces and impacts with less collision energy than this are",
+                                "silent, so a mob rolling along the ground doesn't keep thudding.")
+                        .defineInRange("effect_min_energy", 2.0, 0.0, 10_000.0);
+                EFFECT_FULL_ENERGY = builder.comment("Collision energy for full volume and the most particles. A",
+                                "hard creeper throw reaches about 46.")
+                        .defineInRange("effect_full_energy", 40.0, 0.0, 10_000.0);
+                builder.pop();
+
                 builder.comment("What mobs do when picked up, thrown and when they hit something (creepers explode,",
                         "endermen teleport...). Set per mob with mob profiles in datapacks.").push("behaviors");
                 BEHAVIORS_ENABLED = builder.comment("Off: no mob behaviors run. Mob profile physics",
@@ -340,6 +360,11 @@ public final class CreatorConfig
                         get(CATCH_DAMAGE),
                         get(CATCH_ABSORB_MOMENTUM),
                         get(CATCH_DAMAGE_FACTOR));
+        }
+
+        static EffectsConfig readEffects()
+        {
+                return new EffectsConfig(get(SOUNDS), get(PARTICLES), get(EFFECT_MIN_ENERGY), get(EFFECT_FULL_ENERGY));
         }
 
         static BehaviorConfig readBehaviors()

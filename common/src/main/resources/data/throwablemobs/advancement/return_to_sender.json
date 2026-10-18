@@ -1,0 +1,29 @@
+{
+    "parent": "throwablemobs:nice_catch",
+    "criteria": {
+        "return_to_sender": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "return_hit"
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:snowball"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.return_to_sender.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.return_to_sender.description"
+        },
+        "frame": "challenge",
+        "hidden": true
+    },
+    "requirements": [
+        [
+            "return_to_sender"
+        ]
+    ]
+}

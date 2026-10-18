@@ -228,6 +228,19 @@ public final class ThrowPhysics
                 return Math.max(0.0, momentum - absorbMomentum) * damagePerMomentum;
         }
 
+        /**
+         * How loud an effect is, 0 – 1: {@code clamp((value − floor) / (full − floor), 0, 1)}. At or below {@code floor}
+         * nothing plays, from {@code full} on it's at full strength.
+         */
+        public static double effectStrength(double value, double floor, double full)
+        {
+                if (full <= floor)
+                {
+                        return value > floor ? 1.0 : 0.0;
+                }
+                return Math.clamp((value - floor) / (full - floor), 0.0, 1.0);
+        }
+
         /** Plain 3D vector, so this module stays free of Minecraft's {@code Vec3}. */
         public record Vector(double x, double y, double z)
         {

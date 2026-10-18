@@ -1,0 +1,29 @@
+{
+    "parent": "throwablemobs:root",
+    "criteria": {
+        "yeet": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "throw",
+                "min_charge": 1.0
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:wind_charge"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.yeet.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.yeet.description"
+        },
+        "frame": "task"
+    },
+    "requirements": [
+        [
+            "yeet"
+        ]
+    ]
+}

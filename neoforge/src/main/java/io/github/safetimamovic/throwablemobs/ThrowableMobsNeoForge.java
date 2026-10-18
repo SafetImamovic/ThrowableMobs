@@ -12,6 +12,9 @@ import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import io.github.safetimamovic.throwablemobs.platform.NeoForgeCarryStateAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.neoforged.bus.api.IEventBus;
@@ -31,6 +34,7 @@ import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 @Mod(Constants.MOD_ID)
 public class ThrowableMobsNeoForge
@@ -42,6 +46,15 @@ public class ThrowableMobsNeoForge
                 container.registerConfig(ModConfig.Type.SYNCED, CreatorConfig.SPEC, CreatorConfig.FILE_NAME);
                 container.registerConfig(ModConfig.Type.CLIENT, PlayerConfig.SPEC, PlayerConfig.FILE_NAME);
                 NeoForgeCarryStateAccess.ATTACHMENT_TYPES.register(modEventBus);
+                // Fires once per registry; RegisterEvent.register ignores keys of the other registries.
+                modEventBus.addListener((RegisterEvent event) -> ModRegistries.registerAll(new ModRegistries.Registrar()
+                {
+                        @Override
+                        public <T> void register(ResourceKey<? extends Registry<T>> registry, Identifier id, T value)
+                        {
+                                event.register(registry, id, () -> value);
+                        }
+                }));
                 modEventBus.addListener((RegisterPayloadHandlersEvent event) -> event.registrar("1")
                         .playToServer(DropCarriedPayload.TYPE, DropCarriedPayload.STREAM_CODEC,
                                 (payload, context) -> CarryManager.onDropRequest((ServerPlayer) context.player()))

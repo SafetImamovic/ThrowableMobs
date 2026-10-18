@@ -1,0 +1,28 @@
+{
+    "parent": "throwablemobs:root",
+    "criteria": {
+        "nice_catch": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "catch"
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:leather"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.nice_catch.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.nice_catch.description"
+        },
+        "frame": "task"
+    },
+    "requirements": [
+        [
+            "nice_catch"
+        ]
+    ]
+}

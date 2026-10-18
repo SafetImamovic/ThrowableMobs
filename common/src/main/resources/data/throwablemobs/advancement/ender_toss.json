@@ -1,0 +1,28 @@
+{
+    "parent": "throwablemobs:yeet",
+    "criteria": {
+        "ender_toss": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "teleport"
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:ender_pearl"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.ender_toss.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.ender_toss.description"
+        },
+        "frame": "task"
+    },
+    "requirements": [
+        [
+            "ender_toss"
+        ]
+    ]
+}

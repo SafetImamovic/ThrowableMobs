@@ -1,0 +1,29 @@
+{
+    "parent": "throwablemobs:yeet",
+    "criteria": {
+        "long_distance": {
+            "trigger": "throwablemobs:throw_event",
+            "conditions": {
+                "event": "land",
+                "min_distance": 50.0
+            }
+        }
+    },
+    "display": {
+        "icon": {
+            "id": "minecraft:spyglass"
+        },
+        "title": {
+            "translate": "advancements.throwablemobs.long_distance.title"
+        },
+        "description": {
+            "translate": "advancements.throwablemobs.long_distance.description"
+        },
+        "frame": "goal"
+    },
+    "requirements": [
+        [
+            "long_distance"
+        ]
+    ]
+}

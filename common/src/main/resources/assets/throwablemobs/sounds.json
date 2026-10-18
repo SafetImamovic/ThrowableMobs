@@ -1,0 +1,18 @@
+{
+    "entity.mob.throw": {
+        "subtitle": "subtitles.throwablemobs.entity.mob.throw",
+        "sounds": [{ "name": "minecraft:entity.player.attack.sweep", "type": "event" }]
+    },
+    "entity.mob.bounce": {
+        "subtitle": "subtitles.throwablemobs.entity.mob.bounce",
+        "sounds": [{ "name": "minecraft:entity.generic.small_fall", "type": "event" }]
+    },
+    "entity.mob.impact": {
+        "subtitle": "subtitles.throwablemobs.entity.mob.impact",
+        "sounds": [{ "name": "minecraft:entity.player.attack.knockback", "type": "event" }]
+    },
+    "entity.mob.catch": {
+        "subtitle": "subtitles.throwablemobs.entity.mob.catch",
+        "sounds": [{ "name": "minecraft:item.armor.equip_leather", "type": "event" }]
+    }
+}

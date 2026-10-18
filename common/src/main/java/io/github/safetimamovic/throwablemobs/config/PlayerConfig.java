@@ -41,6 +41,8 @@ public final class PlayerConfig
 
         private static final BooleanValue CATCH_HIGHLIGHT;
 
+        private static final BooleanValue FLIGHT_TRAIL;
+
         static
         {
                 ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -100,6 +102,11 @@ public final class PlayerConfig
                         .define("catch_highlight", true);
                 builder.pop();
 
+                builder.comment("Effects drawn on your screen only.").push("effects");
+                FLIGHT_TRAIL = builder.comment("A faint trail behind fast thrown mobs.")
+                        .define("flight_trail", true);
+                builder.pop();
+
                 SPEC = builder.build();
         }
 
@@ -124,7 +131,8 @@ public final class PlayerConfig
                         get(TRAJECTORY_STYLE),
                         get(FLIGHT_POSE),
                         get(SPIRAL_SPEED).floatValue(),
-                        get(CATCH_HIGHLIGHT));
+                        get(CATCH_HIGHLIGHT),
+                        get(FLIGHT_TRAIL));
         }
 
         /** Not loaded on a dedicated server, which has no client config; the defaults apply there. */
