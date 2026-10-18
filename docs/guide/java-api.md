@@ -68,6 +68,7 @@ ThrowableMobsApi.registerBehavior(ExampleEntities.FIRE_DRAKE, new FireDrakeBehav
 | `onFlightTick(ctx)` | Every tick in the air, before moving |
 | `onImpact(ctx, current)` | Hit a block or entity; return a changed `ImpactResult` |
 | `onLand(ctx)` | The flight ended and the mob has its AI back |
+| `onCaught(ctx, thrower)` | A player caught it in the air; `ctx.player()` is the catcher, `thrower` may be `null` or the catcher. No `onPickup` or `onLand` for a catch. Removing the mob here cancels the catch |
 
 `ThrowContext` gives the mob, the server level, the player (`null` in flight if the thrower logged out), the velocity
 and the ticks since the throw. `ImpactContext` adds the hit entity (`null` for a block), the relative velocity, the
@@ -160,4 +161,4 @@ by priority. See [Merging](mob-profiles.md#merging).
 ## Coming later
 
 Cancellable events (`PickupEvent`, `ThrowEvent`, `ImpactEvent`) for claim and protection mods, a
-`throwablemobs:throw_strength` attribute for gear, and catching hooks (`onCaught`).
+`throwablemobs:throw_strength` attribute for gear.

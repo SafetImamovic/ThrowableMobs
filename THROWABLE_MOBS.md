@@ -694,15 +694,15 @@ Every number in §8 is in here. Validate ranges, and document each key in a comm
 - Any player with an **empty main hand** who **isn't carrying** can catch.
 - Catch check runs on the **server** each tick for in-flight mobs: player within `radius` of the mob's swept path this tick (segment–AABB distance, not just endpoint — fast mobs skip past otherwise), and the mob is inside the player's view cone (`dot(look, toMob) ≥ cos(cone)`), and (optional) holding use key.
 - **Thrower self-catch** allowed after `self_catch_delay_ticks` (throw up, catch yourself; boomerang-ish).
-- On catch: flight ends, mob becomes carried by catcher. Behaviors get `onCaught`. **Fuse/timers keep running** → creeper hot potato across a team.
+- On catch: flight ends, mob becomes carried by catcher. Behaviors get `onCaught`. **Fuse/timers keep running** → creeper hot potato across a team. (M4: only **ignited** creepers keep hissing; carrying calms a creeper that isn't, as since M1.)
 - **Recoil:** catcher receives momentum `m × v` (scaled) as knockback; optional damage when the impulse exceeds what a player can "absorb". Catching a cow at full speed should push you back a few blocks.
-- **Teams/PvP:** if `throwableMobsPvp` is false, thrown mobs don't damage players at all but can still be caught. Respect scoreboard teams (`allowFriendlyFire`).
+- **Teams/PvP:** if `pvp` is false, thrown mobs don't damage players at all but can still be caught. Respect scoreboard teams (`allowFriendlyFire`). (M4: a mob that can't hurt a player flies past them instead of hitting them; the thrower's own mob can always hit them after `thrower_grace_ticks`.)
 
 **Latency:** a player with 150 ms ping sees the mob ~3 ticks late. Options:
 - `latency_compensation`: expand catch radius by `speed × ping_ticks` (cheap, good enough).
 - Or client sends `CatchAttempt(entityId, clientTick)`; server rewinds that mob's position history (store last ~10 positions) and checks there. More accurate, more code. Start with radius expansion.
 
-**Client prediction:** clients already receive entity motion; for smoothness, run the same physics integration client-side between server updates (shared `physics/` code) and render the incoming-catchable highlight (outline glow when you're in catch range).
+**Client prediction** (moved to M7 polish, 2026-10-18): clients already receive entity motion; for smoothness, run the same physics integration client-side between server updates (shared `physics/` code) and render the incoming-catchable highlight (outline glow when you're in catch range).
 
 **Game-mode ideas** (later, optional): "Hot Potato" mini-game (creeper fuse passed around, last holder explodes), throw-distance leaderboard via stats, "Yeet" / "Nice Catch" / "Return to Sender" advancements.
 
