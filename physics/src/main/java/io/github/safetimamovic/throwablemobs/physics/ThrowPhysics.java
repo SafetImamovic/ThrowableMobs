@@ -165,12 +165,91 @@ public final class ThrowPhysics
                 return -(1.0 + restitution) * m2 / (m1 + m2);
         }
 
+        /**
+         * Where on the segment {@code start → end} the point {@code p} is closest, as a fraction {@code t ∈ [0, 1]}
+         * (0 = {@code start}). A segment of length 0 yields 0.
+         */
+        public static double segmentFraction(Vector p, Vector start, Vector end)
+        {
+                Vector d = end.subtract(start);
+                double lengthSqr = d.dot(d);
+                if (lengthSqr == 0.0)
+                {
+                        return 0.0;
+                }
+                return Math.clamp(p.subtract(start).dot(d) / lengthSqr, 0.0, 1.0);
+        }
+
+        /** Distance from {@code p} to the segment {@code start → end}: a fast mob can pass a player between two ticks. */
+        public static double segmentDistance(Vector p, Vector start, Vector end)
+        {
+                Vector closest = start.lerp(end, segmentFraction(p, start, end));
+                return p.subtract(closest).length();
+        }
+
+        /**
+         * Whether something at {@code from} moving by {@code velocity} is coming closer to {@code p}. A mob flying away
+         * can't be caught, so a thrower walking after a slow throw doesn't catch it again right away.
+         */
+        public static boolean approaching(Vector p, Vector from, Vector velocity)
+        {
+                return velocity.dot(p.subtract(from)) > 0.0;
+        }
+
+        /**
+         * Whether {@code target} is inside the view cone of someone at {@code eye} looking along {@code look}:
+         * {@code dot(look, toTarget) ≥ cos(halfAngle)}. A target exactly at the eye counts as inside.
+         */
+        public static boolean inViewCone(Vector eye, Vector look, Vector target, double halfAngleDegrees)
+        {
+                Vector to = target.subtract(eye);
+                double distance = to.length();
+                double lookLength = look.length();
+                if (distance == 0.0 || lookLength == 0.0)
+                {
+                        return true;
+                }
+                return to.dot(look) / (distance * lookLength) >= Math.cos(Math.toRadians(halfAngleDegrees));
+        }
+
+        /**
+         * Catch radius grown for ping: {@code radius + speed × min(pingTicks, maxTicks) × compensation}. A player
+         * with ping sees the mob that many ticks late, so it's already that much further along its path.
+         */
+        public static double catchRadius(double radius, double speed, double pingTicks, double maxTicks,
+                double compensation)
+        {
+                return radius + speed * Math.min(Math.max(pingTicks, 0.0), maxTicks) * compensation;
+        }
+
+        /** Damage from a hard catch: {@code max(0, p − p_absorb) × k}, with momentum {@code p = m × v}. */
+        public static double catchDamage(double momentum, double absorbMomentum, double damagePerMomentum)
+        {
+                return Math.max(0.0, momentum - absorbMomentum) * damagePerMomentum;
+        }
+
         /** Plain 3D vector, so this module stays free of Minecraft's {@code Vec3}. */
         public record Vector(double x, double y, double z)
         {
                 public double length()
                 {
                         return Math.sqrt(x * x + y * y + z * z);
+                }
+
+                public Vector subtract(Vector other)
+                {
+                        return new Vector(x - other.x, y - other.y, z - other.z);
+                }
+
+                public double dot(Vector other)
+                {
+                        return x * other.x + y * other.y + z * other.z;
+                }
+
+                /** {@code this + (to − this) × t}. */
+                public Vector lerp(Vector to, double t)
+                {
+                        return new Vector(x + (to.x - x) * t, y + (to.y - y) * t, z + (to.z - z) * t);
                 }
         }
 
