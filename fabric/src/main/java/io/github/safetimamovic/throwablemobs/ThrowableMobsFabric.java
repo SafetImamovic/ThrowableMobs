@@ -24,6 +24,10 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
 import net.neoforged.fml.config.ModConfig;
 
@@ -33,6 +37,17 @@ public class ThrowableMobsFabric implements ModInitializer
         public void onInitialize()
         {
                 ThrowableMobs.init();
+                ModRegistries.registerAll(new ModRegistries.Registrar()
+                {
+                        @Override
+                        @SuppressWarnings({"unchecked", "rawtypes"})
+                        public <T> void register(ResourceKey<? extends Registry<T>> registry, Identifier id, T value)
+                        {
+                                Registry<T> target = (Registry<T>) BuiltInRegistries.REGISTRY
+                                        .getValueOrThrow((ResourceKey) registry);
+                                Registry.register(target, id, value);
+                        }
+                });
                 ConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.SERVER, CreatorConfig.SPEC,
                         CreatorConfig.FILE_NAME);
                 ConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.CLIENT, PlayerConfig.SPEC,
