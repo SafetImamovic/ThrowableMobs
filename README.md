@@ -64,8 +64,7 @@ Requires JDK 25.
 | `neoforge/` | NeoForge entrypoint and NeoForge-specific glue. |
 | `build-logic/` | Shared Gradle conventions. |
 
-Loader-specific calls from `common` go through `platform/Services` (Java `ServiceLoader`). Milestone plans live in
-`docs/plans/`.
+Loader-specific calls from `common` go through `platform/Services` (Java `ServiceLoader`).
 
 ## Contributing
 
