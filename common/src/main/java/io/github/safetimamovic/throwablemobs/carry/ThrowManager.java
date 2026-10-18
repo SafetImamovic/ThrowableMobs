@@ -104,7 +104,7 @@ public final class ThrowManager
                         return;
                 }
                 ThrowState state = new ThrowState(player.getUUID(), carried.originalNoAi(), carried.originalNoGravity(),
-                        mob.level().getGameTime());
+                        mob.level().getGameTime(), false);
                 Services.THROW_STATE.set(mob, state);
                 mob.setNoAi(!config.aiInFlight() || state.originalNoAi());
                 mob.setNoGravity(true);
@@ -199,6 +199,15 @@ public final class ThrowManager
                                 return null;
                         }
                         velocity = bounce;
+                        if (bounces == 0)
+                        {
+                                // Clients need it too, for the catch highlight's self-catch rule.
+                                ThrowState state = Services.THROW_STATE.get(mob);
+                                if (state != null)
+                                {
+                                        Services.THROW_STATE.set(mob, state.withBounced());
+                                }
+                        }
                         bounces++;
                         bounced = true;
                 }
@@ -286,7 +295,7 @@ public final class ThrowManager
                 double firstFraction = Double.MAX_VALUE;
                 for (ServerPlayer player : level.players())
                 {
-                        if (!canCatch(player, mob, flight.thrower(), ticks, config))
+                        if (!canCatch(player, mob, flight.thrower(), ticks, flight.bounces() > 0, config))
                         {
                                 continue;
                         }
@@ -303,16 +312,18 @@ public final class ThrowManager
 
         /**
          * Who may catch {@code mob}, wherever it is: same rules as picking it up (empty hand, not carrying, weight,
-         * tags, pets), not riding anything, and the thrower only after {@code self_catch_delay_ticks}.
+         * tags, pets), not riding anything, and the thrower only as {@code self_catch} allows.
          */
-        private static boolean canCatch(ServerPlayer player, Mob mob, UUID thrower, int ticks, CatchConfig config)
+        private static boolean canCatch(ServerPlayer player, Mob mob, UUID thrower, int ticks, boolean bounced,
+                CatchConfig config)
         {
                 if (!player.isAlive() || player.isPassenger() || !CarryRules.canUseHands(player)
                         || CarryManager.carriedBy(player) != null)
                 {
                         return false;
                 }
-                if (player.getUUID().equals(thrower) && ticks <= config.selfCatchDelayTicks())
+                if (player.getUUID().equals(thrower)
+                        && !config.selfCatch().allows(ticks, bounced, config.selfCatchDelayTicks()))
                 {
                         return false;
                 }

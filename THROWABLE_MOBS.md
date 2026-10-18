@@ -302,7 +302,7 @@ ThrowableMobs/
 Three key mappings in Controls → Throwable Mobs: **Modifier** (default Left Shift; unbind it to need no modifier), **Pick up** and **Put down** (both default right-click, so the same key toggles). The defaults share keys with Sneak and Use; when one of ours acts, vanilla's use is swallowed for that press, so no trading with the villager you just picked up. Same input as Carry On (clash accepted).
 
 ### Carrying
-- **Follow model** (not a passenger): vanilla refuses entities riding players on the server (`PLAYER` is `.noSave()`), and passengers aren't saved with chunks. The mob stays a normal, always-saved entity; the server moves it above the carrier's head each tick (AI, gravity and physics off), and the client mod locks it to the carrier for smooth rendering. A carry-state attachment (persistent + synced) records who carries it. Details: `docs/plans/m1-carry.md`.
+- **Follow model** (not a passenger): vanilla refuses entities riding players on the server (`PLAYER` is `.noSave()`), and passengers aren't saved with chunks. The mob stays a normal, always-saved entity; the server moves it above the carrier's head each tick (AI, gravity and physics off), and the client mod locks it to the carrier for smooth rendering. A carry-state attachment (persistent + synced) records who carries it.
 - While carried: mob AI paused (`setNoAi` temporarily), invulnerable to suffocation, can't attack carrier. Restore original state on throw/drop — store the original flags in the attachment.
 - **Carry slowdown** scales with mass (attribute modifier on movement speed). Carrying a cow should feel heavy.
 - Behaviors get `onPickup` / `onCarryTick` hooks (creeper: fuse starts ticking while carried if config `creeper_fuse_on_pickup = true` — hot potato!).
@@ -670,6 +670,7 @@ enabled = true
 radius = 1.5
 cone_degrees = 35
 require_use_key = false
+self_catch = "AFTER_BOUNCE"
 self_catch_delay_ticks = 10
 recoil = true                         # catching fast heavy mobs knocks you back
 recoil_damage = false
@@ -693,7 +694,7 @@ Every number in §8 is in here. Validate ranges, and document each key in a comm
 **Rules:**
 - Any player with an **empty main hand** who **isn't carrying** can catch.
 - Catch check runs on the **server** each tick for in-flight mobs: player within `radius` of the mob's swept path this tick (segment–AABB distance, not just endpoint — fast mobs skip past otherwise), and the mob is inside the player's view cone (`dot(look, toMob) ≥ cos(cone)`), and (optional) holding use key.
-- **Thrower self-catch** allowed after `self_catch_delay_ticks` (throw up, catch yourself; boomerang-ish).
+- **Thrower self-catch** per `self_catch`: by default only after a bounce (boomerang off a wall). `AFTER_DELAY` allows it after `self_catch_delay_ticks` (throw up, catch yourself), but then a thrower walking after a slow throw catches it again.
 - On catch: flight ends, mob becomes carried by catcher. Behaviors get `onCaught`. **Fuse/timers keep running** → creeper hot potato across a team. (M4: only **ignited** creepers keep hissing; carrying calms a creeper that isn't, as since M1.)
 - **Recoil:** catcher receives momentum `m × v` (scaled) as knockback; optional damage when the impulse exceeds what a player can "absorb". Catching a cow at full speed should push you back a few blocks.
 - **Teams/PvP:** if `pvp` is false, thrown mobs don't damage players at all but can still be caught. Respect scoreboard teams (`allowFriendlyFire`). (M4: a mob that can't hurt a player flies past them instead of hitting them; the thrower's own mob can always hit them after `thrower_grace_ticks`.)
@@ -850,7 +851,7 @@ Hand-written reference tables rot. Generate them:
 |---|---|
 | **M0 — Setup** | JDK 25, MultiLoader-Template on 26.3 (or 26.2 if loaders lag), Neovim + jdtls + DAP working, `runClient` on both loaders. **Follow-up:** split `physics/` into its own MC-free Gradle module. |
 | **M1 — Pick up & drop** | Carry (follow model, §7), sneak+right-click, on-screen prompt, restore state, `unthrowable` tag (incl. `c:` defaults), dedicated server test. |
-| **M2 — Throw** | Charge + charge bar, impulse launch, flight sim, trajectory preview, block/entity collision, energy damage, knockback, damage type. Config files + screens done before M2 (`docs/plans/config-files.md`). |
+| **M2 — Throw** | Charge + charge bar, impulse launch, flight sim, trajectory preview, block/entity collision, energy damage, knockback, damage type. Config files + screens done before M2. |
 | **M3 — Behavior system** | `ThrowBehavior` API, registry, 6 vanilla behaviors (creeper, enderman, slime, chicken, blaze, cat), datapack loader, heuristics. |
 | **M4 — Catching** | Server catch check, recoil, self-catch, glow highlight, latency compensation. |
 | **M5 — Backport 1.21.1** | Stonecutter multi-version build, 1.21.1 on Fabric + NeoForge next to 26.3. Moved up from "Reach" (2026-10-11): most modpacks run 1.21.1 / 1.20.1. |

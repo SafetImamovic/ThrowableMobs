@@ -8,6 +8,7 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarrierL
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.GroundFilter;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfCatch;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfDamage;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
 import java.util.HashSet;
@@ -81,6 +82,7 @@ public final class CreatorConfig
         private static final BooleanValue CATCHING_ENABLED;
         private static final DoubleValue CATCH_RADIUS;
         private static final DoubleValue CATCH_CONE_DEGREES;
+        private static final EnumValue<SelfCatch> SELF_CATCH;
         private static final IntValue SELF_CATCH_DELAY_TICKS;
         private static final DoubleValue LATENCY_COMPENSATION;
         private static final IntValue MAX_LATENCY_TICKS;
@@ -232,8 +234,12 @@ public final class CreatorConfig
                         .defineInRange("catch_radius", 1.5, 0.0, 16.0);
                 CATCH_CONE_DEGREES = builder.comment("The catcher must look within this many degrees of the mob.")
                         .defineInRange("catch_cone_degrees", 60.0, 0.0, 180.0);
+                SELF_CATCH = builder.comment("When the thrower can catch their own mob. NEVER. AFTER_BOUNCE: once it",
+                                "bounced off a block (a wall throw coming back). AFTER_DELAY: after self_catch_delay_ticks.",
+                                "AFTER_BOUNCE_OR_DELAY: whichever comes first.")
+                        .defineEnum("self_catch", SelfCatch.AFTER_BOUNCE);
                 SELF_CATCH_DELAY_TICKS = builder.comment("Ticks after the throw before the thrower can catch their",
-                                "own mob.")
+                                "own mob, with self_catch AFTER_DELAY or AFTER_BOUNCE_OR_DELAY.")
                         .defineInRange("self_catch_delay_ticks", 10, 0, 200);
                 LATENCY_COMPENSATION = builder.comment("Players with ping see the mob late, so the radius grows by",
                                 "speed × ping in ticks × this. 0 = off.")
@@ -326,6 +332,7 @@ public final class CreatorConfig
                         get(CATCHING_ENABLED),
                         get(CATCH_RADIUS),
                         get(CATCH_CONE_DEGREES),
+                        get(SELF_CATCH),
                         get(SELF_CATCH_DELAY_TICKS),
                         get(LATENCY_COMPENSATION),
                         get(MAX_LATENCY_TICKS),

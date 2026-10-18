@@ -100,6 +100,31 @@ public final class ThrowableMobsConfig
                 NONE
         }
 
+        /** When the thrower can catch their own mob. */
+        public enum SelfCatch
+        {
+                NEVER,
+                /** Once it bounced off a block, like a throw at a wall coming back. */
+                AFTER_BOUNCE,
+                /** After {@code self_catch_delay_ticks}. */
+                AFTER_DELAY,
+                /** After a bounce or the delay, whichever comes first. */
+                AFTER_BOUNCE_OR_DELAY;
+
+                /** Whether the thrower may catch it now, {@code ticks} after the throw. */
+                public boolean allows(long ticks, boolean bounced, int delayTicks)
+                {
+                        boolean delayed = ticks > delayTicks;
+                        return switch (this)
+                        {
+                                case NEVER -> false;
+                                case AFTER_BOUNCE -> bounced;
+                                case AFTER_DELAY -> delayed;
+                                case AFTER_BOUNCE_OR_DELAY -> bounced || delayed;
+                        };
+                }
+        }
+
         /** Which blocks count as ground to put a carried mob down on. Both need a collision shape to stand on. */
         public enum GroundFilter
         {
@@ -191,6 +216,7 @@ public final class ThrowableMobsConfig
                 boolean enabled,
                 double radius,
                 double coneDegrees,
+                SelfCatch selfCatch,
                 int selfCatchDelayTicks,
                 double latencyCompensation,
                 int maxLatencyTicks,
