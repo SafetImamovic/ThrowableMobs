@@ -51,6 +51,10 @@ public final class CarryClient
         private static boolean suppressingAttack;
         /** Ticks the Throw key has been held while carrying, for the charge bar; -1 when not charging. */
         private static int chargeTicks = -1;
+        /** Another mod's key on our pick-up key, checked each tick; while set, picking up is left to that mod. */
+        private static @Nullable KeyMapping conflict;
+        /** The chat notice about {@link #conflict} went out; once per world joined. */
+        private static boolean conflictNoticed;
 
         private CarryClient()
         {
@@ -69,7 +73,15 @@ public final class CarryClient
                 if (level == null || player == null)
                 {
                         LocalCarry.set(null);
+                        conflict = null;
+                        conflictNoticed = false;
                         return;
+                }
+                conflict = CarryKeys.foreignConflict(minecraft.options);
+                if (conflict != null && !conflictNoticed)
+                {
+                        noticeConflict(minecraft, conflict);
+                        conflictNoticed = true;
                 }
 
                 Entity localCarried = null;
@@ -168,13 +180,22 @@ public final class CarryClient
                                 suppressUse(minecraft, CarryKeys.PUT_DOWN);
                         }
                 }
-                else if (pickUpPressed && CarryRules.canUseHands(player)
+                else if (pickUpPressed && conflict == null && CarryRules.canUseHands(player)
                         && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob
                         && CarryRules.check(player, mob) == null)
                 {
                         sendToServer.accept(new PickUpPayload(mob.getId()));
                         suppressUse(minecraft, CarryKeys.PICK_UP);
                 }
+        }
+
+        /** "[Left Shift] is also Carry On's Carry key, so picking up is left to it. Rebind with /throwablemobs keybinds." */
+        private static void noticeConflict(Minecraft minecraft, KeyMapping other)
+        {
+                minecraft.gui.hud.getChat().addClientSystemMessage(Component.translatable("throwablemobs.conflict",
+                        Component.translatable("throwablemobs.prompt.key", other.getTranslatedKeyMessage()),
+                        Component.translatable(other.getName()), other.getCategory().label(),
+                        ThrowableMobsClientCommand.link("keybinds")));
         }
 
         private static void suppressUse(Minecraft minecraft, KeyMapping ours)
@@ -290,7 +311,7 @@ public final class CarryClient
                 else if (minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob)
                 {
                         Component keys = inputKeys(CarryKeys.PICK_UP);
-                        if (!CarryRules.canUseHands(player) || keys == null)
+                        if (!CarryRules.canUseHands(player) || keys == null || conflict != null)
                         {
                                 return;
                         }

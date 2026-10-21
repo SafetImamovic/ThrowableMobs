@@ -58,6 +58,7 @@
     "throwablemobs.command.help.config": "open the settings",
     "throwablemobs.command.help.keybinds": "open Controls to rebind the keys",
     "throwablemobs.command.help.profile": "<mob>: where a mob's throw values come from (operators)",
+    "throwablemobs.conflict": "Throwable Mobs: %1$s is also %2$s (%3$s), so picking up mobs is left to that mod. To use Throwable Mobs too, rebind one of them: %4$s",
     "throwablemobs.configuration.thrower_grace_ticks": "Thrower Grace Ticks",
     "throwablemobs.configuration.allow_trajectory": "Allow Trajectory Preview",
     "throwablemobs.configuration.flight": "Flight",

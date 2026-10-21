@@ -33,6 +33,9 @@ All rebindable under Controls → Throwable Mobs, or with `/throwablemobs keybin
 | Throw (hold to charge, let go to throw) | Right Button while carrying |
 | Cancel throw | Left Button while charging |
 
+The defaults match Carry On's. If another mod has a key on Left Shift (or on whatever starts a pick-up), picking up is
+left to that mod and a chat message says so; rebind either one to use both.
+
 ## Commands
 
 | Command | Who | What |
