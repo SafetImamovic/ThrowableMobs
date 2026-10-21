@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/SafetImamovic/ThrowableMobs/security/advisories/new
     about: A way to crash or exploit a server. Please report it privately.
   - name: Guide for pack devs and mod devs
-    url: https://github.com/SafetImamovic/ThrowableMobs/tree/master/docs/guide
+    url: https://safetimamovic.github.io/ThrowableMobs/guide/
     about: Mob profiles, behaviors, tags, the Java API, and ready-made examples.

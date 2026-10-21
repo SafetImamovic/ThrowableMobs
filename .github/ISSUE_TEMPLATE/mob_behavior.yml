@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Many behaviors can be built from the existing actions with a datapack, no Java needed. See the
-        [behaviors guide](https://github.com/SafetImamovic/ThrowableMobs/blob/master/docs/guide/behaviors.md).
+        [behaviors guide](https://safetimamovic.github.io/ThrowableMobs/guide/behaviors).
 
   - type: input
     id: mob

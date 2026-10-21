@@ -70,7 +70,8 @@ left to that mod and a chat message says so; rebind either one to use both.
 - `config/throwablemobs-client.toml`: personal (prompt, charge bar, trajectory style, flight pose), editable in game.
 - Datapacks: tags and mob profiles per mob, reload with `/reload`. Check a mob with `/throwablemobs profile <mob>`.
 
-Guide for pack devs and mod devs (draft): [docs/guide](docs/guide/README.md).
+Guide for pack devs and mod devs: [safetimamovic.github.io/ThrowableMobs](https://safetimamovic.github.io/ThrowableMobs/)
+(source in [docs/guide](docs/guide/README.md)).
 
 ## Issues and ideas
 

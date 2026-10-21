@@ -55,6 +55,16 @@ Useful tasks:
 ./gradlew :fabric:runClient --debug-jvm   # waits for a debugger on port 5005
 ```
 
+**Docs site:** the guide in `docs/guide` is also a [VitePress](https://vitepress.dev) site, deployed to GitHub Pages
+from `master`. Previewing it needs Node 24:
+
+```sh
+npm ci
+npm run docs:dev                    # live preview at http://localhost:5173/ThrowableMobs/
+```
+
+New guide pages also go in the sidebar in `docs/.vitepress/config.mts`.
+
 Any editor works. IntelliJ IDEA (with the Minecraft Development plugin) and Neovim (nvim-jdtls) are both used; see [THROWABLE_MOBS.md §5](THROWABLE_MOBS.md#5-dev-environment-jdk-gradle-neovim).
 
 **Project layout:** almost all code lives in `common/` and must only use vanilla Minecraft. Loader-specific code goes in `fabric/` or `neoforge/` and is reached from `common` through `platform/Services`. If you find yourself writing the same logic twice in both loader modules, it probably belongs in `common`.
