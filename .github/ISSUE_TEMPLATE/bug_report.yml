@@ -1,0 +1,82 @@
+name: Bug report
+description: Something broke, crashed, or doesn't work the way it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please check the [open issues](https://github.com/SafetImamovic/ThrowableMobs/issues) first.
+        A way to crash or exploit a server? Please use [a private report](https://github.com/SafetImamovic/ThrowableMobs/security/advisories/new) instead.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Pick up a creeper
+        2. Throw it at a wall
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Loader
+      options:
+        - Fabric
+        - NeoForge
+        - Both
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Minecraft, loader and Throwable Mobs.
+      placeholder: Minecraft 26.3, NeoForge 26.3.0.45-beta, Throwable Mobs 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Singleplayer
+        - Dedicated server
+        - LAN / open to LAN
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Other mods
+      description: The modpack and its version, or the list of other mods. "None" is a fine answer.
+    validations:
+      required: true
+
+  - type: input
+    id: log
+    attributes:
+      label: Log
+      description: |
+        Upload `logs/latest.log` (and the crash report from `crash-reports/`, if there is one) to
+        [mclo.gs](https://mclo.gs) and paste the link here.
+      placeholder: https://mclo.gs/...
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, clips, config changes, datapacks.

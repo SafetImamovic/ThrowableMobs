@@ -1,0 +1,41 @@
+name: Feature request
+description: An idea for something new, or a change to how something works.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An idea for what one specific mob should do? Use the **Mob behavior** form instead.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to do?
+      description: What you're trying to do in game, and what gets in the way today.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How it could work. Rough is fine.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who is it for?
+      multiple: true
+      options:
+        - Players
+        - Server admins
+        - Pack devs (datapacks, configs)
+        - Mod devs (Java API)
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other ways to get there, or other mods that already do something like it.

@@ -1,0 +1,44 @@
+name: Mob behavior
+description: What a mob should do when it's picked up, thrown, lands or is caught.
+labels: [enhancement, mob-behavior]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Many behaviors can be built from the existing actions with a datapack, no Java needed. See the
+        [behaviors guide](https://github.com/SafetImamovic/ThrowableMobs/blob/master/docs/guide/behaviors.md).
+
+  - type: input
+    id: mob
+    attributes:
+      label: Mob
+      description: Its name, and the mod it comes from if it isn't vanilla.
+      placeholder: Ghast (vanilla)
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What should happen?
+      description: On pickup, in flight, on impact, when it's caught. Only the parts that matter.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why does it fit this mob?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: default
+    attributes:
+      label: On by default?
+      options:
+        - Yes, it fits normal survival
+        - No, opt-in for chaotic packs
+        - Not sure
+    validations:
+      required: true
