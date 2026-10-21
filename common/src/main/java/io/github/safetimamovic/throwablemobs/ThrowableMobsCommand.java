@@ -1,6 +1,7 @@
 package io.github.safetimamovic.throwablemobs;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.safetimamovic.throwablemobs.api.MobProfile;
@@ -29,9 +30,16 @@ import org.jspecify.annotations.Nullable;
 /**
  * {@code /throwablemobs profile <mob>} (game masters): the mob's resolved profile and, for every value, the layer it
  * came from, so pack devs can see how their files merged. Registered on each loader.
+ * <p>
+ * Also stubs for the client's subcommands (see {@code ThrowableMobsClientCommand}), which the client runs before they
+ * reach the server. They are here for suggestions: Fabric API copies client commands into the server's tree, and when
+ * the root is already there (for game masters, from {@code profile}) the copied children are lost.
  */
 public final class ThrowableMobsCommand
 {
+        /** Run by the client; same names as in {@code ThrowableMobsClientCommand}. */
+        private static final List<String> CLIENT_SUBCOMMANDS = List.of("help", "config", "keybinds");
+
         private static final List<Field> FIELDS = List.of(
                 new Field("mass", MobProfile::mass),
                 new Field("gravity_multiplier", MobProfile::gravityMultiplier),
@@ -52,11 +60,24 @@ public final class ThrowableMobsCommand
 
         public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
         {
-                dispatcher.register(Commands.literal(Constants.MOD_ID)
-                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(Constants.MOD_ID)
+                        .executes(ThrowableMobsCommand::clientOnly)
                         .then(Commands.literal("profile")
+                                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                                 .then(Commands.argument("mob", EntityArgument.entity())
-                                        .executes(ThrowableMobsCommand::profile))));
+                                        .executes(ThrowableMobsCommand::profile)));
+                for (String subcommand : CLIENT_SUBCOMMANDS)
+                {
+                        root.then(Commands.literal(subcommand).executes(ThrowableMobsCommand::clientOnly));
+                }
+                dispatcher.register(root);
+        }
+
+        /** From the console, a command block or a client without the mod: nothing the server can open. */
+        private static int clientOnly(CommandContext<CommandSourceStack> context)
+        {
+                context.getSource().sendFailure(Component.translatable("throwablemobs.command.client_only"));
+                return 0;
         }
 
         private static int profile(CommandContext<CommandSourceStack> context) throws CommandSyntaxException

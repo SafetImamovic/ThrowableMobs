@@ -17,7 +17,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Client side of {@code /throwablemobs}: {@code help}, {@code config} and {@code keybinds}, for every player. They share
  * the root with the server's {@code profile}; both loaders send a subcommand the client doesn't know on to the server.
- * Each loader registers this with its own command source, which these commands don't use.
+ * The server has stubs of these for suggestions (see {@code ThrowableMobsCommand}). Each loader registers this with its
+ * own command source, which these commands don't use.
  */
 public final class ThrowableMobsClientCommand
 {
