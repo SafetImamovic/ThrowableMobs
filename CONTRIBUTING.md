@@ -9,13 +9,14 @@ For the design, physics model, behavior API and roadmap, see [THROWABLE_MOBS.md]
 - [Code of conduct](#code-of-conduct)
 - [Ways to contribute](#ways-to-contribute)
 - [Development setup](#development-setup)
-- [Branching model: git-flow](#branching-model-git-flow)
+- [Branching: GitHub flow](#branching-github-flow)
 - [Commits: atomic & conventional](#commits-atomic--conventional)
 - [Pull requests](#pull-requests)
 - [Code style](#code-style)
 - [Testing](#testing)
 - [Reporting bugs](#reporting-bugs)
 - [Suggesting features & mob behaviors](#suggesting-features--mob-behaviors)
+- [Releasing](#releasing)
 - [License](#license)
 
 ---
@@ -41,7 +42,6 @@ Requirements: **JDK 25**, Git. Gradle is provided by the wrapper.
 ```sh
 git clone https://github.com/SafetImamovic/ThrowableMobs.git
 cd ThrowableMobs
-git checkout develop
 ./gradlew build
 ```
 
@@ -59,32 +59,31 @@ Any editor works. IntelliJ IDEA (with the Minecraft Development plugin) and Neov
 
 **Project layout:** almost all code lives in `common/` and must only use vanilla Minecraft. Loader-specific code goes in `fabric/` or `neoforge/` and is reached from `common` through `platform/Services`. If you find yourself writing the same logic twice in both loader modules, it probably belongs in `common`.
 
-## Branching model: git-flow
+## Branching: GitHub flow
 
-We use [git-flow](https://nvie.com/posts/a-successful-git-branching-model/).
+We use [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow): one long-lived branch,
+`master`, which always builds and is always releasable. Everything else is a short branch off `master` that comes back
+through a pull request.
 
-| Branch | Purpose | Branches from | Merges into |
-|---|---|---|---|
-| `master` | Released code only. Every commit is a tagged release. | — | — |
-| `develop` | Integration branch for the next release. Should always build. | `master` | — |
-| `feature/<name>` | New features and non-urgent fixes. | `develop` | `develop` |
-| `release/<version>` | Release preparation: version bump, changelog, last fixes. No new features. | `develop` | `master` **and** `develop` |
-| `hotfix/<version>` | Urgent fix for a released version. | `master` | `master` **and** `develop` |
+| Prefix | For | Example |
+|---|---|---|
+| `feat/` | New features and behaviors | `feat/creeper-impact-explosion` |
+| `fix/` | Bug fixes | `fix/slime-split-loop` |
+| `docs/` | Documentation only | `docs/cookbook-alexs-mobs` |
+| `ci/` | GitHub Actions and release automation | `ci/build-workflow` |
+| `chore/` | Build, dependencies, repo housekeeping | `chore/bump-neoforge` |
 
 **Rules:**
 
-- Never commit directly to `master` or `develop`. Everything goes through a pull request.
-- Branch names are lowercase kebab-case and short: `feature/creeper-impact-explosion`, `feature/catching`, `release/0.2.0`, `hotfix/0.2.1`.
-- Bug fixes for unreleased code are `feature/` branches too (e.g. `feature/fix-slime-split-loop`).
-- Keep feature branches short-lived. Rebase onto `develop` regularly to avoid painful merges:
+- Never commit directly to `master`. Everything goes through a pull request, and CI must pass.
+- Branch names are lowercase kebab-case and short. The prefix matches the main commit type.
+- Keep branches short-lived. Rebase onto `master` if it moved on:
   ```sh
   git fetch origin
-  git rebase origin/develop
+  git rebase origin/master
   ```
-- Releases are tagged on `master` as `v<version>` (e.g. `v0.2.0`). Tags trigger the publishing workflow.
+- Releases are tags on `master` (see [Releasing](#releasing)); there are no release or develop branches.
 - Versions follow [Semantic Versioning](https://semver.org). The public API (`api` package) and the datapack JSON schema are what count as "breaking".
-
-The [git-flow CLI](https://github.com/petervanderdoes/gitflow-avh) (`git flow feature start <name>`) is optional — plain git with the branch names above is fine.
 
 ## Commits: atomic & conventional
 
@@ -155,18 +154,21 @@ onImpact(ImpactContext).
 
 ## Pull requests
 
-1. Fork the repo (or create a branch if you have write access) from `develop`.
+1. Fork the repo (or create a branch if you have write access) from `master`.
 2. Make your changes as atomic commits.
 3. Make sure `./gradlew build` passes locally, and test in-game on **both Fabric and NeoForge** if you touched gameplay.
-4. Open a PR **against `develop`** (hotfixes: against `master`).
-5. Fill in the PR description:
+4. Open a PR **against `master`**. CI builds both loaders and attaches the jars to the run, so reviewers can test them.
+5. Fill in the PR template:
    - What does it change and why? Link the issue (`Closes #123`).
    - How did you test it? (Loader(s), single-player / dedicated server, screenshots or a short clip for gameplay changes.)
    - Any config, API, or datapack schema changes?
 6. Keep the PR focused. One feature or fix per PR; unrelated cleanups go in a separate PR.
 7. Address review feedback with fixup commits, then squash them before merge so the history stays atomic.
 
-PRs are merged once CI is green and a maintainer has approved. We prefer **rebase merges** (keeping your atomic commits); release and hotfix branches use merge commits so they show up in history.
+PRs are merged once CI is green and a maintainer has approved, with a **merge commit**, so your atomic commits stay
+as they are and the PR shows up in the history.
+
+If you add something players will notice, add a line under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 
 ## Code style
 
@@ -189,20 +191,21 @@ PRs are merged once CI is green and a maintainer has approved. We prefer **rebas
 
 ## Reporting bugs
 
-Open an issue and include:
+[Open a bug report](https://github.com/SafetImamovic/ThrowableMobs/issues/new/choose). The form asks for:
 
 - Minecraft version, loader (Fabric/NeoForge) and loader version, Throwable Mobs version.
 - Other installed mods (or the modpack name and version).
 - Steps to reproduce, what you expected, and what happened.
-- The **full** `latest.log` and any crash report — upload to [mclo.gs](https://mclo.gs) or a gist rather than pasting into the issue.
+- The **full** `latest.log` and any crash report, uploaded to [mclo.gs](https://mclo.gs) rather than pasted into the issue.
 
 Check existing issues first to avoid duplicates.
 
-**Security issues** (e.g. a way to crash or exploit servers via packets): please don't open a public issue. Report privately via GitHub's "Report a vulnerability" (Security tab).
+**Security issues** (e.g. a way to crash or exploit servers via packets): please don't open a public issue. See
+[SECURITY.md](SECURITY.md).
 
 ## Suggesting features & mob behaviors
 
-Open an issue with the `enhancement` label. For a mob behavior, describe:
+Use the **feature request** or **mob behavior** issue form. For a mob behavior, describe:
 
 - The mob (vanilla or modded — include the mod).
 - What should happen on pickup, in flight, on impact, and when caught.
@@ -210,6 +213,22 @@ Open an issue with the `enhancement` label. For a mob behavior, describe:
 - Whether it should be on by default for balanced survival, or opt-in for chaotic packs.
 
 Behaviors that can be built from existing datapack atoms can often be added as a mob profile JSON without Java code at all.
+
+## Releasing
+
+Maintainers only.
+
+1. On a `chore/release-<version>` branch: set `version` in `gradle.properties`, and in `CHANGELOG.md` rename
+   `## [Unreleased]` to `## [<version>] - <date>` and add a fresh empty `## [Unreleased]` above it. Merge the PR.
+2. Tag the merge commit on `master` and push the tag:
+   ```sh
+   git tag v<version>
+   git push origin v<version>
+   ```
+3. The release workflow checks that the tag matches `gradle.properties`, builds both loaders and creates a GitHub
+   Release with both jars and the changelog section. Versions with a `-` (like `0.2.0-beta.1`) and every `0.x`
+   version are marked as pre-releases.
+4. Upload the same jars to Modrinth by hand, with the same changelog.
 
 ## License
 
