@@ -1,13 +1,28 @@
-# Throwable Mobs
+<p align="center">
+  <img src="common/src/main/resources/throwablemobs.png" alt="Throwable Mobs icon: a pig flying through the air" width="160">
+</p>
 
-Pick up mobs and throw them. Creepers explode on impact, endermen blink away, slimes bounce and split, chickens float.
-Catching your friends' throws mid-air is coming next.
+<h1 align="center">Throwable Mobs</h1>
 
-Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT
+<p align="center">
+  Pick up mobs and throw them. Creepers explode on impact, endermen blink away, slimes bounce and split, chickens float.
+  Catch your friends' throws mid-air.
+</p>
 
-Requires [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) on Fabric (NeoForge needs nothing extra).
+<p align="center">
+  <a href="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/build.yml"><img src="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/SafetImamovic/ThrowableMobs/releases/latest"><img src="https://img.shields.io/github/v/release/SafetImamovic/ThrowableMobs?include_prereleases&label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/SafetImamovic/ThrowableMobs" alt="MIT license"></a>
+</p>
 
-> Early development. Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_MOBS.md).
+Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
+
+- **Fabric:** needs [Fabric API](https://modrinth.com/mod/fabric-api) and
+  [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port).
+- **NeoForge:** nothing extra.
+- Install on both the client and the server.
+
+Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_MOBS.md).
 
 ## What it does
 
@@ -18,8 +33,12 @@ Requires [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port)
   makes it harder.
 - **Impacts:** damage from collision energy, split by mass between the mob and what it hits, with knockback. Kills
   credit the thrower.
+- **Catch:** grab a thrown mob out of the air; an outline shows which ones you can catch. Your own throw only after it
+  bounces.
 - **Mob behaviors:** creepers explode, endermen teleport and come for you, slimes and magma cubes bounce and split,
-  blazes and magma cubes set things on fire, chickens float and lay eggs. Modded mobs get sensible guesses.
+  blazes and magma cubes set things on fire, chickens float and lay eggs. Modded mobs act like the vanilla mob they're
+  built on.
+- **Effects:** sounds, particles, a flight trail, and 8 advancements in their own tab.
 - **Data-driven:** every behavior and number is set per mob in datapack mob profiles, or globally in the config. Other
   mods can add their own behaviors through a Java API.
 
@@ -53,6 +72,13 @@ left to that mod and a chat message says so; rebind either one to use both.
 
 Guide for pack devs and mod devs (draft): [docs/guide](docs/guide/README.md).
 
+## Issues and ideas
+
+- Bugs and crashes: [open a bug report](https://github.com/SafetImamovic/ThrowableMobs/issues/new/choose) with your
+  `latest.log` uploaded to [mclo.gs](https://mclo.gs).
+- Ideas for features or mob behaviors are welcome too; the issue form asks what the mob should do.
+- Changes per version: [CHANGELOG.md](CHANGELOG.md).
+
 ## Building
 
 Requires JDK 25.
@@ -80,6 +106,6 @@ Loader-specific calls from `common` go through `platform/Services` (Java `Servic
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) — git-flow branching, atomic Conventional Commits, PRs against `develop`.
+See [CONTRIBUTING.md](CONTRIBUTING.md): short branches off `master`, atomic Conventional Commits, PRs against `master`.
 
 Based on [MultiLoader-Template](https://github.com/jaredlll08/MultiLoader-Template).
