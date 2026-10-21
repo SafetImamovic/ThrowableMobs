@@ -29,3 +29,7 @@ runs
 
 # Local planning notes, not published
 docs/plans/
+
+# JVM crash dumps
+hs_err_*.log
+replay_*.log
