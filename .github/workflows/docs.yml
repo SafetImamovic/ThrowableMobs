@@ -1,0 +1,59 @@
+# Builds the VitePress site from docs/ on pull requests (catches dead links) and deploys it to GitHub Pages on pushes
+# to master: https://safetimamovic.github.io/ThrowableMobs/
+name: Docs
+
+on:
+  push:
+    branches: [master]
+    paths: ['docs/**', 'package.json', 'package-lock.json', '.github/workflows/docs.yml']
+  pull_request:
+    paths: ['docs/**', 'package.json', 'package-lock.json', '.github/workflows/docs.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; don't cancel one that's running.
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # "Last updated" on each page comes from git history
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run docs:build
+
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: docs
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
