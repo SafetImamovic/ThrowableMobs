@@ -4,9 +4,11 @@ import fuzs.forgeconfigapiport.fabric.api.v5.client.ConfigScreenFactoryRegistry;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.client.CarryClient;
 import io.github.safetimamovic.throwablemobs.client.CarryKeys;
+import io.github.safetimamovic.throwablemobs.client.ThrowableMobsClientCommand;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import net.minecraft.client.KeyMapping;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -31,6 +33,9 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                         (payload, context) -> MobProfiles.onSync(payload));
                 // Opened from Mod Menu, through Forge Config API Port.
                 ConfigScreenFactoryRegistry.INSTANCE.register(Constants.MOD_ID, ConfigurationScreen::new);
+                ThrowableMobsClientCommand.init(parent -> new ConfigurationScreen(Constants.MOD_ID, parent));
+                ClientCommandRegistrationCallback.EVENT
+                        .register((dispatcher, buildContext) -> ThrowableMobsClientCommand.register(dispatcher));
                 KeyMapping.Category.register(CarryKeys.CATEGORY.id());
                 KeyMappingHelper.registerKeyMapping(CarryKeys.MODIFIER);
                 KeyMappingHelper.registerKeyMapping(CarryKeys.PICK_UP);

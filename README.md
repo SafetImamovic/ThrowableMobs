@@ -25,13 +25,22 @@ Requires [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port)
 
 ## Controls
 
-All rebindable under Controls → Throwable Mobs.
+All rebindable under Controls → Throwable Mobs, or with `/throwablemobs keybinds`.
 
 | Action | Default |
 |---|---|
 | Pick up / put down | Left Shift + Right Button |
 | Throw (hold to charge, let go to throw) | Right Button while carrying |
 | Cancel throw | Left Button while charging |
+
+## Commands
+
+| Command | Who | What |
+|---|---|---|
+| `/throwablemobs help` | Everyone | Lists these commands |
+| `/throwablemobs config` | Everyone | Opens the settings screen |
+| `/throwablemobs keybinds` | Everyone | Opens Controls to rebind the keys |
+| `/throwablemobs profile <mob>` | Operators | Shows a mob's profile and where each value comes from |
 
 ## Configuration
 

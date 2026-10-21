@@ -2,12 +2,14 @@ package io.github.safetimamovic.throwablemobs;
 
 import io.github.safetimamovic.throwablemobs.client.CarryClient;
 import io.github.safetimamovic.throwablemobs.client.CarryKeys;
+import io.github.safetimamovic.throwablemobs.client.ThrowableMobsClientCommand;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -23,6 +25,9 @@ public class ThrowableMobsNeoForgeClient
         {
                 CarryClient.init(ClientPacketDistributor::sendToServer);
                 container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+                ThrowableMobsClientCommand.init(parent -> new ConfigurationScreen(container, parent));
+                NeoForge.EVENT_BUS.addListener(
+                        (RegisterClientCommandsEvent event) -> ThrowableMobsClientCommand.register(event.getDispatcher()));
                 modEventBus.addListener((RegisterKeyMappingsEvent event) ->
                 {
                         event.registerCategory(CarryKeys.CATEGORY);
