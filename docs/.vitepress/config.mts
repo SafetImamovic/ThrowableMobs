@@ -41,6 +41,10 @@ export default defineConfig({
           items: [{ text: 'Overview', link: '/guide/' }],
         },
         {
+          text: 'Server admins',
+          items: [{ text: 'Server config', link: '/guide/server-config' }],
+        },
+        {
           text: 'Pack devs',
           items: [
             { text: 'Mob profiles', link: '/guide/mob-profiles' },

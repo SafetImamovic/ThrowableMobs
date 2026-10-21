@@ -5,6 +5,21 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- `on_carrier_logout` has two new options: `RESUME` (the mob is put down, but carried again if its carrier rejoins in
+  time) and `TAKE_ALONG` (the mob leaves the world with its carrier and comes back with them). The new
+  `carrier_logout_seconds` sets how long `RESUME` and `KEEP_CARRYING` wait.
+- Docs: a [Server config](https://safetimamovic.github.io/ThrowableMobs/guide/server-config) page with every setting.
+
+### Changed
+
+- `on_carrier_logout` now defaults to `PUT_DOWN`: when a carrier leaves, the mob is put down at their feet. Existing
+  config files keep their value.
+- With `KEEP_CARRYING`, the mob waits on the ground at the carrier's feet instead of frozen in mid-air, and is put down
+  after `carrier_logout_seconds`.
+- When a carrier dies, the mob is put down at their feet instead of falling from above their head.
+
 ## [0.1.0] - 2026-10-21
 
 First beta, for Minecraft 26.3 on Fabric and NeoForge.

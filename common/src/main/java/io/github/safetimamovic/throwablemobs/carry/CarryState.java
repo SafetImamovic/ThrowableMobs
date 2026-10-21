@@ -18,14 +18,18 @@ import net.minecraft.network.codec.StreamCodec;
  * @param originalNoAi      the mob's {@code NoAI} flag before pickup, restored on drop
  * @param originalNoGravity the mob's {@code NoGravity} flag before pickup, restored on drop
  * @param pickupTick        game time of the pickup
+ * @param waitingSince      game time the carrier logged out, for a mob waiting for them
+ *                          ({@code KEEP_CARRYING}); -1 while carried
  */
-public record CarryState(UUID carrier, boolean originalNoAi, boolean originalNoGravity, long pickupTick)
+public record CarryState(UUID carrier, boolean originalNoAi, boolean originalNoGravity, long pickupTick,
+        long waitingSince)
 {
         public static final MapCodec<CarryState> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 UUIDUtil.CODEC.fieldOf("carrier").forGetter(CarryState::carrier),
                 Codec.BOOL.fieldOf("original_no_ai").forGetter(CarryState::originalNoAi),
                 Codec.BOOL.fieldOf("original_no_gravity").forGetter(CarryState::originalNoGravity),
-                Codec.LONG.fieldOf("pickup_tick").forGetter(CarryState::pickupTick))
+                Codec.LONG.fieldOf("pickup_tick").forGetter(CarryState::pickupTick),
+                Codec.LONG.optionalFieldOf("waiting_since", -1L).forGetter(CarryState::waitingSince))
                 .apply(instance, CarryState::new));
 
         public static final Codec<CarryState> CODEC = MAP_CODEC.codec();
@@ -35,5 +39,29 @@ public record CarryState(UUID carrier, boolean originalNoAi, boolean originalNoG
                 ByteBufCodecs.BOOL, CarryState::originalNoAi,
                 ByteBufCodecs.BOOL, CarryState::originalNoGravity,
                 ByteBufCodecs.VAR_LONG, CarryState::pickupTick,
+                ByteBufCodecs.VAR_LONG, CarryState::waitingSince,
                 CarryState::new);
+
+        /** A new carry. */
+        public CarryState(UUID carrier, boolean originalNoAi, boolean originalNoGravity, long pickupTick)
+        {
+                this(carrier, originalNoAi, originalNoGravity, pickupTick, -1L);
+        }
+
+        public boolean isWaiting()
+        {
+                return waitingSince >= 0L;
+        }
+
+        /** The same carry, now waiting for its carrier since {@code gameTime}. */
+        public CarryState waitingFrom(long gameTime)
+        {
+                return new CarryState(carrier, originalNoAi, originalNoGravity, pickupTick, gameTime);
+        }
+
+        /** The same carry, carried again. */
+        public CarryState resumed()
+        {
+                return new CarryState(carrier, originalNoAi, originalNoGravity, pickupTick, -1L);
+        }
 }

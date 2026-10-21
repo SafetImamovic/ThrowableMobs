@@ -149,16 +149,29 @@ public final class ThrowableMobsConfig
                 TRAVEL
         }
 
-        /** What happens to a carried mob when its carrier logs out (or the server stops). */
+        /**
+         * What happens to a carried mob when its carrier logs out (or the server stops). The timed options use
+         * {@link CarryConfig#carrierLogoutSeconds()}.
+         */
         public enum CarrierLogout
         {
-                /** The mob is put down where the carrier was. */
+                /** The mob is put down at the carrier's feet and is free right away. */
                 PUT_DOWN,
                 /**
-                 * The mob stays where it is, frozen, until the carrier logs back in and carries it again. A carrier who
-                 * never returns leaves it frozen for good.
+                 * Put down like {@link #PUT_DOWN}, but if the carrier logs back in within the time limit and the mob is
+                 * still nearby, it's carried again.
                  */
-                KEEP_CARRYING
+                RESUME,
+                /**
+                 * The mob waits at the carrier's feet, frozen, until they log back in and carry it again; after the time
+                 * limit it's put down.
+                 */
+                KEEP_CARRYING,
+                /**
+                 * The mob leaves the world with the carrier, saved in their player data, and is carried again whenever
+                 * they log back in.
+                 */
+                TAKE_ALONG
         }
 
         /**
@@ -178,6 +191,7 @@ public final class ThrowableMobsConfig
                 CarriedFacing carriedFacing,
                 DimensionChange onDimensionChange,
                 CarrierLogout onCarrierLogout,
+                int carrierLogoutSeconds,
                 boolean putDownNeedsGround,
                 GroundFilter groundFilter)
         {
