@@ -18,15 +18,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.network.chat.Component;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntitySpawnRequest;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -35,7 +42,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -52,8 +61,17 @@ public final class CarryManager
         /** Extra reach allowed for pick-up requests, for movement between the client's check and the server's. */
         private static final double PICK_UP_REACH_TOLERANCE = 3.0;
 
+        /** How far a mob may be from its returning carrier to be carried again (RESUME, KEEP_CARRYING). */
+        private static final double RESUME_RANGE = 16.0;
+
         /** Carrier UUID to carried mob. Server-side only; mobs that load with a stale {@link CarryState} are restored. */
         private static final Map<UUID, Mob> CARRIED = new HashMap<>();
+
+        /** {@link CarrierLogout#RESUME}: carrier UUID to the mob they left behind. In memory, so a restart forgets it. */
+        private static final Map<UUID, LeftBehind> LEFT_BEHIND = new HashMap<>();
+
+        /** {@link CarrierLogout#KEEP_CARRYING}: loaded mobs waiting for their carrier, checked for the time limit. */
+        private static final Map<UUID, ResourceKey<Level>> WAITING = new HashMap<>();
 
         private CarryManager()
         {
@@ -180,10 +198,10 @@ public final class CarryManager
                         }
                         if (carrier == null || !carrier.isAlive() || carrier.isSpectator())
                         {
-                                // Logout, death: drop where the mob is, above the carrier's last spot.
+                                // Death, spectator mode (logouts go through onLogout first): drop at the carrier's feet.
                                 it.remove();
                                 removeSlowdown(carrier);
-                                release(mob, mob.position());
+                                release(mob, carrier != null ? landing(mob, carrier.position()) : mob.position());
                                 continue;
                         }
                         if (carrier.level() != mob.level())
@@ -207,6 +225,10 @@ public final class CarryManager
                 for (Map.Entry<ServerPlayer, Mob> entry : travelling)
                 {
                         travel(entry.getKey(), entry.getValue());
+                }
+                if (server.getTickCount() % 20 == 0)
+                {
+                        expireLogouts(server);
                 }
         }
 
@@ -253,82 +275,262 @@ public final class CarryManager
         }
 
         /**
-         * A mob loading with a CarryState nobody holds (crash, restart, chunk reload) gets its original state back. With
-         * {@link CarrierLogout#KEEP_CARRYING} it waits for its carrier instead, and is carried again if they're online.
+         * A mob loading with a CarryState nobody holds. One waiting for its carrier ({@link CarrierLogout#KEEP_CARRYING})
+         * keeps waiting, or is carried again if they're online and near, or put down once the time is up. Any other
+         * (server crash mid-carry, a copy arriving in another dimension) gets its original state back, or starts
+         * waiting with KEEP_CARRYING.
          */
         public static void onEntityLoad(Entity entity)
         {
                 CarryState state = Services.CARRY_STATE.get(entity);
-                if (state == null || !(entity instanceof Mob mob) || CARRIED.get(state.carrier()) == mob)
+                if (state == null || !(entity instanceof Mob mob) || CARRIED.get(state.carrier()) == mob
+                        || !(mob.level() instanceof ServerLevel level))
                 {
                         return;
                 }
-                if (keepsCarryOnLogout() && mob.level() instanceof ServerLevel level)
+                if (!state.isWaiting())
                 {
-                        ServerPlayer carrier = level.getServer().getPlayerList().getPlayer(state.carrier());
-                        if (carrier == null)
+                        if (ThrowableMobsConfig.carry().onCarrierLogout() != CarrierLogout.KEEP_CARRYING)
                         {
+                                release(mob, mob.position());
                                 return;
                         }
-                        if (carriedBy(carrier) == null)
-                        {
-                                hold(carrier, mob, state);
-                                return;
-                        }
+                        state = state.waitingFrom(level.getGameTime());
+                        Services.CARRY_STATE.set(mob, state);
                 }
-                release(mob, mob.position());
+                if (waitIsOver(state, level))
+                {
+                        release(mob, mob.position());
+                        return;
+                }
+                ServerPlayer carrier = level.getServer().getPlayerList().getPlayer(state.carrier());
+                if (carrier != null && carriedBy(carrier) == null && carrier.level() == level
+                        && mob.distanceTo(carrier) <= RESUME_RANGE)
+                {
+                        WAITING.remove(mob.getUUID());
+                        hold(carrier, mob, state.resumed());
+                        return;
+                }
+                WAITING.put(mob.getUUID(), level.dimension());
         }
 
         public static void onLogout(ServerPlayer player)
         {
                 Mob mob = CARRIED.remove(player.getUUID());
                 removeSlowdown(player);
-                if (mob != null && !mob.isRemoved() && !keepsCarryOnLogout())
+                if (mob != null && !mob.isRemoved())
                 {
-                        release(mob, mob.position());
+                        leave(player, mob);
                 }
         }
 
         /**
-         * With {@link CarrierLogout#KEEP_CARRYING}: pick the waiting mob back up. It hangs where the carrier logged out,
-         * so it's near their login position; mobs loading later are handled by {@link #onEntityLoad}.
+         * The carrier logs back in: they get back the mob they took along ({@link CarrierLogout#TAKE_ALONG}), left
+         * behind ({@link CarrierLogout#RESUME}), or that waits for them nearby ({@link CarrierLogout#KEEP_CARRYING}),
+         * whatever the setting is now. Waiting mobs that load later are handled by {@link #onEntityLoad}.
          */
         public static void onLogin(ServerPlayer player)
         {
-                if (!keepsCarryOnLogout() || carriedBy(player) != null)
+                if (carriedBy(player) != null || bringBack(player) || resumeLeftBehind(player))
                 {
                         return;
                 }
-                for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16.0)))
+                for (Mob mob : player.level().getEntitiesOfClass(Mob.class,
+                        player.getBoundingBox().inflate(RESUME_RANGE)))
                 {
                         CarryState state = Services.CARRY_STATE.get(mob);
-                        if (state != null && state.carrier().equals(player.getUUID()))
+                        if (state != null && state.isWaiting() && state.carrier().equals(player.getUUID()))
                         {
-                                hold(player, mob, state);
+                                WAITING.remove(mob.getUUID());
+                                hold(player, mob, state.resumed());
                                 return;
                         }
                 }
         }
 
-        /** Server stop. With {@link CarrierLogout#KEEP_CARRYING} the mobs are saved still carried, to resume later. */
-        public static void dropAll()
+        /**
+         * Server stop, while the carriers are still online: each carried mob is handled as if its carrier logged out,
+         * before the players and the world are saved. RESUME is remembered in memory only, so it's a plain put-down here.
+         */
+        public static void dropAll(MinecraftServer server)
         {
-                if (!keepsCarryOnLogout())
+                for (Map.Entry<UUID, Mob> entry : CARRIED.entrySet())
                 {
-                        for (Mob mob : CARRIED.values())
+                        Mob mob = entry.getValue();
+                        if (mob.isRemoved())
                         {
-                                if (!mob.isRemoved())
-                                {
-                                        release(mob, mob.position());
-                                }
+                                continue;
+                        }
+                        ServerPlayer carrier = server.getPlayerList().getPlayer(entry.getKey());
+                        if (carrier != null)
+                        {
+                                leave(carrier, mob);
+                        }
+                        else
+                        {
+                                release(mob, mob.position());
                         }
                 }
                 CARRIED.clear();
+                LEFT_BEHIND.clear();
+                WAITING.clear();
         }
 
-        private static boolean keepsCarryOnLogout()
+        /** What happens to a carried mob when its carrier leaves the server, per {@code on_carrier_logout}. */
+        private static void leave(ServerPlayer carrier, Mob mob)
         {
-                return ThrowableMobsConfig.carry().onCarrierLogout() == CarrierLogout.KEEP_CARRYING;
+                switch (ThrowableMobsConfig.carry().onCarrierLogout())
+                {
+                        case PUT_DOWN -> release(mob, landing(mob, carrier.position()));
+                        case RESUME ->
+                        {
+                                release(mob, landing(mob, carrier.position()));
+                                MinecraftServer server = carrier.level().getServer();
+                                long ticks = logoutTicks();
+                                LEFT_BEHIND.put(carrier.getUUID(), new LeftBehind(mob.getUUID(), mob.level().dimension(),
+                                        ticks == Long.MAX_VALUE ? Long.MAX_VALUE : server.getTickCount() + ticks));
+                        }
+                        case KEEP_CARRYING -> waitForCarrier(carrier, mob);
+                        case TAKE_ALONG -> takeAlong(carrier, mob);
+                }
+        }
+
+        /** KEEP_CARRYING: the mob stays frozen at the carrier's feet, still holding its CarryState, now waiting. */
+        private static void waitForCarrier(ServerPlayer carrier, Mob mob)
+        {
+                CarryState state = Services.CARRY_STATE.get(mob);
+                if (state == null)
+                {
+                        release(mob, landing(mob, carrier.position()));
+                        return;
+                }
+                Services.CARRY_STATE.set(mob, state.waitingFrom(mob.level().getGameTime()));
+                mob.noPhysics = false;
+                mob.setPos(landing(mob, carrier.position()));
+                mob.setDeltaMovement(Vec3.ZERO);
+                mob.resetFallDistance();
+                WAITING.put(mob.getUUID(), mob.level().dimension());
+        }
+
+        /**
+         * TAKE_ALONG: the mob, back to its original state, is saved into the carrier's player data and removed from the
+         * world, passengers included. If it can't be saved it's put down instead.
+         */
+        private static void takeAlong(ServerPlayer carrier, Mob mob)
+        {
+                release(mob, carrier.position());
+                try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(mob.problemPath(),
+                        Constants.LOG))
+                {
+                        TagValueOutput output = TagValueOutput.createWithContext(reporter, mob.registryAccess());
+                        if (!mob.saveAsPassenger(output))
+                        {
+                                release(mob, landing(mob, carrier.position()));
+                                return;
+                        }
+                        Services.CARRY_STASH.set(carrier, NbtUtils.addCurrentDataVersion(output.buildResult()));
+                }
+                // Players riding the mob aren't saved with it, so they stay; everything else leaves with it.
+                mob.getSelfAndPassengers().filter(entity -> !(entity instanceof Player)).toList()
+                        .forEach(Entity::discard);
+        }
+
+        /** TAKE_ALONG: spawns the mob the player took along back on their head. Returns whether one came back. */
+        private static boolean bringBack(ServerPlayer player)
+        {
+                CompoundTag tag = Services.CARRY_STASH.get(player);
+                if (tag == null)
+                {
+                        return false;
+                }
+                Services.CARRY_STASH.remove(player);
+                ServerLevel level = player.level();
+                Entity entity = EntityType.loadEntityRecursive(tag, level,
+                        new EntitySpawnRequest(EntitySpawnReason.LOAD, true), loaded ->
+                        {
+                                loaded.snapTo(player.getX(), player.getY() + player.getBbHeight(), player.getZ(),
+                                        loaded.getYRot(), loaded.getXRot());
+                                return loaded;
+                        });
+                // Refused if an entity with its UUID is already loaded, like the copy in the world from before a crash.
+                if (!(entity instanceof Mob mob) || !level.tryAddFreshEntityWithPassengers(entity))
+                {
+                        Constants.LOG.warn("Couldn't bring back the mob {} took along: {}", player.getScoreboardName(),
+                                tag.getStringOr("id", "unknown"));
+                        return false;
+                }
+                hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
+                        level.getGameTime()));
+                return true;
+        }
+
+        /** RESUME: carries the mob left behind again, if it's in time, alive, near and free. */
+        private static boolean resumeLeftBehind(ServerPlayer player)
+        {
+                LeftBehind left = LEFT_BEHIND.remove(player.getUUID());
+                if (left == null || player.level().getServer().getTickCount() > left.until()
+                        || player.level().dimension() != left.level())
+                {
+                        return false;
+                }
+                if (player.level().getEntity(left.mob()) instanceof Mob mob && mob.isAlive() && !mob.isPassenger()
+                        && mob.distanceTo(player) <= RESUME_RANGE && Services.CARRY_STATE.get(mob) == null
+                        && Services.THROW_STATE.get(mob) == null)
+                {
+                        hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
+                                mob.level().getGameTime()));
+                        return true;
+                }
+                return false;
+        }
+
+        /** Once a second: forgets RESUME carriers out of time, puts down KEEP_CARRYING mobs whose wait is over. */
+        private static void expireLogouts(MinecraftServer server)
+        {
+                LEFT_BEHIND.values().removeIf(left -> server.getTickCount() > left.until());
+                Iterator<Map.Entry<UUID, ResourceKey<Level>>> it = WAITING.entrySet().iterator();
+                while (it.hasNext())
+                {
+                        Map.Entry<UUID, ResourceKey<Level>> entry = it.next();
+                        ServerLevel level = server.getLevel(entry.getValue());
+                        Entity entity = level != null ? level.getEntity(entry.getKey()) : null;
+                        if (entity == null)
+                        {
+                                // Unloaded with its chunk; onEntityLoad checks the time when it comes back.
+                                it.remove();
+                                continue;
+                        }
+                        CarryState state = Services.CARRY_STATE.get(entity);
+                        if (!(entity instanceof Mob mob) || state == null || !state.isWaiting())
+                        {
+                                it.remove();
+                        }
+                        else if (waitIsOver(state, level))
+                        {
+                                it.remove();
+                                release(mob, mob.position());
+                        }
+                }
+        }
+
+        private static boolean waitIsOver(CarryState state, ServerLevel level)
+        {
+                long ticks = logoutTicks();
+                return ticks != Long.MAX_VALUE && level.getGameTime() - state.waitingSince() > ticks;
+        }
+
+        /** {@code carrier_logout_seconds} in ticks; {@link Long#MAX_VALUE} for 0, which means forever. */
+        private static long logoutTicks()
+        {
+                int seconds = ThrowableMobsConfig.carry().carrierLogoutSeconds();
+                return seconds <= 0 ? Long.MAX_VALUE : seconds * 20L;
+        }
+
+        /** Where a mob leaving its carrier lands: at the carrier's feet if it fits there, else where it is. */
+        private static Vec3 landing(Mob mob, Vec3 feet)
+        {
+                return mob.level().noCollision(mob, mob.getDimensions(mob.getPose()).makeBoundingBox(feet)) ? feet
+                        : mob.position();
         }
 
         /**
@@ -450,5 +652,10 @@ public final class CarryManager
                         }
                 }
                 return player.position();
+        }
+
+        /** A mob left behind with {@link CarrierLogout#RESUME}, until server tick {@code until}. */
+        private record LeftBehind(UUID mob, ResourceKey<Level> level, long until)
+        {
         }
 }

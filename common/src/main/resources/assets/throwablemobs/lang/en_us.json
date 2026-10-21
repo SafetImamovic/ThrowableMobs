@@ -40,6 +40,7 @@
     "throwablemobs.configuration.carried_facing": "Carried Mob Faces",
     "throwablemobs.configuration.on_dimension_change": "On Dimension Change",
     "throwablemobs.configuration.on_carrier_logout": "On Carrier Logout",
+    "throwablemobs.configuration.carrier_logout_seconds": "Carrier Logout Seconds",
     "throwablemobs.configuration.put_down": "Putting Down",
     "throwablemobs.configuration.put_down_needs_ground": "Needs Ground",
     "throwablemobs.configuration.ground_filter": "Ground Filter",

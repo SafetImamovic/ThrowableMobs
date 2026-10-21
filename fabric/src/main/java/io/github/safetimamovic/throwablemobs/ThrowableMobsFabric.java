@@ -112,7 +112,7 @@ public class ThrowableMobsFabric implements ModInitializer
                         });
                 ServerLifecycleEvents.SERVER_STOPPING.register(server ->
                 {
-                        CarryManager.dropAll();
+                        CarryManager.dropAll(server);
                         ThrowManager.clear();
                 });
         }

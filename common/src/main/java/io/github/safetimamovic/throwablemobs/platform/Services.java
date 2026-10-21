@@ -1,6 +1,7 @@
 package io.github.safetimamovic.throwablemobs.platform;
 
 import io.github.safetimamovic.throwablemobs.Constants;
+import io.github.safetimamovic.throwablemobs.platform.services.ICarryStashAccess;
 import io.github.safetimamovic.throwablemobs.platform.services.ICarryStateAccess;
 import io.github.safetimamovic.throwablemobs.platform.services.IPlatformHelper;
 import io.github.safetimamovic.throwablemobs.platform.services.IThrowStateAccess;
@@ -23,6 +24,9 @@ public class Services
 
         // Throw state attachment (persistent + synced to tracking clients).
         public static final IThrowStateAccess THROW_STATE = load(IThrowStateAccess.class);
+
+        // Mob a player took along when they logged out (persistent with the player, not synced).
+        public static final ICarryStashAccess CARRY_STASH = load(ICarryStashAccess.class);
 
         // This code is used to load a service for the current environment. Your implementation of the service must be defined
         // manually by including a text file in META-INF/services named with the fully qualified class name of the service.

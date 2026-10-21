@@ -50,6 +50,7 @@ public final class CreatorConfig
         private static final EnumValue<CarriedFacing> CARRIED_FACING;
         private static final EnumValue<DimensionChange> ON_DIMENSION_CHANGE;
         private static final EnumValue<CarrierLogout> ON_CARRIER_LOGOUT;
+        private static final IntValue CARRIER_LOGOUT_SECONDS;
 
         private static final BooleanValue PUT_DOWN_NEEDS_GROUND;
         private static final EnumValue<GroundFilter> GROUND_FILTER;
@@ -140,10 +141,18 @@ public final class CreatorConfig
                 ON_DIMENSION_CHANGE = builder.comment("When the carrier changes dimension (portal, /tp). TRAVEL: the",
                                 "mob comes along and stays carried. PUT_DOWN: it is put down where the carrier left.")
                         .defineEnum("on_dimension_change", DimensionChange.TRAVEL);
-                ON_CARRIER_LOGOUT = builder.comment("When the carrier logs out or the server stops. KEEP_CARRYING:",
-                                "the mob waits, frozen, and is carried again when they log back in (a carrier who",
-                                "never returns leaves it frozen). PUT_DOWN: it is put down where the carrier was.")
-                        .defineEnum("on_carrier_logout", CarrierLogout.KEEP_CARRYING);
+                ON_CARRIER_LOGOUT = builder.comment("When the carrier logs out or the server stops.",
+                                "PUT_DOWN: the mob is put down at the carrier's feet and is free.",
+                                "RESUME: put down too, but carried again if the carrier logs back in within",
+                                "carrier_logout_seconds and the mob is within 16 blocks.",
+                                "KEEP_CARRYING: the mob waits at the carrier's feet, frozen, and is carried again when",
+                                "they log back in; it's put down after carrier_logout_seconds.",
+                                "TAKE_ALONG: the mob leaves the world with the carrier (saved in their player data) and",
+                                "is carried again whenever they log back in.")
+                        .defineEnum("on_carrier_logout", CarrierLogout.PUT_DOWN);
+                CARRIER_LOGOUT_SECONDS = builder.comment("How long RESUME remembers the carrier and KEEP_CARRYING waits",
+                                "for them, in seconds. 0 = forever.")
+                        .defineInRange("carrier_logout_seconds", 60, 0, 604_800);
                 builder.pop();
 
                 builder.comment("Putting a carried mob down.").push("put_down");
@@ -314,6 +323,7 @@ public final class CreatorConfig
                         get(CARRIED_FACING),
                         get(ON_DIMENSION_CHANGE),
                         get(ON_CARRIER_LOGOUT),
+                        get(CARRIER_LOGOUT_SECONDS),
                         get(PUT_DOWN_NEEDS_GROUND),
                         get(GROUND_FILTER));
         }

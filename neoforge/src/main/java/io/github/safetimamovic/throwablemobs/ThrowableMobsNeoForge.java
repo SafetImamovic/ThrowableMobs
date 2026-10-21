@@ -115,7 +115,7 @@ public class ThrowableMobsNeoForge
                 });
                 bus.addListener((ServerStoppingEvent event) ->
                 {
-                        CarryManager.dropAll();
+                        CarryManager.dropAll(event.getServer());
                         ThrowManager.clear();
                 });
         }
