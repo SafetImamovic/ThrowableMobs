@@ -33,3 +33,8 @@ docs/plans/
 # JVM crash dumps
 hs_err_*.log
 replay_*.log
+
+# Docs site (VitePress)
+node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/

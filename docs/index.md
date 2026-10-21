@@ -1,0 +1,66 @@
+---
+layout: home
+
+hero:
+  name: Throwable Mobs
+  text: Pick them up. Throw them.
+  tagline: A Minecraft mod for Fabric and NeoForge. Charge a throw, see where it lands, and watch every mob react. Catch your friends' throws mid-air.
+  image:
+    src: /throwablemobs.png
+    alt: A pig flying through the air
+  actions:
+    - theme: brand
+      text: Download
+      link: https://github.com/SafetImamovic/ThrowableMobs/releases
+    - theme: alt
+      text: Read the guide
+      link: /guide/
+    - theme: alt
+      text: GitHub
+      link: https://github.com/SafetImamovic/ThrowableMobs
+
+features:
+  - icon: 🎯
+    title: Charged throws
+    details: Hold to charge like a bow. A trajectory preview shows exactly where the mob lands, bounces included. Light mobs fly far, heavy ones barely leave your hands.
+  - icon: 💥
+    title: Every mob reacts
+    details: Creepers explode, endermen teleport and come for you, slimes bounce and split, chickens float down and lay eggs. Modded mobs act like the vanilla mob they're built on.
+  - icon: 🧤
+    title: Catch mid-air
+    details: Grab a thrown mob out of the air. An outline shows which ones you can catch. Throw a creeper to a friend and hope they're paying attention.
+  - icon: 🧩
+    title: Data-driven
+    details: Every number and behavior is set per mob with datapack mob profiles and tags. Other mods add their own behaviors through a Java API.
+    link: /guide/
+    linkText: Read the guide
+---
+
+## Install
+
+Minecraft Java **26.3**, on the client **and** the server.
+
+| Loader | Also install |
+|---|---|
+| Fabric | [Fabric API](https://modrinth.com/mod/fabric-api), [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) |
+| NeoForge | Nothing |
+
+## Controls
+
+| Action | Default |
+|---|---|
+| Pick up / put down | Left Shift + Right Click |
+| Throw | Hold Right Click while carrying, let go to throw |
+| Cancel throw | Left Click while charging |
+
+Rebind them under Controls → Throwable Mobs, or type `/throwablemobs keybinds`. With Carry On installed, it gets the
+shared keys and a chat message explains how to rebind.
+
+## Commands
+
+| Command | Who | What |
+|---|---|---|
+| `/throwablemobs help` | Everyone | Lists the commands |
+| `/throwablemobs config` | Everyone | Opens the settings |
+| `/throwablemobs keybinds` | Everyone | Opens Controls |
+| `/throwablemobs profile <mob>` | Operators | Shows a mob's profile and where each value comes from |

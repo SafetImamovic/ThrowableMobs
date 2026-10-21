@@ -1,7 +1,8 @@
-# Throwable Mobs guide (draft)
+# Throwable Mobs guide
 
-Draft of the docs for pack devs, server admins and mod devs. It's written next to the code during M3 so it stays in
-sync, and becomes the docs site in M8 (THROWABLE_MOBS.md §17), with the config reference generated from code.
+For pack devs, server admins and mod devs: how to change what mobs do when they're picked up, thrown and caught. It's
+written next to the code, so it matches the current version. Read it on the
+[docs site](https://safetimamovic.github.io/ThrowableMobs/guide/) or here on GitHub.
 
 | Page | For | What's in it |
 |---|---|---|
