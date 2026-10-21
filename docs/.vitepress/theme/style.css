@@ -1,0 +1,28 @@
+/*
+ * Brand orange from the mod icon. Light mode uses a darker orange so links and white button text stay readable
+ * (at least 4.5:1); dark mode uses a lighter one for text on the dark background.
+ */
+:root {
+  --vp-c-brand-1: #b4570c;
+  --vp-c-brand-2: #c9650f;
+  --vp-c-brand-3: #b4570c;
+  --vp-c-brand-soft: rgba(242, 140, 40, 0.14);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #f28c28 30%, #e8728a);
+  --vp-home-hero-image-background-image: linear-gradient(-45deg, #f28c28 50%, #e8728a 50%);
+  --vp-home-hero-image-filter: blur(56px);
+}
+
+.dark {
+  --vp-c-brand-1: #f5a356;
+  --vp-c-brand-2: #f28c28;
+  --vp-c-brand-3: #b4570c;
+  --vp-c-brand-soft: rgba(242, 140, 40, 0.16);
+}
+
+/* The icon is pixel art: keep its edges sharp when scaled. */
+.VPHero .image-src,
+.VPNavBarTitle .logo {
+  image-rendering: pixelated;
+}
