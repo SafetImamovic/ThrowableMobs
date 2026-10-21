@@ -10,6 +10,7 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 - `on_carrier_logout` has two new options: `RESUME` (the mob is put down, but carried again if its carrier rejoins in
   time) and `TAKE_ALONG` (the mob leaves the world with its carrier and comes back with them). The new
   `carrier_logout_seconds` sets how long `RESUME` and `KEEP_CARRYING` wait.
+- Docs: a [Server config](https://safetimamovic.github.io/ThrowableMobs/guide/server-config) page with every setting.
 
 ### Changed
 

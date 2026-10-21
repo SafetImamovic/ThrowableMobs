@@ -6,6 +6,7 @@ written next to the code, so it matches the current version. Read it on the
 
 | Page | For | What's in it |
 |---|---|---|
+| [Server config](server-config.md) | Server admins | Every setting in `throwablemobs-server.toml`, and what happens to carried mobs when players leave |
 | [Mob profiles](mob-profiles.md) | Pack devs | The JSON format, where files go, how profiles merge, `/throwablemobs profile` |
 | [Behaviors](behaviors.md) | Pack devs | Triggers, conditions, every built-in action with its fields |
 | [Tags](tags.md) | Pack devs | Which mobs can be carried, who takes impact damage, who can teleport |
