@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-21
+
 First beta, for Minecraft 26.3 on Fabric and NeoForge.
 
 ### Added
