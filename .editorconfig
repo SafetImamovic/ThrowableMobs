@@ -1,0 +1,20 @@
+# Matches the code style in CONTRIBUTING.md. Line endings are set in .gitattributes.
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.java]
+indent_size = 8
+max_line_length = 120
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+max_line_length = 120
+trim_trailing_whitespace = false
