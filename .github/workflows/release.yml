@@ -1,6 +1,6 @@
 # Pushing a tag like v0.1.0 builds both loaders and creates a GitHub Release with the two jars, their sources and the
-# version's section of CHANGELOG.md. Then it publishes one Modrinth version per loader, once the repository has the
-# MODRINTH_ID variable and the MODRINTH_TOKEN secret. See CONTRIBUTING.md, "Releasing".
+# version's section of CHANGELOG.md. Then modrinth.yml publishes that release to Modrinth. See CONTRIBUTING.md,
+# "Releasing".
 name: Release
 
 on:
@@ -13,9 +13,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
 
@@ -71,61 +68,10 @@ jobs:
             neoforge/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}.jar
             neoforge/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}-sources.jar
 
-      # For the modrinth job: the mod jars with their sources, and the release notes.
-      - uses: actions/upload-artifact@v7
-        with:
-          name: release-files
-          path: |
-            fabric/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}.jar
-            fabric/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}-sources.jar
-            neoforge/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}.jar
-            neoforge/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}-sources.jar
-            release-notes.md
-          if-no-files-found: error
-
-  # One Modrinth version per loader. Skipped until the repository has the MODRINTH_ID variable (the project's ID:
-  # Modrinth project page, three-dot menu, Copy ID) and the MODRINTH_TOKEN secret (a Modrinth personal access token with
-  # the "Create versions" scope).
+  # One Modrinth version per loader, from the release just made (modrinth.yml).
   modrinth:
     needs: release
-    if: vars.MODRINTH_ID != ''
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    strategy:
-      # Each upload stands alone; one failing doesn't cancel the other.
-      fail-fast: false
-      matrix:
-        include:
-          - minecraft: '26.3'
-            loader: fabric
-            java: 25
-            dependencies: |
-              fabric-api(required){modrinth:P7dR8mSH}
-              forgeconfigapiport(required){modrinth:ohNO6lps}
-          - minecraft: '26.3'
-            loader: neoforge
-            java: 25
-            dependencies: ''
-    steps:
-      - uses: actions/download-artifact@v7
-        with:
-          name: release-files
-
-      # Pinned to v3.3.1's commit: this action gets the Modrinth token.
-      - uses: Kir-Antipov/mc-publish@52307b03863581dec6b652b83e597aec02ebb075
-        with:
-          modrinth-id: ${{ vars.MODRINTH_ID }}
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          # The first file is the one players download; the sources jar goes with it.
-          files: |
-            ${{ matrix.loader }}/build/libs/throwablemobs-${{ matrix.loader }}-${{ matrix.minecraft }}-${{ needs.release.outputs.version }}.jar
-            ${{ matrix.loader }}/build/libs/throwablemobs-${{ matrix.loader }}-${{ matrix.minecraft }}-${{ needs.release.outputs.version }}-sources.jar
-          name: Throwable Mobs ${{ needs.release.outputs.version }} (${{ matrix.loader == 'fabric' && 'Fabric' || 'NeoForge' }} ${{ matrix.minecraft }})
-          version: ${{ needs.release.outputs.version }}
-          version-type: ${{ needs.release.outputs.prerelease == 'true' && 'beta' || 'release' }}
-          changelog-file: release-notes.md
-          loaders: ${{ matrix.loader }}
-          game-versions: ${{ matrix.minecraft }}
-          java: ${{ matrix.java }}
-          dependencies: ${{ matrix.dependencies }}
+    uses: ./.github/workflows/modrinth.yml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets: inherit
