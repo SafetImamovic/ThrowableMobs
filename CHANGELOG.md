@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-23
+
 ### Added
 
 - `on_carrier_logout` has two new options: `RESUME` (the mob is put down, but carried again if its carrier rejoins in
@@ -19,6 +21,7 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 - With `KEEP_CARRYING`, the mob waits on the ground at the carrier's feet instead of frozen in mid-air, and is put down
   after `carrier_logout_seconds`.
 - When a carrier dies, the mob is put down at their feet instead of falling from above their head.
+- Built against NeoForge 26.3.0.95 (the first stable 26.3 build) and Fabric API 0.164.0.
 
 ## [0.1.0] - 2026-10-21
 
