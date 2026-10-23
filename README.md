@@ -25,6 +25,13 @@
 
 Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
 
+<p align="center">
+  <img src="docs/public/screenshots/throw-pig.gif" alt="Picking up a pig on a beach, charging the throw and throwing it across the sand" width="640">
+</p>
+<p align="center">
+  <img src="docs/public/screenshots/creeper-throw.gif" alt="Another player throws a creeper, and it explodes where it lands" width="640">
+</p>
+
 - **Fabric:** needs [Fabric API](https://modrinth.com/mod/fabric-api) and
   [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port).
 - **NeoForge:** nothing extra.

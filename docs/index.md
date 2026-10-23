@@ -36,6 +36,10 @@ features:
     linkText: Read the guide
 ---
 
+![Picking up a pig on a beach, charging the throw and throwing it across the sand](/screenshots/throw-pig.gif)
+
+![Another player throws a creeper, and it explodes where it lands](/screenshots/creeper-throw.gif)
+
 ## Install
 
 Minecraft Java **26.3**, on the client **and** the server.
