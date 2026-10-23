@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/build.yml"><img src="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/release.yml"><img src="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/release.yml/badge.svg" alt="Release"></a>
   <a href="https://github.com/SafetImamovic/ThrowableMobs/releases"><img src="https://img.shields.io/github/v/release/SafetImamovic/ThrowableMobs?include_prereleases&sort=semver&label=release" alt="Latest release"></a>
   <a href="https://safetimamovic.github.io/ThrowableMobs/"><img src="https://img.shields.io/badge/docs-online-f28c28" alt="Docs"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>

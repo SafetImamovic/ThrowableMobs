@@ -85,7 +85,7 @@ through a pull request.
 
 **Rules:**
 
-- Never commit directly to `master`. Everything goes through a pull request, and CI must pass.
+- Never commit directly to `master`. Everything goes through a pull request.
 - Branch names are lowercase kebab-case and short. The prefix matches the main commit type.
 - Keep branches short-lived. Rebase onto `master` if it moved on:
   ```sh
@@ -167,7 +167,8 @@ onImpact(ImpactContext).
 1. Fork the repo (or create a branch if you have write access) from `master`.
 2. Make your changes as atomic commits.
 3. Make sure `./gradlew build` passes locally, and test in-game on **both Fabric and NeoForge** if you touched gameplay.
-4. Open a PR **against `master`**. CI builds both loaders and attaches the jars to the run, so reviewers can test them.
+4. Open a PR **against `master`**. CI doesn't run on PRs (to save Actions minutes); a maintainer can run the Build
+   workflow on the branch by hand, which attaches the jars to the run so reviewers can test them.
 5. Fill in the PR template:
    - What does it change and why? Link the issue (`Closes #123`).
    - How did you test it? (Loader(s), single-player / dedicated server, screenshots or a short clip for gameplay changes.)
@@ -175,7 +176,7 @@ onImpact(ImpactContext).
 6. Keep the PR focused. One feature or fix per PR; unrelated cleanups go in a separate PR.
 7. Address review feedback with fixup commits, then squash them before merge so the history stays atomic.
 
-PRs are merged once CI is green and a maintainer has approved, with a **merge commit**, so your atomic commits stay
+PRs are merged once `./gradlew build` passes and a maintainer has approved, with a **merge commit**, so your atomic commits stay
 as they are and the PR shows up in the history.
 
 If you add something players will notice, add a line under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
@@ -236,7 +237,8 @@ Maintainers only.
    git push origin v<version>
    ```
 3. The release workflow checks that the tag matches `gradle.properties`, builds both loaders and creates a GitHub
-   Release with both jars and the changelog section. Versions with a `-` (like `0.2.0-beta.1`) and every `0.x`
+   Release with both jars and the changelog section. The docs workflow deploys the docs site from the same tag, so
+   docs changes merged since the last release go live with it. Versions with a `-` (like `0.2.0-beta.1`) and every `0.x`
    version are marked as pre-releases.
 4. Upload the same jars to Modrinth by hand, with the same changelog.
 

@@ -1,13 +1,11 @@
-# Builds the VitePress site from docs/ on pull requests (catches dead links) and deploys it to GitHub Pages on pushes
-# to master: https://safetimamovic.github.io/ThrowableMobs/
+# Builds the VitePress site from docs/ and deploys it to GitHub Pages on release tags (v*), or by hand (Actions → Docs →
+# Run workflow): https://safetimamovic.github.io/ThrowableMobs/
+# The github-pages environment must allow v* tags (Settings → Environments → github-pages → Deployment branches and tags).
 name: Docs
 
 on:
   push:
-    branches: [master]
-    paths: ['docs/**', 'package.json', 'package-lock.json', '.github/workflows/docs.yml']
-  pull_request:
-    paths: ['docs/**', 'package.json', 'package-lock.json', '.github/workflows/docs.yml']
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -36,16 +34,13 @@ jobs:
       - name: Build
         run: npm run docs:build
 
-      - if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v6
+      - uses: actions/configure-pages@v6
 
-      - if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs/.vitepress/dist
 
   deploy:
-    if: github.event_name != 'pull_request'
     needs: docs
     runs-on: ubuntu-latest
     permissions:

@@ -1,11 +1,9 @@
-# Builds both loaders and runs the tests on every push to master and every pull request. The jars are attached to
-# the run as an artifact, so a PR can be tested in game without building it locally.
+# Builds both loaders and runs the tests, on demand only (Actions → Build → Run workflow, pick a branch): pushes and
+# pull requests don't run CI, to save Actions minutes. The jars are attached to the run as an artifact, so a branch can
+# be tested in game without building it locally. Release tags are built and tested by release.yml.
 name: Build
 
 on:
-  push:
-    branches: [master]
-  pull_request:
   workflow_dispatch:
 
 permissions:
