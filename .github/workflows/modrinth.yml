@@ -1,0 +1,82 @@
+# Publishes a GitHub Release to Modrinth: one Modrinth version per loader, with that release's
+# mod jar (and its sources jar, if the release has one) and its notes. Runs after every release tag (release.yml), or by
+# hand for a tag that's already released: Actions, Modrinth, Run workflow.
+#
+# Needs the repository variable MODRINTH_ID (the project's ID: Modrinth project page, three-dot menu, Copy ID) and the
+# secret MODRINTH_TOKEN (a Modrinth personal access token with the "Create versions" scope); skipped without the ID.
+name: Modrinth
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish, like v0.2.0
+        required: true
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  modrinth:
+    if: vars.MODRINTH_ID != ''
+    runs-on: ubuntu-latest
+    strategy:
+      # Each upload stands alone; one failing doesn't cancel the others.
+      fail-fast: false
+      matrix:
+        include:
+          - minecraft: '26.3'
+            loader: fabric
+            java: 25
+            dependencies: |
+              fabric-api(required){modrinth:P7dR8mSH}
+              forgeconfigapiport(required){modrinth:ohNO6lps}
+          - minecraft: '26.3'
+            loader: neoforge
+            java: 25
+            dependencies: ''
+    steps:
+      - name: Take the release's jars and notes
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          JAR: throwablemobs-${{ matrix.loader }}-${{ matrix.minecraft }}
+        run: |
+          version=${TAG#v}
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$JAR-$version.jar" \
+            --pattern "$JAR-$version-sources.jar"
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > release-notes.md
+          if [ "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)" = true ]; then
+            echo "type=beta" >> "$GITHUB_OUTPUT"
+          else
+            echo "type=release" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # The mod jar first: it's the one players download. Releases before 0.2.1 have no sources jars.
+          {
+            echo 'files<<EOF'
+            echo "$JAR-$version.jar"
+            [ -f "$JAR-$version-sources.jar" ] && echo "$JAR-$version-sources.jar"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # Pinned to v3.3.1's commit: this action gets the Modrinth token.
+      - uses: Kir-Antipov/mc-publish@52307b03863581dec6b652b83e597aec02ebb075
+        with:
+          modrinth-id: ${{ vars.MODRINTH_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: ${{ steps.release.outputs.files }}
+          name: Throwable Mobs ${{ steps.release.outputs.version }} (${{ matrix.loader == 'fabric' && 'Fabric' || 'NeoForge' }} ${{ matrix.minecraft }})
+          version: ${{ steps.release.outputs.version }}
+          version-type: ${{ steps.release.outputs.type }}
+          changelog-file: release-notes.md
+          loaders: ${{ matrix.loader }}
+          game-versions: ${{ matrix.minecraft }}
+          java: ${{ matrix.java }}
+          dependencies: ${{ matrix.dependencies }}

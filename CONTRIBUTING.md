@@ -241,7 +241,8 @@ Maintainers only.
    docs changes merged since the last release go live with it. Versions with a `-` (like `0.2.0-beta.1`) and every `0.x`
    version are marked as pre-releases.
 4. The same workflow then publishes one Modrinth version per loader: the mod jar with its sources jar, the changelog
-   section, and on Fabric the required Fabric API and Forge Config API Port.
+   section, and on Fabric the required Fabric API and Forge Config API Port (`.github/workflows/modrinth.yml`). To
+   publish a release that's already on GitHub: Actions → Modrinth → Run workflow, with its tag.
 
    One-time setup, without which this step is skipped: the repository variable `MODRINTH_ID` (the project's ID, from
    the three-dot menu on its Modrinth page) and the secret `MODRINTH_TOKEN` (a Modrinth personal access token with the
