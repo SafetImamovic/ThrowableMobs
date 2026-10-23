@@ -888,7 +888,7 @@ Settled 2026-10-02:
 ### Current setup state (M0 done)
 
 - MultiLoader-Template (26.3 branch) layout: `common/`, `fabric/`, `neoforge/`, `build-logic/`.
-- Versions pinned in `gradle.properties`: MC 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, NeoForge 26.3.0.41-**beta** (no stable 26.3 NeoForge yet — bump when it lands), Loom 1.18.2, ModDevGradle 2.0.148, Gradle 9.7.1, Java 25.
+- Versions pinned in `gradle.properties`: MC 26.3, Fabric Loader 0.19.5, Fabric API 0.164.0+26.3, NeoForge 26.3.0.95 (the first stable 26.3 build), Loom 1.18.2, ModDevGradle 2.0.148, Gradle 9.7.1, Java 25.
 - `./gradlew build` produces `throwablemobs-{fabric,neoforge}-26.3-0.1.0.jar`; JUnit tests run on the `physics/` module (`ThrowPhysics` + test), split out of `common` during M1 (§3).
 - Both loaders verified loading the mod on a dev server.
 - Neovim: `~/AppData/Local/nvim/lua/plugins/java.lua` (nvim-jdtls + nvim-dap + dap-ui, Mason auto-installs jdtls/java-debug-adapter/java-test); treesitter java/groovy/properties parsers.
