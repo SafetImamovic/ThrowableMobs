@@ -240,7 +240,12 @@ Maintainers only.
    Release with both jars and the changelog section. The docs workflow deploys the docs site from the same tag, so
    docs changes merged since the last release go live with it. Versions with a `-` (like `0.2.0-beta.1`) and every `0.x`
    version are marked as pre-releases.
-4. Upload the same jars to Modrinth by hand, with the same changelog.
+4. The same workflow then publishes one Modrinth version per loader: the mod jar with its sources jar, the changelog
+   section, and on Fabric the required Fabric API and Forge Config API Port.
+
+   One-time setup, without which this step is skipped: the repository variable `MODRINTH_ID` (the project's ID, from
+   the three-dot menu on its Modrinth page) and the secret `MODRINTH_TOKEN` (a Modrinth personal access token with the
+   *Create versions* scope).
 
 ## License
 
