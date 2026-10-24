@@ -5,6 +5,12 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-24
+
+### Changed
+
+- Releases are also published on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/throwablemobs).
+
 ## [0.4.0] - 2026-10-24
 
 ### Added
