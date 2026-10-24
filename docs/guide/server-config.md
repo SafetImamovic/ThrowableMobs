@@ -8,7 +8,9 @@ On **1.21.1** the file is per world: `serverconfig/throwablemobs-server.toml` in
 (from `defaultconfigs/throwablemobs-server.toml` if you put one there).
 
 Each player's own settings (prompt, charge bar, trajectory style, flight pose) are in
-`config/throwablemobs-client.toml` and can be changed in game with `/throwablemobs config`.
+`config/throwablemobs-client.toml` and can be changed in game with `/throwablemobs config`. With
+[YACL](https://modrinth.com/mod/yacl) installed, that screen also shows this file's settings; they can be changed there
+in your own world (singleplayer or LAN host), and on 26.3 from the title screen too.
 
 Per-mob numbers and behaviors don't belong here: set them with [mob profiles](mob-profiles.md) and [tags](tags.md).
 

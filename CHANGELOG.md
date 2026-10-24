@@ -5,6 +5,12 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- With [YACL](https://modrinth.com/mod/yacl) installed (optional), the settings screen is a YACL one, with every
+  player and server setting. Server settings can only be changed in your own world. Without YACL, the screen stays as
+  before.
+
 ## [0.3.0] - 2026-10-24
 
 ### Added

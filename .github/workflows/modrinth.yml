@@ -36,20 +36,24 @@ jobs:
             dependencies: |
               fabric-api(required){modrinth:P7dR8mSH}
               forgeconfigapiport(required){modrinth:ohNO6lps}
+              yacl(optional){modrinth:1eAoo2KR}
           - minecraft: '1.21.1'
             loader: neoforge
             java: 21
-            dependencies: ''
+            dependencies: |
+              yacl(optional){modrinth:1eAoo2KR}
           - minecraft: '26.3'
             loader: fabric
             java: 25
             dependencies: |
               fabric-api(required){modrinth:P7dR8mSH}
               forgeconfigapiport(required){modrinth:ohNO6lps}
+              yacl(optional){modrinth:1eAoo2KR}
           - minecraft: '26.3'
             loader: neoforge
             java: 25
-            dependencies: ''
+            dependencies: |
+              yacl(optional){modrinth:1eAoo2KR}
     steps:
       - name: Take the release's jars and notes
         id: release

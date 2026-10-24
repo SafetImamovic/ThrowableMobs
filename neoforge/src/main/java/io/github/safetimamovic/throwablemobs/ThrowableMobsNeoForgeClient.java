@@ -2,8 +2,11 @@ package io.github.safetimamovic.throwablemobs;
 
 import io.github.safetimamovic.throwablemobs.client.CarryClient;
 import io.github.safetimamovic.throwablemobs.client.CarryKeys;
+import io.github.safetimamovic.throwablemobs.client.ConfigScreens;
 import io.github.safetimamovic.throwablemobs.client.ThrowableMobsClientCommand;
+import java.util.function.UnaryOperator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -23,6 +26,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 *///?}
 import net.neoforged.neoforge.common.NeoForge;
+import org.jspecify.annotations.Nullable;
 
 @Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
 public class ThrowableMobsNeoForgeClient
@@ -33,8 +37,11 @@ public class ThrowableMobsNeoForgeClient
                 CarryClient.init(ClientPacketDistributor::sendToServer);
                 //?} else
                 /*CarryClient.init(payload -> PacketDistributor.sendToServer(payload));*/
-                container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-                ThrowableMobsClientCommand.init(parent -> new ConfigurationScreen(container, parent));
+                UnaryOperator<@Nullable Screen> configScreen = ConfigScreens
+                        .withYacl(parent -> new ConfigurationScreen(container, parent));
+                container.registerExtensionPoint(IConfigScreenFactory.class,
+                        (IConfigScreenFactory) (mod, parent) -> configScreen.apply(parent));
+                ThrowableMobsClientCommand.init(configScreen);
                 NeoForge.EVENT_BUS.addListener(
                         (RegisterClientCommandsEvent event) -> ThrowableMobsClientCommand.register(event.getDispatcher()));
                 modEventBus.addListener((RegisterKeyMappingsEvent event) ->
