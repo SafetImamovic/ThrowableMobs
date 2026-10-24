@@ -856,7 +856,7 @@ Hand-written reference tables rot. Generate them:
 | **M2 — Throw** | Charge + charge bar, impulse launch, flight sim, trajectory preview, block/entity collision, energy damage, knockback, damage type. Config files + screens done before M2. |
 | **M3 — Behavior system** | `ThrowBehavior` API, registry, 6 vanilla behaviors (creeper, enderman, slime, chicken, blaze, cat), datapack loader, heuristics. |
 | **M4 — Catching** | Server catch check, recoil, self-catch, glow highlight, latency compensation. |
-| **M5 — Backport 1.21.1** | Stonecutter multi-version build, 1.21.1 on Fabric + NeoForge next to 26.3. Moved up from "Reach" (2026-10-11): most modpacks run 1.21.1 / 1.20.1. |
+| **M5 — Backport 1.21.1** | Stonecutter multi-version build, 1.21.1 on Fabric + NeoForge next to 26.3. **Done in 0.3.0.** Moved up from "Reach" (2026-10-11): most modpacks run 1.21.1 / 1.20.1. |
 | **M5b — Configurator** | New config screen with live HUD preview and 3D throw scene, from the Configurator library, bundled via jar-in-jar (§11). |
 | **M6 — Carry+** | Carry blocks with their contents (chests, furnaces, spawners, modded machines) and throw them; carry and throw players (opt-in); stack mobs (small on big, thrown as a stack); holding animation in first and third person; Carry On compatibility. Goal: the best carry mod, not just the best throw mod. |
 | **M7 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |

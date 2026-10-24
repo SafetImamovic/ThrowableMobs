@@ -118,7 +118,7 @@ processResources {
 
     // Mixins whose target class only exists in some Minecraft versions, with the versions they're for; the other
     // versions' mixin configs leave their line out (so none of them may be the last entry of a list).
-    def versionedMixins = ['LivingEntityRenderStateMixin': '>=1.21.2']
+    def versionedMixins = ['LivingEntityRenderStateMixin': '>=1.21.2', 'KeyMappingMixin': '<26.1']
     filesMatching('*.mixins.json') {
         filter { String line ->
             versionedMixins.any { name, versions ->
