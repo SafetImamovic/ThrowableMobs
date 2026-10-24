@@ -1,4 +1,4 @@
-# Publishes a GitHub Release to Modrinth: one Modrinth version per loader, with that release's
+# Publishes a GitHub Release to Modrinth: one Modrinth version per Minecraft version and loader, with that release's
 # mod jar (and its sources jar, if the release has one) and its notes. Runs after every release tag (release.yml), or by
 # hand for a tag that's already released: Actions, Modrinth, Run workflow.
 #
@@ -30,6 +30,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - minecraft: '1.21.1'
+            loader: fabric
+            java: 21
+            dependencies: |
+              fabric-api(required){modrinth:P7dR8mSH}
+              forgeconfigapiport(required){modrinth:ohNO6lps}
+          - minecraft: '1.21.1'
+            loader: neoforge
+            java: 21
+            dependencies: ''
           - minecraft: '26.3'
             loader: fabric
             java: 25

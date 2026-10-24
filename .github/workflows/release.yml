@@ -1,6 +1,6 @@
-# Pushing a tag like v0.1.0 builds both loaders and creates a GitHub Release with the two jars, their sources and the
-# version's section of CHANGELOG.md. Then modrinth.yml publishes that release to Modrinth. See CONTRIBUTING.md,
-# "Releasing".
+# Pushing a tag like v0.1.0 builds every Minecraft version on both loaders and creates a GitHub Release with the mod
+# jars, their sources and the version's section of CHANGELOG.md. Then modrinth.yml publishes that release to Modrinth.
+# See CONTRIBUTING.md, "Releasing".
 name: Release
 
 on:
@@ -68,7 +68,7 @@ jobs:
             neoforge/versions/*/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}.jar
             neoforge/versions/*/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}-sources.jar
 
-  # One Modrinth version per loader, from the release just made (modrinth.yml).
+  # One Modrinth version per Minecraft version and loader, from the release just made (modrinth.yml).
   modrinth:
     needs: release
     uses: ./.github/workflows/modrinth.yml
