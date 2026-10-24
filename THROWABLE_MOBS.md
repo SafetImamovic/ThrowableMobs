@@ -687,7 +687,7 @@ Every number in §8 is in here. Validate ranges, and document each key in a comm
 
 **Naming: one spelling per concept.** Vanilla's `server.properties` is the cautionary tale: `white-list` (turns the list on) sits next to `enforce-whitelist` (kicks players not on it). `white-list` is the old key, kept so existing servers don't break; `enforce-whitelist` came later with the other spelling, and now admins have to remember both. Our config keys, tags and translation keys use `snake_case` with one term per concept (e.g. `put_down_ground_allowed` / `put_down_ground_denied`, never mixing allow/white). Pick names before 1.0: renaming a key later means keeping the old one forever.
 
-**Config screen: Configurator (planned, 2026-10-24).** The stock NeoForge `ConfigurationScreen` will be replaced by [Configurator](https://github.com/SafetImamovic/Configurator), my in-game config library: a three-pane screen (categories, options, live preview), bundled in the jar via jar-in-jar, so players install nothing extra. Storage stays as described above. Throwable Mobs previews the prompt and charge bar in the pane and shows a 3D mini scene for trajectory, flight pose, trail and catch highlight. Design and roadmap: `CONFIGURATOR.md` in that repo (§15 covers this mod). Starts after M5.
+**Config screen: YACL, optional (planned, 2026-10-24).** With [YACL](https://modrinth.com/mod/yacl) (YetAnotherConfigLib) installed, Mod Menu, the NeoForge config button and `/throwablemobs config` open a YACL screen; without it, the stock NeoForge `ConfigurationScreen` as now. YACL only draws the screen: each option is bound to its `ModConfigSpec` value, so storage stays as described above. Server options are greyed out on multiplayer servers. YACL's description pane takes a custom renderer in place of its image: it previews the prompt and charge bar, and a 3D mini scene for trajectory, flight pose, trail and catch highlight. Replaces the planned Configurator library (dropped 2026-10-24: YACL already does all of it, on both versions and loaders). Starts after M5.
 
 ---
 
@@ -857,7 +857,7 @@ Hand-written reference tables rot. Generate them:
 | **M3 — Behavior system** | `ThrowBehavior` API, registry, 6 vanilla behaviors (creeper, enderman, slime, chicken, blaze, cat), datapack loader, heuristics. |
 | **M4 — Catching** | Server catch check, recoil, self-catch, glow highlight, latency compensation. |
 | **M5 — Backport 1.21.1** | Stonecutter multi-version build, 1.21.1 on Fabric + NeoForge next to 26.3. **Done in 0.3.0.** Moved up from "Reach" (2026-10-11): most modpacks run 1.21.1 / 1.20.1. |
-| **M5b — Configurator** | New config screen with live HUD preview and 3D throw scene, from the Configurator library, bundled via jar-in-jar (§11). |
+| **M5b — YACL screen** | Optional YACL config screen with live HUD preview and 3D throw scene; the stock screen stays as the fallback (§11). |
 | **M6 — Carry+** | Carry blocks with their contents (chests, furnaces, spawners, modded machines) and throw them; carry and throw players (opt-in); stack mobs (small on big, thrown as a stack); holding animation in first and third person; Carry On compatibility. Goal: the best carry mod, not just the best throw mod. |
 | **M7 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
 | **M8 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. |
