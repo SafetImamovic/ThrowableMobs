@@ -76,7 +76,8 @@ public final class ThrowManager
         /** {@link io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload} from a client. */
         public static void onChargeRequest(ServerPlayer player)
         {
-                if (CarryRules.canThrow(player) && CarryManager.carriedBy(player) != null)
+                if (CarryManager.enabledFor(player) && CarryRules.canThrow(player)
+                        && CarryManager.carriedBy(player) != null)
                 {
                         CHARGING.put(player.getUUID(), player.level().getGameTime());
                 }
@@ -87,7 +88,7 @@ public final class ThrowManager
         {
                 Long start = CHARGING.remove(player.getUUID());
                 Mob mob = CarryManager.carriedBy(player);
-                if (start == null || mob == null || !CarryRules.canThrow(player))
+                if (start == null || mob == null || !CarryManager.enabledFor(player) || !CarryRules.canThrow(player))
                 {
                         return;
                 }
@@ -139,6 +140,14 @@ public final class ThrowManager
         /** Once per server tick, after entities ticked: move every mob in the air one step. */
         public static void tick(MinecraftServer server)
         {
+                if (!ThrowableMobsConfig.enabled())
+                {
+                        // Turned off: flights end and the mobs fall normally.
+                        FLYING.keySet().forEach(mob -> land(mob, Vec3.ZERO));
+                        FLYING.clear();
+                        CHARGING.clear();
+                        return;
+                }
                 ThrowConfig config = ThrowableMobsConfig.throwing();
                 Iterator<Map.Entry<Mob, Flight>> it = FLYING.entrySet().iterator();
                 while (it.hasNext())
@@ -325,8 +334,8 @@ public final class ThrowManager
         private static boolean canCatch(ServerPlayer player, Mob mob, UUID thrower, int ticks, boolean bounced,
                 CatchConfig config)
         {
-                if (!player.isAlive() || player.isPassenger() || !CarryRules.canUseHands(player)
-                        || CarryManager.carriedBy(player) != null)
+                if (!player.isAlive() || player.isPassenger() || !CarryManager.enabledFor(player)
+                        || !CarryRules.canUseHands(player) || CarryManager.carriedBy(player) != null)
                 {
                         return false;
                 }
@@ -661,6 +670,12 @@ public final class ThrowManager
         {
                 CHARGING.remove(player.getUUID());
                 CAUGHT_FROM.remove(player.getUUID());
+        }
+
+        /** The player turned the mod off for themselves mid-charge. */
+        static void forgetCharge(ServerPlayer player)
+        {
+                CHARGING.remove(player.getUUID());
         }
 
         /** A normal pick-up: whatever {@code player} caught before is no longer theirs to return. */

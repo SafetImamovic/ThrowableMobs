@@ -21,6 +21,8 @@ public final class PlayerConfig
 
         public static final ModConfigSpec SPEC;
 
+        private static final BooleanValue ENABLED;
+
         private static final BooleanValue SHOW_PROMPT;
         private static final EnumValue<HudAnchor> PROMPT_ANCHOR;
         private static final IntValue PROMPT_OFFSET_X;
@@ -46,6 +48,13 @@ public final class PlayerConfig
         static
         {
                 ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+                builder.comment("The whole mod, for you.").push("general");
+                ENABLED = builder.comment("Off: your keys are plain Sneak and Use again, no prompt or charge bar,",
+                                "and you don't catch mobs thrown at you. Anything you carry is put down. Other",
+                                "players can still throw mobs, and those can still hit you.")
+                        .define("enabled", true);
+                builder.pop();
 
                 builder.comment("The pick-up / put-down / throw prompt.").push("prompt");
                 SHOW_PROMPT = builder.comment("Show the prompt when looking at a mob or while carrying one.")
@@ -133,6 +142,11 @@ public final class PlayerConfig
                         get(SPIRAL_SPEED).floatValue(),
                         get(CATCH_HIGHLIGHT),
                         get(FLIGHT_TRAIL));
+        }
+
+        static boolean enabled()
+        {
+                return get(ENABLED);
         }
 
         /** Not loaded on a dedicated server, which has no client config; the defaults apply there. */

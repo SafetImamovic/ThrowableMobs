@@ -15,6 +15,18 @@ public final class ThrowableMobsConfig
         {
         }
 
+        /** The server's {@code enabled}: off, nobody picks up, throws or catches. Synced to clients. */
+        public static boolean enabled()
+        {
+                return CreatorConfig.enabled();
+        }
+
+        /** This client's own {@code enabled}; the server hears of it through {@code PlayerEnabledPayload}. */
+        public static boolean playerEnabled()
+        {
+                return PlayerConfig.enabled();
+        }
+
         /** Current creator settings: the server's values once synced, the defaults before that. */
         public static CarryConfig carry()
         {

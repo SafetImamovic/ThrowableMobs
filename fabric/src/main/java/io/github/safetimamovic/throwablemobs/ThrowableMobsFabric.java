@@ -13,6 +13,7 @@ import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
 import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
+import io.github.safetimamovic.throwablemobs.network.PlayerEnabledPayload;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import net.fabricmc.api.ModInitializer;
@@ -88,6 +89,9 @@ public class ThrowableMobsFabric implements ModInitializer
                 serverbound.register(ChargeThrowPayload.TYPE, ChargeThrowPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(ChargeThrowPayload.TYPE,
                         (payload, context) -> ThrowManager.onChargeRequest(context.player()));
+                serverbound.register(PlayerEnabledPayload.TYPE, PlayerEnabledPayload.STREAM_CODEC);
+                ServerPlayNetworking.registerGlobalReceiver(PlayerEnabledPayload.TYPE,
+                        (payload, context) -> CarryManager.onPlayerEnabled(context.player(), payload.enabled()));
                 serverbound.register(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(ThrowPayload.TYPE,
                         (payload, context) -> ThrowManager.onThrowRequest(context.player()));

@@ -17,6 +17,15 @@ Per-mob numbers and behaviors don't belong here: set them with [mob profiles](mo
 Units: masses in game-kg, distances in blocks, speeds in blocks per tick, times in ticks (20 ticks = 1 second) unless a
 name says otherwise.
 
+## Turning the mod off (`[general]`)
+
+| Setting | Default | What it does |
+|---|---|---|
+| `enabled` | `true` | Off: nobody can pick up, throw or catch mobs. Carried mobs are put down and thrown mobs fall, right away. Mob profiles and the other settings are kept. |
+
+Each player can also turn the mod off for themselves, with `enabled` in their own settings: their keys are plain Sneak
+and Use again, they see no prompt, don't catch thrown mobs, and anything they carry is put down.
+
 ## When a carrier leaves the server
 
 What happens to a carried mob when its carrier logs out, or when the server stops while they carry it.

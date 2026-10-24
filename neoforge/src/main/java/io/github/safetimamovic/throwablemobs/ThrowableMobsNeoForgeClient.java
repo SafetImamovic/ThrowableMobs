@@ -6,6 +6,8 @@ import io.github.safetimamovic.throwablemobs.client.ConfigScreens;
 import io.github.safetimamovic.throwablemobs.client.ThrowableMobsClientCommand;
 import java.util.function.UnaryOperator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -16,6 +18,8 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen.Context;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen.Element;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 //? if >=26.1 {
@@ -33,12 +37,20 @@ public class ThrowableMobsNeoForgeClient
 {
         public ThrowableMobsNeoForgeClient(IEventBus modEventBus, ModContainer container)
         {
-                //? if >=26.1 {
-                CarryClient.init(ClientPacketDistributor::sendToServer);
-                //?} else
-                /*CarryClient.init(payload -> PacketDistributor.sendToServer(payload));*/
-                UnaryOperator<@Nullable Screen> configScreen = ConfigScreens
-                        .withYacl(parent -> new ConfigurationScreen(container, parent));
+                // Servers without the mod don't know the payloads.
+                CarryClient.init(payload ->
+                {
+                        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+                        if (connection != null && connection.hasChannel(payload))
+                        {
+                                //? if >=26.1 {
+                                ClientPacketDistributor.sendToServer(payload);
+                                //?} else
+                                /*PacketDistributor.sendToServer(payload);*/
+                        }
+                });
+                UnaryOperator<@Nullable Screen> configScreen = ConfigScreens.withYacl(
+                        parent -> new ConfigurationScreen(container, parent, ThrowableMobsNeoForgeClient::filter));
                 container.registerExtensionPoint(IConfigScreenFactory.class,
                         (IConfigScreenFactory) (mod, parent) -> configScreen.apply(parent));
                 ThrowableMobsClientCommand.init(configScreen);
@@ -71,5 +83,17 @@ public class ThrowableMobsNeoForgeClient
                         }
                 });
                 *///?}
+        }
+
+        /** The stock screen greys out the player's {@code enabled} while the server has the mod off. */
+        private static Element filter(Context context, String key, Element original)
+        {
+                if (!ConfigScreens.lockedByServer(context.modSpec(), context.keylist(), key))
+                {
+                        return original;
+                }
+                AbstractWidget widget = original.getWidget(Minecraft.getInstance().options);
+                ConfigScreens.showLockedByServer(widget);
+                return new Element(original.name(), original.tooltip(), widget, false);
         }
 }

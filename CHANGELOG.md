@@ -10,6 +10,11 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 - With [YACL](https://modrinth.com/mod/yacl) installed (optional), the settings screen is a YACL one, with every
   player and server setting. Server settings can only be changed in your own world. Without YACL, the screen stays as
   before.
+- An `enabled` setting on both sides. Server: off, nobody can pick up, throw or catch, carried mobs are put down and
+  thrown ones fall. Player: off, your keys are plain Sneak and Use again, no prompt, and you don't catch thrown mobs.
+  While the server has it off, your own setting is greyed out with a note saying so.
+- The prompt and charge bar settings in the YACL screen show a live preview: a small screen with the prompt and a
+  filling charge bar where they'd be, updated while you change the values.
 
 ## [0.3.0] - 2026-10-24
 

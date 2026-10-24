@@ -28,7 +28,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 *///?}
 import java.util.function.UnaryOperator;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen.Context;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen.Element;
 import org.jspecify.annotations.Nullable;
 
 public class ThrowableMobsFabricClient implements ClientModInitializer
@@ -47,8 +51,8 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                 ClientPlayNetworking.registerGlobalReceiver(ProfileSyncPayload.TYPE,
                         (payload, context) -> MobProfiles.onSync(payload));
                 // Opened from Mod Menu, through Forge Config API Port.
-                UnaryOperator<@Nullable Screen> configScreen = ConfigScreens
-                        .withYacl(parent -> new ConfigurationScreen(Constants.MOD_ID, parent));
+                UnaryOperator<@Nullable Screen> configScreen = ConfigScreens.withYacl(
+                        parent -> new ConfigurationScreen(Constants.MOD_ID, parent, ThrowableMobsFabricClient::filter));
                 ConfigScreenFactoryRegistry.INSTANCE.register(Constants.MOD_ID,
                         (modId, parent) -> configScreen.apply(parent));
                 ThrowableMobsClientCommand.init(configScreen);
@@ -79,5 +83,17 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                 // The trajectory preview, drawn by vanilla's gizmos from 26.1 on.
                 WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> ShapeCanvas.render());
                 *///?}
+        }
+
+        /** The stock screen greys out the player's {@code enabled} while the server has the mod off. */
+        private static Element filter(Context context, String key, Element original)
+        {
+                if (!ConfigScreens.lockedByServer(context.modSpec(), context.keylist(), key))
+                {
+                        return original;
+                }
+                AbstractWidget widget = original.getWidget(Minecraft.getInstance().options);
+                ConfigScreens.showLockedByServer(widget);
+                return new Element(original.name(), original.tooltip(), widget, false);
         }
 }
