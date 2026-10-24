@@ -36,6 +36,8 @@ public final class CreatorConfig
 
         public static final ModConfigSpec SPEC;
 
+        private static final BooleanValue ENABLED;
+
         private static final BooleanValue REQUIRE_EMPTY_HAND;
         private static final DoubleValue MAX_MASS;
         private static final DoubleValue DEFAULT_DENSITY;
@@ -105,6 +107,12 @@ public final class CreatorConfig
         static
         {
                 ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+                builder.comment("The whole mod on this server.").push("general");
+                ENABLED = builder.comment("Off: nobody can pick up, throw or catch mobs. Carried mobs are put down and",
+                                "thrown mobs fall, right away. Mob profiles and the other settings are kept.")
+                        .define("enabled", true);
+                builder.pop();
 
                 builder.comment("Who can pick up what. Which mobs can never be carried is set with the entity type",
                         "tag #throwablemobs:unthrowable; pets only their owner can carry with #throwablemobs:owner_only.")
@@ -389,6 +397,11 @@ public final class CreatorConfig
                         }
                 }
                 return new BehaviorConfig(get(BEHAVIORS_ENABLED), get(AUTO_DETECT_BEHAVIORS), Set.copyOf(disabled));
+        }
+
+        static boolean enabled()
+        {
+                return get(ENABLED);
         }
 
         /** A server config isn't loaded on a client outside a world; the defaults apply there. */

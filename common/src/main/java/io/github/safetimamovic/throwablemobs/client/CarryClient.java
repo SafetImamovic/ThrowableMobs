@@ -11,6 +11,7 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudConfi
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
+import io.github.safetimamovic.throwablemobs.network.PlayerEnabledPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
@@ -55,6 +56,8 @@ public final class CarryClient
         private static @Nullable KeyMapping conflict;
         /** The chat notice about {@link #conflict} went out; once per world joined. */
         private static boolean conflictNoticed;
+        /** The player's {@code enabled} as the server last heard it; servers start from enabled. */
+        private static boolean sentEnabled = true;
 
         private CarryClient()
         {
@@ -75,7 +78,15 @@ public final class CarryClient
                         LocalCarry.set(null);
                         conflict = null;
                         conflictNoticed = false;
+                        sentEnabled = true;
                         return;
+                }
+                boolean enabled = ThrowableMobsConfig.playerEnabled();
+                if (enabled != sentEnabled)
+                {
+                        // The server assumes enabled, so only a change from that needs telling.
+                        sendToServer.accept(new PlayerEnabledPayload(enabled));
+                        sentEnabled = enabled;
                 }
                 conflict = CarryKeys.foreignConflict(minecraft.options);
                 if (conflict != null && !conflictNoticed)
@@ -132,6 +143,12 @@ public final class CarryClient
                 boolean putDownPressed = consumeAll(CarryKeys.PUT_DOWN);
                 boolean throwPressed = consumeAll(CarryKeys.THROW);
                 boolean cancelPressed = consumeAll(CarryKeys.CANCEL_THROW);
+                if (!active())
+                {
+                        // Presses are still consumed, so none are left over for when it's turned back on.
+                        chargeTicks = -1;
+                        return;
+                }
                 LocalPlayer player = minecraft.player;
                 if (player == null || LocalCarry.get() == null)
                 {
@@ -285,13 +302,15 @@ public final class CarryClient
                 Minecraft minecraft = Minecraft.getInstance();
                 LocalPlayer player = minecraft.player;
                 HudConfig config = ThrowableMobsConfig.hud();
-                if (player == null || player.isSpectator())
+                if (player == null || player.isSpectator() || !active())
                 {
                         return;
                 }
                 if (chargeTicks >= 0 && config.showChargeBar() && LocalCarry.get() != null)
                 {
-                        renderChargeBar(graphics, config);
+                        int max = ThrowableMobsConfig.throwing().maxChargeTicks();
+                        drawChargeBar(graphics, graphics.guiWidth(), graphics.guiHeight(), config,
+                                ThrowPhysics.chargeFraction(Math.min(chargeTicks, max), max));
                 }
                 if (!config.showPrompt())
                 {
@@ -343,8 +362,38 @@ public final class CarryClient
                         return;
                 }
 
-                int x = graphics.guiWidth() / 2 + config.promptOffsetX();
-                int y = anchorY(graphics, config.promptAnchor()) + config.promptOffsetY();
+                drawPrompt(graphics, promptX(graphics.guiWidth(), config), promptY(graphics.guiHeight(), config),
+                        prompt, reason);
+        }
+
+        /** The server's and this player's {@code enabled}: off, the keys are vanilla's again and nothing is drawn. */
+        static boolean active()
+        {
+                return ThrowableMobsConfig.enabled() && ThrowableMobsConfig.playerEnabled();
+        }
+
+        /** The pick-up prompt, for the config screen's preview; empty if Pick up is unbound. */
+        static Component samplePrompt()
+        {
+                Component keys = inputKeys(CarryKeys.PICK_UP);
+                return keys != null ? Component.translatable("throwablemobs.prompt.pick_up", keys) : Component.empty();
+        }
+
+        /** Centre of the prompt's first line on a screen {@code guiWidth} wide. */
+        static int promptX(int guiWidth, HudConfig config)
+        {
+                return guiWidth / 2 + config.promptOffsetX();
+        }
+
+        static int promptY(int guiHeight, HudConfig config)
+        {
+                return anchorY(guiHeight, config.promptAnchor()) + config.promptOffsetY();
+        }
+
+        static void drawPrompt(GuiGraphicsExtractor graphics, int x, int y, Component prompt,
+                @Nullable Component reason)
+        {
+                Minecraft minecraft = Minecraft.getInstance();
                 graphics.centeredText(minecraft.font, prompt, x, y, PROMPT_COLOR);
                 if (reason != null)
                 {
@@ -353,26 +402,28 @@ public final class CarryClient
                 }
         }
 
-        /** Fills like a bow's pull: same ease curve as the charge the server measures. */
-        private static void renderChargeBar(GuiGraphicsExtractor graphics, HudConfig config)
+        /**
+         * On a screen of the given size. {@code charge} from 0 to 1: fills like a bow's pull, same ease curve as the
+         * charge the server measures.
+         */
+        static void drawChargeBar(GuiGraphicsExtractor graphics, int guiWidth, int guiHeight, HudConfig config,
+                double charge)
         {
-                int max = ThrowableMobsConfig.throwing().maxChargeTicks();
-                double charge = ThrowPhysics.chargeFraction(Math.min(chargeTicks, max), max);
                 int width = config.chargeBarWidth();
-                int left = graphics.guiWidth() / 2 + config.chargeBarOffsetX() - width / 2;
-                int top = anchorY(graphics, config.chargeBarAnchor()) + config.chargeBarOffsetY();
+                int left = guiWidth / 2 + config.chargeBarOffsetX() - width / 2;
+                int top = anchorY(guiHeight, config.chargeBarAnchor()) + config.chargeBarOffsetY();
                 int bottom = top + config.chargeBarHeight();
                 graphics.fill(left, top, left + width, bottom, BAR_BACKGROUND);
                 graphics.fill(left, top, left + (int) Math.round(width * charge), bottom, BAR_FILL);
         }
 
-        private static int anchorY(GuiGraphicsExtractor graphics, HudAnchor anchor)
+        private static int anchorY(int guiHeight, HudAnchor anchor)
         {
                 return switch (anchor)
                 {
-                        case CROSSHAIR -> graphics.guiHeight() / 2;
+                        case CROSSHAIR -> guiHeight / 2;
                         case TOP -> 0;
-                        case BOTTOM -> graphics.guiHeight();
+                        case BOTTOM -> guiHeight;
                 };
         }
 

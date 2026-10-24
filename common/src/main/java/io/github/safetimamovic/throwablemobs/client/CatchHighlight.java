@@ -37,7 +37,8 @@ public final class CatchHighlight
                 Entity previous = highlighted;
                 highlighted = null;
                 CatchConfig config = ThrowableMobsConfig.catching();
-                if (!ThrowableMobsConfig.hud().catchHighlight() || !config.enabled() || LocalCarry.get() != null
+                if (!CarryClient.active() || !ThrowableMobsConfig.hud().catchHighlight() || !config.enabled()
+                        || LocalCarry.get() != null
                         || player.isPassenger() || !CarryRules.canUseHands(player))
                 {
                         return;

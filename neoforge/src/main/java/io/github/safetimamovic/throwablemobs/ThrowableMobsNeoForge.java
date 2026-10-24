@@ -9,6 +9,7 @@ import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
 import io.github.safetimamovic.throwablemobs.network.ChargeThrowPayload;
 import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
+import io.github.safetimamovic.throwablemobs.network.PlayerEnabledPayload;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import io.github.safetimamovic.throwablemobs.platform.NeoForgeCarryStateAccess;
@@ -70,6 +71,9 @@ public class ThrowableMobsNeoForge
                                         payload.entityId()))
                         .playToServer(ChargeThrowPayload.TYPE, ChargeThrowPayload.STREAM_CODEC,
                                 (payload, context) -> ThrowManager.onChargeRequest((ServerPlayer) context.player()))
+                        .playToServer(PlayerEnabledPayload.TYPE, PlayerEnabledPayload.STREAM_CODEC,
+                                (payload, context) -> CarryManager.onPlayerEnabled((ServerPlayer) context.player(),
+                                        payload.enabled()))
                         .playToServer(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC,
                                 (payload, context) -> ThrowManager.onThrowRequest((ServerPlayer) context.player()))
                         .playToClient(ProfileSyncPayload.TYPE, ProfileSyncPayload.STREAM_CODEC,

@@ -10,9 +10,12 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryCon
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
+import io.github.safetimamovic.throwablemobs.network.PlayerEnabledPayload;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +74,9 @@ public final class CarryManager
         /** Carrier UUID to carried mob. Server-side only; mobs that load with a stale {@link CarryState} are restored. */
         private static final Map<UUID, Mob> CARRIED = new HashMap<>();
 
+        /** Players whose own {@code enabled} is off ({@link PlayerEnabledPayload}), until they log out. */
+        private static final Set<UUID> DISABLED_PLAYERS = new HashSet<>();
+
         /** {@link CarrierLogout#RESUME}: carrier UUID to the mob they left behind. In memory, so a restart forgets it. */
         private static final Map<UUID, LeftBehind> LEFT_BEHIND = new HashMap<>();
 
@@ -99,6 +105,7 @@ public final class CarryManager
         /** {@link io.github.safetimamovic.throwablemobs.network.DropCarriedPayload} from a client (put-down key). */
         public static void onDropRequest(ServerPlayer player)
         {
+                // Put-down still works with the mod off: nothing can be carried by then anyway.
                 if (!player.isSpectator())
                 {
                         drop(player);
@@ -108,7 +115,7 @@ public final class CarryManager
         /** {@link io.github.safetimamovic.throwablemobs.network.PickUpPayload} from a client (pick-up key). */
         public static void onPickUpRequest(ServerPlayer player, int entityId)
         {
-                if (!CarryRules.canUseHands(player) || carriedBy(player) != null
+                if (!enabledFor(player) || !CarryRules.canUseHands(player) || carriedBy(player) != null
                         || !(player.level().getEntity(entityId) instanceof Mob mob)
                         //? if >=26.1 {
                         || !player.isWithinEntityInteractionRange(mob, PICK_UP_REACH_TOLERANCE))
@@ -192,9 +199,55 @@ public final class CarryManager
                 release(mob, at);
         }
 
+        /**
+         * {@link PlayerEnabledPayload} from a client. Turned off, the player can't pick up, throw or catch until it's
+         * back on, and whatever they carry is put down at their feet.
+         */
+        public static void onPlayerEnabled(ServerPlayer player, boolean enabled)
+        {
+                if (enabled)
+                {
+                        DISABLED_PLAYERS.remove(player.getUUID());
+                        return;
+                }
+                DISABLED_PLAYERS.add(player.getUUID());
+                ThrowManager.forgetCharge(player);
+                putDownAtFeet(player);
+        }
+
+        /** The server's {@code enabled} and the player's own. */
+        public static boolean enabledFor(ServerPlayer player)
+        {
+                return ThrowableMobsConfig.enabled() && !DISABLED_PLAYERS.contains(player.getUUID());
+        }
+
+        private static void putDownAtFeet(ServerPlayer player)
+        {
+                Mob mob = CARRIED.remove(player.getUUID());
+                removeSlowdown(player);
+                if (mob != null && !mob.isRemoved())
+                {
+                        release(mob, landing(mob, player.position()));
+                }
+        }
+
         /** Once per server tick: keep carried mobs on their carriers' heads, drop them when the carry is broken. */
         public static void tick(MinecraftServer server)
         {
+                if (!ThrowableMobsConfig.enabled() && !CARRIED.isEmpty())
+                {
+                        // Turned off (config edit, reload): every carry ends where its carrier stands.
+                        for (UUID carrier : List.copyOf(CARRIED.keySet()))
+                        {
+                                ServerPlayer player = server.getPlayerList().getPlayer(carrier);
+                                Mob mob = CARRIED.remove(carrier);
+                                removeSlowdown(player);
+                                if (!mob.isRemoved())
+                                {
+                                        release(mob, player != null ? landing(mob, player.position()) : mob.position());
+                                }
+                        }
+                }
                 List<Map.Entry<ServerPlayer, Mob>> travelling = new ArrayList<>();
                 Iterator<Map.Entry<UUID, Mob>> it = CARRIED.entrySet().iterator();
                 while (it.hasNext())
@@ -332,6 +385,7 @@ public final class CarryManager
 
         public static void onLogout(ServerPlayer player)
         {
+                DISABLED_PLAYERS.remove(player.getUUID());
                 Mob mob = CARRIED.remove(player.getUUID());
                 removeSlowdown(player);
                 if (mob != null && !mob.isRemoved())
