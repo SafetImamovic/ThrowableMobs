@@ -41,9 +41,20 @@ configurations {
     }
 }
 
+// Stonecutter gives each version's project more than one source directory (the branch's src/ and the version's own),
+// so the loaders get one copy of everything.
+def collectCommonJava = tasks.register('collectCommonJava', Sync) {
+    from(sourceSets.main.java)
+    into(layout.buildDirectory.dir('collected/java'))
+}
+def collectCommonResources = tasks.register('collectCommonResources', Sync) {
+    from(sourceSets.main.resources)
+    into(layout.buildDirectory.dir('collected/resources'))
+}
+
 artifacts {
-    commonJava sourceSets.main.java.sourceDirectories.singleFile
-    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+    commonJava(collectCommonJava.map { it.destinationDir }) { builtBy(collectCommonJava) }
+    commonResources(collectCommonResources.map { it.destinationDir }) { builtBy(collectCommonResources) }
 }
 
 // Implement mcgradleconventions loader attribute

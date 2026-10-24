@@ -49,10 +49,10 @@ Useful tasks:
 
 ```sh
 ./gradlew :physics:test             # unit tests
-./gradlew :fabric:runClient         # dev client (Fabric)
-./gradlew :neoforge:runClient       # dev client (NeoForge)
-./gradlew :fabric:runServer         # dedicated server — test multiplayer features here
-./gradlew :fabric:runClient --debug-jvm   # waits for a debugger on port 5005
+./gradlew :fabric:26.3:runClient         # dev client (Fabric)
+./gradlew :neoforge:26.3:runClient       # dev client (NeoForge)
+./gradlew :fabric:26.3:runServer         # dedicated server — test multiplayer features here
+./gradlew :fabric:26.3:runClient --debug-jvm   # waits for a debugger on port 5005
 ```
 
 **Docs site:** the guide in `docs/guide` is also a [VitePress](https://vitepress.dev) site, deployed to GitHub Pages

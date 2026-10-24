@@ -35,8 +35,8 @@ jobs:
         with:
           name: throwablemobs-jars
           path: |
-            fabric/build/libs/*.jar
-            neoforge/build/libs/*.jar
+            fabric/versions/*/build/libs/*.jar
+            neoforge/versions/*/build/libs/*.jar
             !**/*-sources.jar
             !**/*-javadoc.jar
           if-no-files-found: error

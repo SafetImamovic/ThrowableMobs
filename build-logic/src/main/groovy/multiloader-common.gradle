@@ -3,8 +3,19 @@ plugins {
     id 'maven-publish'
 }
 
+// Stonecutter makes one project per branch and Minecraft version, like :fabric:26.3 (named "26.3"). Its Minecraft
+// version's properties come from versions/<version>/gradle.properties and override the root gradle.properties.
+def versionProperties = new Properties()
+rootProject.file("versions/${stonecutter.current.version}/gradle.properties").withInputStream { versionProperties.load(it) }
+versionProperties.each { key, value -> project.ext.set(key, value) }
+// common, fabric or neoforge
+ext.platform = project.parent.name
+// Every branch's project for one version is named after it (26.3), so the group tells :common:26.3 and :fabric:26.3
+// apart; with the same group and name Gradle would take one for the other.
+group = "${group}.${platform}"
+
 base {
-    archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+    archivesName = "${mod_id}-${platform}-${minecraft_version}"
 }
 
 java {
@@ -51,7 +62,7 @@ jar {
                 'Specification-Title'   : mod_name,
                 'Specification-Vendor'  : mod_author,
                 'Specification-Version' : project.jar.archiveVersion,
-                'Implementation-Title'  : project.name,
+                'Implementation-Title'  : platform,
                 'Implementation-Version': project.jar.archiveVersion,
                 'Implementation-Vendor' : mod_author,
                 'Built-On-Minecraft'    : minecraft_version

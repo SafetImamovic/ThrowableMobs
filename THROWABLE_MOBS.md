@@ -132,12 +132,12 @@ Optional: **JetBrains Runtime (JBR)** with enhanced class redefinition for much 
 ### 5.2 Gradle basics you'll use
 
 ```powershell
-./gradlew build                      # builds all loader jars → */build/libs
-./gradlew :fabric:runClient          # launch dev client (Fabric)
-./gradlew :neoforge:runClient        # launch dev client (NeoForge)
-./gradlew :fabric:runServer          # dedicated server — ALWAYS test multiplayer here
-./gradlew :fabric:runClient --debug-jvm   # waits for debugger on port 5005
-./gradlew :fabric:genSources         # Fabric: decompile MC sources for go-to-definition
+./gradlew build                      # builds all loader jars → */versions/<mc>/build/libs
+./gradlew :fabric:26.3:runClient          # launch dev client (Fabric)
+./gradlew :neoforge:26.3:runClient        # launch dev client (NeoForge)
+./gradlew :fabric:26.3:runServer          # dedicated server — ALWAYS test multiplayer here
+./gradlew :fabric:26.3:runClient --debug-jvm   # waits for debugger on port 5005
+./gradlew :fabric:26.3:genSources         # Fabric: decompile MC sources for go-to-definition
 ```
 
 NeoForge's ModDevGradle (`net.neoforged.moddev`) attaches decompiled sources automatically.
@@ -228,7 +228,7 @@ require("dap").configurations.java = {
 }
 ```
 
-Workflow: `./gradlew :fabric:runClient --debug-jvm` in a terminal → in Neovim `:lua require'dap'.continue()` → pick "Attach". Breakpoints + hot code replace work.
+Workflow: `./gradlew :fabric:26.3:runClient --debug-jvm` in a terminal → in Neovim `:lua require'dap'.continue()` → pick "Attach". Breakpoints + hot code replace work.
 
 **Gotchas:**
 - First import of a Minecraft project takes minutes (it indexes the whole game). Run `./gradlew build` once from the shell first so Gradle has everything downloaded.

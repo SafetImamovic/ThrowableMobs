@@ -102,12 +102,12 @@ Guide for pack devs and mod devs: [safetimamovic.github.io/ThrowableMobs](https:
 Requires JDK 25.
 
 ```sh
-./gradlew build                     # jars in fabric/build/libs and neoforge/build/libs
+./gradlew build                     # jars in fabric/versions/<mc>/build/libs and neoforge/versions/<mc>/build/libs
 ./gradlew :physics:test             # unit tests
-./gradlew :fabric:runClient         # dev client (Fabric)
-./gradlew :neoforge:runClient       # dev client (NeoForge); :neoforge:runClient2 for a second one
-./gradlew :fabric:runServer         # dedicated server
-./gradlew :fabric:runClient --debug-jvm   # wait for a debugger on port 5005
+./gradlew :fabric:26.3:runClient         # dev client (Fabric)
+./gradlew :neoforge:26.3:runClient       # dev client (NeoForge); :neoforge:26.3:runClient2 for a second one
+./gradlew :fabric:26.3:runServer         # dedicated server
+./gradlew :fabric:26.3:runClient --debug-jvm   # wait for a debugger on port 5005
 ```
 
 ## Layout

@@ -63,10 +63,10 @@ jobs:
           prerelease: ${{ steps.version.outputs.prerelease }}
           fail_on_unmatched_files: true
           files: |
-            fabric/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}.jar
-            fabric/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}-sources.jar
-            neoforge/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}.jar
-            neoforge/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}-sources.jar
+            fabric/versions/*/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}.jar
+            fabric/versions/*/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}-sources.jar
+            neoforge/versions/*/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}.jar
+            neoforge/versions/*/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}-sources.jar
 
   # One Modrinth version per loader, from the release just made (modrinth.yml).
   modrinth:
