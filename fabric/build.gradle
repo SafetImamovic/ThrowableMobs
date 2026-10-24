@@ -17,6 +17,29 @@ dependencies {
     "${mod('implementation')}"("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
     "${mod('implementation')}"("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_version}")
     "${mod('localRuntime')}"("maven.modrinth:modmenu:${modmenu_version}")
+    // Optional config screen.
+    "${mod('compileOnly')}"("maven.modrinth:yacl:${yacl_version}-fabric")
+    "${mod('localRuntime')}"("maven.modrinth:yacl:${yacl_version}-fabric")
+    if (obfuscated) {
+        // Remapping drops YACL's list of bundled libraries, so the dev run needs them on its own.
+        localRuntime('org.quiltmc.parsers:json:0.2.1')
+        localRuntime('org.quiltmc.parsers:gson:0.2.1')
+        localRuntime('com.twelvemonkeys.imageio:imageio-webp:3.12.0')
+    }
+}
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'QuiltMC'
+                url = 'https://maven.quiltmc.org/repository/release/'
+            }
+        }
+        filter {
+            includeGroup('org.quiltmc.parsers')
+        }
+    }
 }
 
 loom {

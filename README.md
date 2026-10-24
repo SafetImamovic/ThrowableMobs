@@ -32,10 +32,26 @@ Minecraft Java **1.21.1** and **26.3** · **Fabric** + **NeoForge** · MIT · **
   <img src="docs/public/screenshots/creeper-throw.gif" alt="Another player throws a creeper, and it explodes where it lands" width="640">
 </p>
 
-- **Fabric:** needs [Fabric API](https://modrinth.com/mod/fabric-api) and
-  [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port).
-- **NeoForge:** 21.1.197 (1.21.1) or 26.3.0.95 (26.3) or newer, nothing extra.
-- Install on both the client and the server.
+## Requirements
+
+Install on both the client and the server. Optional mods are client only.
+
+| | Minecraft 1.21.1 | Minecraft 26.3 |
+|---|---|---|
+| **Fabric, required** | [Fabric Loader](https://fabricmc.net/use/) 0.16.0+<br>[Fabric API](https://modrinth.com/mod/fabric-api) 0.109.0+<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 21.1.0+ | [Fabric Loader](https://fabricmc.net/use/) 0.19.5+<br>[Fabric API](https://modrinth.com/mod/fabric-api)<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 26.3.1+ |
+| **NeoForge, required** | [NeoForge](https://neoforged.net/) 21.1.197+ | [NeoForge](https://neoforged.net/) 26.3.0.95+ |
+| **Optional** (both loaders) | [YACL](https://modrinth.com/mod/yacl) 3.8.2+: a nicer settings screen | [YACL](https://modrinth.com/mod/yacl) 3.9.7+: a nicer settings screen |
+
+### Tested with
+
+| Mod | Minecraft | Loader | Result |
+|---|---|---|---|
+| [YACL](https://modrinth.com/mod/yacl) 3.8.2 | 1.21.1 | Fabric, NeoForge | Works: the settings screen is YACL's |
+| [YACL](https://modrinth.com/mod/yacl) 3.9.7 | 26.3 | Fabric, NeoForge | Works. On NeoForge, a warning about YACL's `logoFile` shows at startup; that's YACL's own metadata ([fix pending](https://github.com/isXander/YetAnotherConfigLib/pull/359)), click Proceed |
+| [Carry On](https://modrinth.com/mod/carry-on) | 26.3 | Fabric | Works. Both use Left Shift + Right Click: Carry On does the picking up and a chat message explains how to rebind ours |
+| [Carry On](https://modrinth.com/mod/carry-on) 2.12.0 | 26.3 | NeoForge | Carry On itself doesn't load on NeoForge 26.3 (its own bug) |
+
+Found a mod that doesn't work with it? [Open an issue](https://github.com/SafetImamovic/ThrowableMobs/issues).
 
 Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_MOBS.md).
 

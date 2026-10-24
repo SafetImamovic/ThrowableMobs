@@ -47,6 +47,18 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+// For the run configs only, not published, as in NeoForge's MDK.
+configurations {
+    localRuntime
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    // Optional config screen.
+    compileOnly("maven.modrinth:yacl:${yacl_version}-neoforge")
+    localRuntime("maven.modrinth:yacl:${yacl_version}-neoforge")
+}
+
 // Implement mcgradleconventions loader attribute
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->

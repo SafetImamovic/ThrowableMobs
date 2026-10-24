@@ -87,6 +87,8 @@ processResources {
             'fabric_api_requirement'       : fabric_api_requirement,
             'forgeconfigapiport_requirement': forgeconfigapiport_requirement,
             'neoforge_version_range'       : neoforge_version_range,
+            'yacl_requirement'             : yacl_requirement,
+            'yacl_version_range'           : yacl_version_range,
             'fabric_version'               : fabric_version,
             'fabric_loader_version'        : fabric_loader_version,
             'forgeconfigapiport_version'   : forgeconfigapiport_version,

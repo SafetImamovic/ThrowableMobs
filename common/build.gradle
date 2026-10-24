@@ -28,6 +28,8 @@ dependencies {
     // NeoForge's config API (ModConfigSpec). NeoForge has it built in; on Fabric, Forge Config API Port provides the
     // same classes, so config specs can live in common.
     compileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${forgeconfigapiport_version}")
+    // Optional; its API is the same on both loaders, and the NeoForge jar uses Mojang's names like :common does.
+    compileOnly("maven.modrinth:yacl:${yacl_version}-neoforge") { transitive = false }
 }
 
 configurations {
