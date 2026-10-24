@@ -5,6 +5,15 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- Minecraft 1.21.1, on Fabric (Fabric API 0.109.0 or newer) and NeoForge (21.1.197 or newer), with the same features
+  as 26.3. Its server config is per world, in the world's `serverconfig/` folder.
+
+### Changed
+
+- The catch outline uses vanilla's glowing outline, so a mob on a team glows in its team color.
+
 ## [0.2.0] - 2026-10-23
 
 ### Added

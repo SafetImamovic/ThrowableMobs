@@ -42,12 +42,12 @@ features:
 
 ## Install
 
-Minecraft Java **26.3**, on the client **and** the server.
+Minecraft Java **1.21.1** or **26.3**, on the client **and** the server. Both versions have the same features.
 
 | Loader | Also install |
 |---|---|
 | Fabric | [Fabric API](https://modrinth.com/mod/fabric-api), [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) |
-| NeoForge | Nothing |
+| NeoForge (21.1.197 or newer for 1.21.1, 26.3.0.95 or newer for 26.3) | Nothing |
 
 ## Controls
 

@@ -23,7 +23,7 @@
   <a href="https://github.com/SafetImamovic/ThrowableMobs/issues/new/choose"><b>Report a bug</b></a>
 </p>
 
-Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
+Minecraft Java **1.21.1** and **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
 
 <p align="center">
   <img src="docs/public/screenshots/throw-pig.gif" alt="Picking up a pig on a beach, charging the throw and throwing it across the sand" width="640">
@@ -34,7 +34,7 @@ Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
 
 - **Fabric:** needs [Fabric API](https://modrinth.com/mod/fabric-api) and
   [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port).
-- **NeoForge:** nothing extra.
+- **NeoForge:** 21.1.197 (1.21.1) or 26.3.0.95 (26.3) or newer, nothing extra.
 - Install on both the client and the server.
 
 Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_MOBS.md).
