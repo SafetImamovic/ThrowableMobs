@@ -32,7 +32,7 @@ include('physics')
 // properties (dependency versions, Java) are in versions/<minecraft version>/gradle.properties.
 stonecutter {
     create(rootProject) {
-        versions('26.3')
+        versions('1.21.1', '26.3')
         vcsVersion = '26.3'
         branch('common')
         branch('fabric')

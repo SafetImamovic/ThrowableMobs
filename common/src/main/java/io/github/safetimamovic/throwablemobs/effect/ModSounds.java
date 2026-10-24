@@ -30,7 +30,10 @@ public final class ModSounds
         {
                 for (SoundEvent sound : List.of(THROW, BOUNCE, IMPACT, CATCH))
                 {
+                        //? if >=26.1 {
                         registrar.register(Registries.SOUND_EVENT, sound.location(), sound);
+                        //?} else
+                        /*registrar.register(Registries.SOUND_EVENT, sound.getLocation(), sound);*/
                 }
         }
 }

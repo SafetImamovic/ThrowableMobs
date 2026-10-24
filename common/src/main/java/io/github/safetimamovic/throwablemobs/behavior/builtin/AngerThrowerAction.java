@@ -6,6 +6,7 @@ import io.github.safetimamovic.throwablemobs.api.BehaviorAction;
 import io.github.safetimamovic.throwablemobs.api.BehaviorType;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
 import net.minecraft.server.level.ServerPlayer;
+//? if >=26.1
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enderman;
@@ -40,7 +41,10 @@ public record AngerThrowerAction() implements BehaviorAction
                 mob.setTarget(player);
                 if (mob instanceof Enderman enderman)
                 {
+                        //? if >=26.1 {
                         enderman.setPersistentAngerTarget(EntityReference.of(player));
+                        //?} else
+                        /*enderman.setPersistentAngerTarget(player.getUUID());*/
                         enderman.startPersistentAngerTimer();
                 }
         }

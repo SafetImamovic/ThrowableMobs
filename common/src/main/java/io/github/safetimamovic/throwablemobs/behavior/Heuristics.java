@@ -16,7 +16,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enderman;
+//? if >=26.1 {
 import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
+//?} else
+/*import net.minecraft.world.entity.monster.Slime;*/
 
 /**
  * Guessed behaviors for modded mobs without a profile, from what they extend: a modded creeper explodes, a modded
@@ -51,7 +54,10 @@ public final class Heuristics
                                 Optional.empty(), Optional.empty(), false),
                                 new ExplodeAction(1.5F, 0.01F, 4.0F, 2.0F, false, true)));
                 }
+                //? if >=26.1 {
                 if (mob instanceof AbstractCubeMob)
+                //?} else
+                /*if (mob instanceof Slime)*/
                 {
                         profile.blockRestitution(0.8).maxBounces(5);
                         behaviors.add(new DataBehavior(Trigger.IMPACT, HARD_IMPACT, new SplitAction(2, 4)));

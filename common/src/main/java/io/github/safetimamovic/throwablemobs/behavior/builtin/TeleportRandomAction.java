@@ -77,7 +77,7 @@ public record TeleportRandomAction(int range, boolean cancelDamage) implements B
 
         private boolean teleport(ServerLevel level, Mob mob)
         {
-                if (mob.is(ModTags.NO_TELEPORT))
+                if (mob.getType().builtInRegistryHolder().is(ModTags.NO_TELEPORT))
                 {
                         return false;
                 }

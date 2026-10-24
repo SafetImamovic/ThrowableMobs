@@ -50,6 +50,15 @@ def collectCommonJava = tasks.register('collectCommonJava', Sync) {
 def collectCommonResources = tasks.register('collectCommonResources', Sync) {
     from(sourceSets.main.resources)
     into(layout.buildDirectory.dir('collected/resources'))
+    // Data pack formats the resources are written for (26.3) that older versions read differently: entity predicates
+    // took the entity type as "type", and tag predicates a tag ID without the #.
+    if (stonecutter.eval(stonecutter.current.version, '<26.1')) {
+        filesMatching('data/*/advancement/*.json') {
+            filter { String line ->
+                line.replace('"minecraft:entity_type":', '"type":').replaceAll(/("id": *)"#/, '$1"')
+            }
+        }
+    }
 }
 
 artifacts {

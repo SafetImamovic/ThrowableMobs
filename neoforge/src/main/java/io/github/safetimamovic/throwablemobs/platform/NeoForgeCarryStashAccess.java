@@ -13,7 +13,10 @@ public final class NeoForgeCarryStashAccess implements ICarryStashAccess
         // only, so not synced.
         private static final Supplier<AttachmentType<CompoundTag>> CARRY_STASH = NeoForgeCarryStateAccess.ATTACHMENT_TYPES
                 .register("carry_stash", () -> AttachmentType.<CompoundTag>builder(() -> null)
+                        //? if >=26.1 {
                         .serialize(CompoundTag.CODEC.fieldOf("mob"))
+                        //?} else
+                        /*.serialize(CompoundTag.CODEC)*/
                         .build());
 
         @Override

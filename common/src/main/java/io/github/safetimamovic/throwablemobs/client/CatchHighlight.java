@@ -10,7 +10,6 @@ import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.OptionalDouble;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
@@ -25,7 +24,6 @@ public final class CatchHighlight
 {
         /** How many ticks of the mob's path ahead count, at its current speed. */
         private static final int LOOKAHEAD_TICKS = 10;
-        private static final int COLOR = 0xFFFFFFFF;
 
         private static @Nullable Entity highlighted;
 
@@ -70,13 +68,10 @@ public final class CatchHighlight
                 }
         }
 
-        /** Called from the renderer while it fills in an entity's render state. */
-        public static void extract(Entity entity, EntityRenderState state)
+        /** Whether {@code entity} gets the outline, asked by vanilla's glowing check (see {@code MinecraftMixin}). */
+        public static boolean isHighlighted(Entity entity)
         {
-                if (entity == highlighted)
-                {
-                        state.outlineColor = COLOR;
-                }
+                return entity == highlighted;
         }
 
         private static boolean canCatch(ClientLevel level, LocalPlayer player, Mob mob, ThrowState state,

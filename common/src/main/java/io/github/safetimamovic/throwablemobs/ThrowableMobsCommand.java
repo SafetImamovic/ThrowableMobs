@@ -63,7 +63,10 @@ public final class ThrowableMobsCommand
                 LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(Constants.MOD_ID)
                         .executes(ThrowableMobsCommand::clientOnly)
                         .then(Commands.literal("profile")
+                                //? if >=26.1 {
                                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                                //?} else
+                                /*.requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))*/
                                 .then(Commands.argument("mob", EntityArgument.entity())
                                         .executes(ThrowableMobsCommand::profile)));
                 for (String subcommand : CLIENT_SUBCOMMANDS)

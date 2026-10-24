@@ -1,3 +1,4 @@
+//? if >=1.21.2 {
 package io.github.safetimamovic.throwablemobs.mixin;
 
 import io.github.safetimamovic.throwablemobs.client.FlightPoseState;
@@ -43,3 +44,4 @@ abstract class LivingEntityRenderStateMixin implements FlightPoseState
                 return throwablemobs$flightSpin;
         }
 }
+//?}

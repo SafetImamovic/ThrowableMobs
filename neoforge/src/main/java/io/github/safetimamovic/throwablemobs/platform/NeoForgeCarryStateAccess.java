@@ -20,7 +20,10 @@ public final class NeoForgeCarryStateAccess implements ICarryStateAccess
         private static final Supplier<AttachmentType<CarryState>> CARRY_STATE = ATTACHMENT_TYPES.register(
                 "carry_state",
                 () -> AttachmentType.<CarryState>builder(() -> null)
+                        //? if >=26.1 {
                         .serialize(CarryState.MAP_CODEC)
+                        //?} else
+                        /*.serialize(CarryState.CODEC)*/
                         .sync(CarryState.STREAM_CODEC)
                         .build());
 

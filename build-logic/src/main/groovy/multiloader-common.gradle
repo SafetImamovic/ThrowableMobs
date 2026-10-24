@@ -25,6 +25,7 @@ java {
 }
 
 repositories {
+    mavenCentral()
     exclusiveContent {
         forRepository {
             maven {
@@ -47,6 +48,11 @@ repositories {
             includeGroup('maven.modrinth')
         }
     }
+}
+
+dependencies {
+    // @Nullable; Minecraft brings it from 26.1 on, older versions don't.
+    compileOnly('org.jspecify:jspecify:1.0.0')
 }
 
 tasks.withType(Jar).configureEach {
@@ -76,6 +82,11 @@ processResources {
             'group'                        : project.group, //Else we target the task's group.
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
+            'minecraft_version_range_fabric': minecraft_version_range_fabric,
+            'fabric_loader_requirement'    : fabric_loader_requirement,
+            'fabric_api_requirement'       : fabric_api_requirement,
+            'forgeconfigapiport_requirement': forgeconfigapiport_requirement,
+            'neoforge_version_range'       : neoforge_version_range,
             'fabric_version'               : fabric_version,
             'fabric_loader_version'        : fabric_loader_version,
             'forgeconfigapiport_version'   : forgeconfigapiport_version,
@@ -103,6 +114,17 @@ processResources {
 
     filesMatching(['pack.mcmeta', 'fabric.mod.json', '*.mixins.json']) {
         expand jsonExpandProps
+    }
+
+    // Mixins whose target class only exists in some Minecraft versions, with the versions they're for; the other
+    // versions' mixin configs leave their line out (so none of them may be the last entry of a list).
+    def versionedMixins = ['LivingEntityRenderStateMixin': '>=1.21.2']
+    filesMatching('*.mixins.json') {
+        filter { String line ->
+            versionedMixins.any { name, versions ->
+                line.contains("\"${name}\"") && !stonecutter.eval(stonecutter.current.version, versions)
+            } ? null : line
+        }
     }
 
     inputs.properties(expandProps)

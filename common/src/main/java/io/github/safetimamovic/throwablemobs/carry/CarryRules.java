@@ -7,7 +7,10 @@ import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import io.github.safetimamovic.throwablemobs.tags.ModTags;
 import java.util.Locale;
+//? if <26.1
+/*import java.util.UUID;*/
 import net.minecraft.network.chat.Component;
+//? if >=26.1
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
@@ -73,7 +76,7 @@ public final class CarryRules
                         return Denial.ALREADY_CARRIED;
                 }
                 // Ender dragon: multipart, its parts can't follow a carrier.
-                if (mob.is(ModTags.UNTHROWABLE) || mob instanceof EnderDragon
+                if (mob.getType().builtInRegistryHolder().is(ModTags.UNTHROWABLE) || mob instanceof EnderDragon
                         || (!config.allowVillagers() && mob instanceof AbstractVillager))
                 {
                         return Denial.UNTHROWABLE;
@@ -112,8 +115,14 @@ public final class CarryRules
                 {
                         return false;
                 }
-                boolean ownerOnly = ThrowableMobsConfig.carry().ownerOnlyForTamed() || mob.is(ModTags.OWNER_ONLY);
+                boolean ownerOnly = ThrowableMobsConfig.carry().ownerOnlyForTamed()
+                        || mob.getType().builtInRegistryHolder().is(ModTags.OWNER_ONLY);
+                //? if >=26.1 {
                 EntityReference<LivingEntity> owner = ownable.getOwnerReference();
                 return ownerOnly && owner != null && !owner.getUUID().equals(player.getUUID());
+                //?} else {
+                /*UUID owner = ownable.getOwnerUUID();
+                return ownerOnly && owner != null && !owner.equals(player.getUUID());
+                *///?}
         }
 }

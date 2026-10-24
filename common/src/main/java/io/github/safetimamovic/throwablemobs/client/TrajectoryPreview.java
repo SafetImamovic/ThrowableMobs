@@ -12,9 +12,6 @@ import java.util.List;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.gizmos.GizmoStyle;
-import net.minecraft.gizmos.Gizmos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -26,8 +23,8 @@ import org.jspecify.annotations.Nullable;
  * Dotted path of the throw being charged, from the client's own charge, look direction and movement. It runs the
  * server's flight tick by tick: move with vanilla collision ({@link Entity#collideBoundingBox}, what
  * {@link Entity#move} uses), bounce off blocks like {@link ThrowManager#bounceVelocity} or stop there, stop at the
- * first entity or water, then {@link ThrowPhysics#stepVelocity}. Drawn with vanilla gizmos from the client tick,
- * which vanilla collects per tick and draws every frame until the next one.
+ * first entity or water, then {@link ThrowPhysics#stepVelocity}. Drawn once per client tick on a
+ * {@link PreviewCanvas}, which shows it until the next tick.
  */
 final class TrajectoryPreview
 {
@@ -52,7 +49,7 @@ final class TrajectoryPreview
         {
         }
 
-        static void draw(ClientLevel level, LocalPlayer player, Mob mob, int chargeTicks)
+        static void draw(ClientLevel level, LocalPlayer player, Mob mob, int chargeTicks, PreviewCanvas canvas)
         {
                 ThrowConfig config = ThrowableMobsConfig.throwing();
                 TrajectoryStyle style = ThrowableMobsConfig.hud().trajectoryStyle();
@@ -78,28 +75,28 @@ final class TrajectoryPreview
                         Entity target = findTarget(level, player, mob, box, velocity, tick, config);
                         if (target != null)
                         {
-                                Gizmos.cuboid(target.getBoundingBox(), GizmoStyle.stroke(ENTITY_MARKER_COLOR, MARKER_WIDTH));
+                                canvas.box(target.getBoundingBox(), ENTITY_MARKER_COLOR, MARKER_WIDTH);
                                 return;
                         }
                         Vec3 allowed = Entity.collideBoundingBox(mob, velocity, box, level, List.of());
                         AABB next = box.move(allowed);
-                        drawSegment(style, tick, box.getCenter(), next.getCenter());
+                        drawSegment(canvas, style, tick, box.getCenter(), next.getCenter());
                         box = next;
                         if (allowed.distanceToSqr(velocity) > EPSILON)
                         {
                                 Vec3 bounce = ThrowManager.bounceVelocity(physics, config, bounces, velocity, allowed);
                                 if (bounce == null)
                                 {
-                                        drawLanding(box, allowed.y > velocity.y + EPSILON);
+                                        drawLanding(canvas, box, allowed.y > velocity.y + EPSILON);
                                         return;
                                 }
-                                Gizmos.point(box.getCenter(), BOUNCE_COLOR, BOUNCE_SIZE);
+                                canvas.point(box.getCenter(), BOUNCE_COLOR, BOUNCE_SIZE);
                                 velocity = bounce;
                                 bounces++;
                         }
                         if (inWater(level, box))
                         {
-                                drawLanding(box, false);
+                                drawLanding(canvas, box, false);
                                 return;
                         }
                         ThrowPhysics.Vector step = ThrowPhysics.stepVelocity(
@@ -109,32 +106,30 @@ final class TrajectoryPreview
         }
 
         /** On the ground: footprint plus a faint box for the mob's size. Against a wall or in water: the box. */
-        private static void drawLanding(AABB box, boolean onGround)
+        private static void drawLanding(PreviewCanvas canvas, AABB box, boolean onGround)
         {
                 if (!onGround)
                 {
-                        Gizmos.cuboid(box, GizmoStyle.stroke(BLOCK_MARKER_COLOR, MARKER_WIDTH));
+                        canvas.box(box, BLOCK_MARKER_COLOR, MARKER_WIDTH);
                         return;
                 }
-                double y = box.minY + FOOTPRINT_LIFT;
-                Gizmos.rect(new Vec3(box.minX, y, box.minZ), new Vec3(box.maxX, y, box.maxZ), Direction.UP,
-                        GizmoStyle.strokeAndFill(BLOCK_MARKER_COLOR, MARKER_WIDTH, FOOTPRINT_FILL));
-                Gizmos.cuboid(box, GizmoStyle.stroke(GHOST_BOX_COLOR, GHOST_BOX_WIDTH));
+                canvas.footprint(box, box.minY + FOOTPRINT_LIFT, BLOCK_MARKER_COLOR, MARKER_WIDTH, FOOTPRINT_FILL);
+                canvas.box(box, GHOST_BOX_COLOR, GHOST_BOX_WIDTH);
         }
 
-        private static void drawSegment(TrajectoryStyle style, int tick, Vec3 from, Vec3 to)
+        private static void drawSegment(PreviewCanvas canvas, TrajectoryStyle style, int tick, Vec3 from, Vec3 to)
         {
                 switch (style)
                 {
-                        case LINE -> Gizmos.line(from, to, PATH_COLOR, PATH_WIDTH);
+                        case LINE -> canvas.line(from, to, PATH_COLOR, PATH_WIDTH);
                         case DASHED ->
                         {
                                 if (tick % 2 == 1)
                                 {
-                                        Gizmos.line(from, to, PATH_COLOR, PATH_WIDTH);
+                                        canvas.line(from, to, PATH_COLOR, PATH_WIDTH);
                                 }
                         }
-                        case DOTS -> Gizmos.point(to, PATH_COLOR, DOT_SIZE);
+                        case DOTS -> canvas.point(to, PATH_COLOR, DOT_SIZE);
                         case LANDING_ONLY ->
                         {
                         }
