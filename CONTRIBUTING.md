@@ -240,13 +240,16 @@ Maintainers only.
    Release with both jars and the changelog section. The docs workflow deploys the docs site from the same tag, so
    docs changes merged since the last release go live with it. Versions with a `-` (like `0.2.0-beta.1`) and every `0.x`
    version are marked as pre-releases.
-4. The same workflow then publishes one Modrinth version per loader: the mod jar with its sources jar, the changelog
-   section, and on Fabric the required Fabric API and Forge Config API Port (`.github/workflows/modrinth.yml`). To
-   publish a release that's already on GitHub: Actions → Modrinth → Run workflow, with its tag.
+4. The same workflow then publishes one Modrinth and one CurseForge version per Minecraft version and loader: the
+   mod jar with its sources jar, the changelog section, and on Fabric the required Fabric API and Forge Config API Port
+   (`.github/workflows/publish.yml`). To publish a release that's already on GitHub: Actions → Publish → Run workflow,
+   with its tag.
 
-   One-time setup, without which this step is skipped: the repository variable `MODRINTH_ID` (the project's ID, from
-   the three-dot menu on its Modrinth page) and the secret `MODRINTH_TOKEN` (a Modrinth personal access token with the
-   *Create versions* scope).
+   One-time setup, per platform; a platform without it is skipped. Modrinth: the repository variable `MODRINTH_ID`
+   (the project's ID, from the three-dot menu on its Modrinth page) and the secret `MODRINTH_TOKEN` (a Modrinth
+   personal access token with the *Create versions* scope). CurseForge: the repository variable `CURSE_ID` (the
+   Project ID on its CurseForge page) and the secret `CURSE_TOKEN` (an API token from CurseForge → Account → API
+   Tokens).
 
 ## License
 

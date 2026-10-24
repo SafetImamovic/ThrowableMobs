@@ -1,10 +1,13 @@
-# Publishes a GitHub Release to Modrinth: one Modrinth version per Minecraft version and loader, with that release's
-# mod jar (and its sources jar, if the release has one) and its notes. Runs after every release tag (release.yml), or by
-# hand for a tag that's already released: Actions, Modrinth, Run workflow.
+# Publishes a GitHub Release to Modrinth and CurseForge: one version on each per Minecraft version and loader, with
+# that release's mod jar (and its sources jar, if the release has one) and its notes. Runs after every release tag
+# (release.yml), or by hand for a tag that's already released: Actions, Publish, Run workflow.
 #
-# Needs the repository variable MODRINTH_ID (the project's ID: Modrinth project page, three-dot menu, Copy ID) and the
-# secret MODRINTH_TOKEN (a Modrinth personal access token with the "Create versions" scope); skipped without the ID.
-name: Modrinth
+# Modrinth needs the repository variable MODRINTH_ID (the project's ID: Modrinth project page, three-dot menu, Copy ID)
+# and the secret MODRINTH_TOKEN (a Modrinth personal access token with the "Create versions" scope). CurseForge needs
+# the repository variable CURSE_ID (the Project ID on the CurseForge project page) and the secret CURSE_TOKEN (an API
+# token from CurseForge, Account, API Tokens). A platform without its token is skipped; the job is skipped without
+# either ID.
+name: Publish
 
 on:
   workflow_dispatch:
@@ -22,8 +25,8 @@ permissions:
   contents: read
 
 jobs:
-  modrinth:
-    if: vars.MODRINTH_ID != ''
+  publish:
+    if: vars.MODRINTH_ID != '' || vars.CURSE_ID != ''
     runs-on: ubuntu-latest
     strategy:
       # Each upload stands alone; one failing doesn't cancel the others.
@@ -34,26 +37,26 @@ jobs:
             loader: fabric
             java: 21
             dependencies: |
-              fabric-api(required){modrinth:P7dR8mSH}
-              forgeconfigapiport(required){modrinth:ohNO6lps}
-              yacl(optional){modrinth:1eAoo2KR}
+              fabric-api(required){modrinth:P7dR8mSH}{curseforge:306612}
+              forgeconfigapiport(required){modrinth:ohNO6lps}{curseforge:547434}
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
           - minecraft: '1.21.1'
             loader: neoforge
             java: 21
             dependencies: |
-              yacl(optional){modrinth:1eAoo2KR}
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
           - minecraft: '26.3'
             loader: fabric
             java: 25
             dependencies: |
-              fabric-api(required){modrinth:P7dR8mSH}
-              forgeconfigapiport(required){modrinth:ohNO6lps}
-              yacl(optional){modrinth:1eAoo2KR}
+              fabric-api(required){modrinth:P7dR8mSH}{curseforge:306612}
+              forgeconfigapiport(required){modrinth:ohNO6lps}{curseforge:547434}
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
           - minecraft: '26.3'
             loader: neoforge
             java: 25
             dependencies: |
-              yacl(optional){modrinth:1eAoo2KR}
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
     steps:
       - name: Take the release's jars and notes
         id: release
@@ -80,11 +83,13 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      # Pinned to v3.3.1's commit: this action gets the Modrinth token.
+      # Pinned to v3.3.1's commit: this action gets the Modrinth and CurseForge tokens.
       - uses: Kir-Antipov/mc-publish@52307b03863581dec6b652b83e597aec02ebb075
         with:
           modrinth-id: ${{ vars.MODRINTH_ID }}
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-id: ${{ vars.CURSE_ID }}
+          curseforge-token: ${{ secrets.CURSE_TOKEN }}
           files: ${{ steps.release.outputs.files }}
           name: Throwable Mobs ${{ steps.release.outputs.version }} (${{ matrix.loader == 'fabric' && 'Fabric' || 'NeoForge' }} ${{ matrix.minecraft }})
           version: ${{ steps.release.outputs.version }}
