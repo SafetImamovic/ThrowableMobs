@@ -1,17 +1,26 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.fabricmc.fabric-loom'
 }
+
+// Minecraft is unobfuscated from 26.1 on. Older versions need Loom's remapping variant, Mojang's mappings, and mods
+// in the mod* configurations so Loom remaps them.
+def obfuscated = stonecutter.eval(stonecutter.current.version, '<26.1')
+apply plugin: obfuscated ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabric-loom'
+def mod = { String configuration -> obfuscated ? "mod${configuration.capitalize()}" : configuration }
+
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft_version}")
-    implementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
-    implementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-    implementation("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_version}")
-    localRuntime("maven.modrinth:modmenu:${modmenu_version}")
+    if (obfuscated) {
+        mappings(loom.officialMojangMappings())
+    }
+    "${mod('implementation')}"("net.fabricmc:fabric-loader:${fabric_loader_version}")
+    "${mod('implementation')}"("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+    "${mod('implementation')}"("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_version}")
+    "${mod('localRuntime')}"("maven.modrinth:modmenu:${modmenu_version}")
 }
 
 loom {
-    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
+    def aw = rootProject.file("common/src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {
         accessWidenerPath.set(aw)
     }

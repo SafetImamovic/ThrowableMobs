@@ -26,13 +26,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+//? if >=26.1
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+//? if >=26.1 {
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntitySpawnRequest;
+//?}
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -44,6 +47,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
+//? if >=26.1
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -106,7 +110,10 @@ public final class CarryManager
         {
                 if (!CarryRules.canUseHands(player) || carriedBy(player) != null
                         || !(player.level().getEntity(entityId) instanceof Mob mob)
+                        //? if >=26.1 {
                         || !player.isWithinEntityInteractionRange(mob, PICK_UP_REACH_TOLERANCE))
+                        //?} else
+                        /*|| !player.canInteractWithEntity(mob, PICK_UP_REACH_TOLERANCE))*/
                 {
                         return;
                 }
@@ -114,7 +121,10 @@ public final class CarryManager
                 if (denial != null)
                 {
                         // The client only asks when its own check passed, so tell the player why the server disagrees.
+                        //? if >=26.1 {
                         player.sendOverlayMessage(denial.message());
+                        //?} else
+                        /*player.displayClientMessage(denial.message(), true);*/
                         return;
                 }
                 pickUp(player, mob);
@@ -169,7 +179,10 @@ public final class CarryManager
                 {
                         if (ThrowableMobsConfig.carry().putDownNeedsGround())
                         {
+                                //? if >=26.1 {
                                 player.sendOverlayMessage(Component.translatable("throwablemobs.carry.need_ground"));
+                                //?} else
+                                /*player.displayClientMessage(Component.translatable("throwablemobs.carry.need_ground"), true);*/
                                 return;
                         }
                         at = fallbackDropPosition(player, mob);
@@ -258,7 +271,10 @@ public final class CarryManager
         private static void travel(ServerPlayer carrier, Mob mob)
         {
                 CarryState state = Services.CARRY_STATE.get(mob);
+                //? if >=26.1 {
                 Entity arrived = mob.teleport(new TeleportTransition(carrier.level(), carrier.position()
+                //?} else
+                /*Entity arrived = mob.changeDimension(new TeleportTransition(carrier.serverLevel(), carrier.position()*/
                         .add(0.0, carrier.getBbHeight(), 0.0), Vec3.ZERO, carrier.getYRot(), mob.getXRot(),
                         TeleportTransition.DO_NOTHING));
                 if (state != null && arrived instanceof Mob arrivedMob && !arrivedMob.isRemoved())
@@ -419,6 +435,7 @@ public final class CarryManager
         private static void takeAlong(ServerPlayer carrier, Mob mob)
         {
                 release(mob, carrier.position());
+                //? if >=26.1 {
                 try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(mob.problemPath(),
                         Constants.LOG))
                 {
@@ -430,6 +447,15 @@ public final class CarryManager
                         }
                         Services.CARRY_STASH.set(carrier, NbtUtils.addCurrentDataVersion(output.buildResult()));
                 }
+                //?} else {
+                /*CompoundTag output = new CompoundTag();
+                if (!mob.saveAsPassenger(output))
+                {
+                        release(mob, landing(mob, carrier.position()));
+                        return;
+                }
+                Services.CARRY_STASH.set(carrier, NbtUtils.addCurrentDataVersion(output));
+                *///?}
                 // Players riding the mob aren't saved with it, so they stay; everything else leaves with it.
                 mob.getSelfAndPassengers().filter(entity -> !(entity instanceof Player)).toList()
                         .forEach(Entity::discard);
@@ -444,6 +470,7 @@ public final class CarryManager
                         return false;
                 }
                 Services.CARRY_STASH.remove(player);
+                //? if >=26.1 {
                 ServerLevel level = player.level();
                 Entity entity = EntityType.loadEntityRecursive(tag, level,
                         new EntitySpawnRequest(EntitySpawnReason.LOAD, true), loaded ->
@@ -452,11 +479,23 @@ public final class CarryManager
                                         loaded.getYRot(), loaded.getXRot());
                                 return loaded;
                         });
+                //?} else {
+                /*ServerLevel level = player.serverLevel();
+                Entity entity = EntityType.loadEntityRecursive(tag, level, loaded ->
+                {
+                        loaded.moveTo(player.getX(), player.getY() + player.getBbHeight(), player.getZ(),
+                                loaded.getYRot(), loaded.getXRot());
+                        return loaded;
+                });
+                *///?}
                 // Refused if an entity with its UUID is already loaded, like the copy in the world from before a crash.
                 if (!(entity instanceof Mob mob) || !level.tryAddFreshEntityWithPassengers(entity))
                 {
                         Constants.LOG.warn("Couldn't bring back the mob {} took along: {}", player.getScoreboardName(),
+                                //? if >=26.1 {
                                 tag.getStringOr("id", "unknown"));
+                                //?} else
+                                /*tag.getString("id"));*/
                         return false;
                 }
                 hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
@@ -473,7 +512,10 @@ public final class CarryManager
                 {
                         return false;
                 }
+                //? if >=26.1 {
                 if (player.level().getEntity(left.mob()) instanceof Mob mob && mob.isAlive() && !mob.isPassenger()
+                //?} else
+                /*if (player.serverLevel().getEntity(left.mob()) instanceof Mob mob && mob.isAlive() && !mob.isPassenger()*/
                         && mob.distanceTo(player) <= RESUME_RANGE && Services.CARRY_STATE.get(mob) == null
                         && Services.THROW_STATE.get(mob) == null)
                 {

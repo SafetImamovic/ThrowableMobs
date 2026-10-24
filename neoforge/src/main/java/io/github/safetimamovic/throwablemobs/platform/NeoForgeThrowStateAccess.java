@@ -12,7 +12,10 @@ public final class NeoForgeThrowStateAccess implements IThrowStateAccess
         // Same register as the carry state; no meaningful default, only ever read with getExistingDataOrNull.
         private static final Supplier<AttachmentType<ThrowState>> THROW_STATE = NeoForgeCarryStateAccess.ATTACHMENT_TYPES
                 .register("throw_state", () -> AttachmentType.<ThrowState>builder(() -> null)
+                        //? if >=26.1 {
                         .serialize(ThrowState.MAP_CODEC)
+                        //?} else
+                        /*.serialize(ThrowState.CODEC)*/
                         .sync(ThrowState.STREAM_CODEC)
                         .build());
 

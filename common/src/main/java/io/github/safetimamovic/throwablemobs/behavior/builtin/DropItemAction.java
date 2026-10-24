@@ -30,6 +30,9 @@ public record DropItemAction(Item item, int count) implements BehaviorAction
         @Override
         public void run(ThrowContext ctx)
         {
+                //? if >=26.1 {
                 ctx.mob().spawnAtLocation(ctx.level(), new ItemStack(item, count));
+                //?} else
+                /*ctx.mob().spawnAtLocation(new ItemStack(item, count));*/
         }
 }

@@ -22,7 +22,10 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
+//? if >=26.1 {
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+//?} else
+/*import net.neoforged.neoforge.event.AddReloadListenerEvent;*/
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
@@ -42,8 +45,12 @@ public class ThrowableMobsNeoForge
         public ThrowableMobsNeoForge(IEventBus modEventBus, ModContainer container)
         {
                 ThrowableMobs.init();
-                // SYNCED: NeoForge's synced-to-clients config (called SERVER on Fabric's port); same file names on both.
+                // SYNCED: NeoForge's synced-to-clients config (called SERVER on Fabric's port, and before 26.1, where
+                // the file is per world, in serverconfig/); same file names on both.
+                //? if >=26.1 {
                 container.registerConfig(ModConfig.Type.SYNCED, CreatorConfig.SPEC, CreatorConfig.FILE_NAME);
+                //?} else
+                /*container.registerConfig(ModConfig.Type.SERVER, CreatorConfig.SPEC, CreatorConfig.FILE_NAME);*/
                 container.registerConfig(ModConfig.Type.CLIENT, PlayerConfig.SPEC, PlayerConfig.FILE_NAME);
                 NeoForgeCarryStateAccess.ATTACHMENT_TYPES.register(modEventBus);
                 // Fires once per registry; RegisterEvent.register ignores keys of the other registries.
@@ -71,9 +78,20 @@ public class ThrowableMobsNeoForge
                 IEventBus bus = NeoForge.EVENT_BUS;
                 bus.addListener(ThrowableMobsNeoForge::onEntityInteract);
                 bus.addListener((RegisterCommandsEvent event) -> ThrowableMobsCommand.register(event.getDispatcher()));
+                //? if >=26.1 {
                 bus.addListener((AddServerReloadListenersEvent event) -> event
                         .addListener(MobProfileReloadListener.ID, new MobProfileReloadListener()));
                 bus.addListener((TagsUpdatedEvent.ServerDataLoad event) -> MobProfiles.onTagsLoaded());
+                //?} else {
+                /*bus.addListener((AddReloadListenerEvent event) -> event.addListener(new MobProfileReloadListener()));
+                bus.addListener((TagsUpdatedEvent event) ->
+                {
+                        if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD)
+                        {
+                                MobProfiles.onTagsLoaded();
+                        }
+                });
+                *///?}
                 // On join and after every /reload, once the new tags and profiles are in.
                 bus.addListener((OnDatapackSyncEvent event) -> event.getRelevantPlayers()
                         .forEach(player -> PacketDistributor.sendToPlayer(player, MobProfiles.syncPayload())));

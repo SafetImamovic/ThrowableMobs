@@ -38,6 +38,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+//? if >=26.1
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -404,7 +405,10 @@ public final class ThrowManager
                                 thrower);
                 }
                 ThrowEffects.caught(level, mob, momentum);
+                //? if >=26.1 {
                 catcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+                //?} else
+                /*catcher.swing(InteractionHand.MAIN_HAND, true);*/
                 if (!catcher.getUUID().equals(flight.thrower()))
                 {
                         CAUGHT_FROM.put(catcher.getUUID(), flight.thrower());
@@ -547,7 +551,7 @@ public final class ThrowManager
                 boolean immune = switch (config.selfDamage())
                 {
                         case ALL -> false;
-                        case RESPECT_TAG -> mob.is(ModTags.NO_SELF_DAMAGE);
+                        case RESPECT_TAG -> mob.getType().builtInRegistryHolder().is(ModTags.NO_SELF_DAMAGE);
                         case NONE -> true;
                 };
                 return immune ? 0.0 : multiplier(profile.selfMultiplier());
@@ -570,11 +574,16 @@ public final class ThrowManager
                 {
                         return;
                 }
+                //? if >=26.1 {
                 if (thrower != null && entity instanceof LivingEntity living && !(entity instanceof Player))
                 {
                         living.setLastHurtByPlayer(thrower, KILL_CREDIT_TICKS);
                 }
                 entity.hurtServer(level, source, (float) amount);
+                //?} else {
+                /*// The thrower is the source's entity, so hurt gives them the kill credit.
+                entity.hurt(source, (float) amount);
+                *///?}
         }
 
         /**

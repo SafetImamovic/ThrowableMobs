@@ -41,9 +41,29 @@ configurations {
     }
 }
 
+// Stonecutter gives each version's project more than one source directory (the branch's src/ and the version's own),
+// so the loaders get one copy of everything.
+def collectCommonJava = tasks.register('collectCommonJava', Sync) {
+    from(sourceSets.main.java)
+    into(layout.buildDirectory.dir('collected/java'))
+}
+def collectCommonResources = tasks.register('collectCommonResources', Sync) {
+    from(sourceSets.main.resources)
+    into(layout.buildDirectory.dir('collected/resources'))
+    // Data pack formats the resources are written for (26.3) that older versions read differently: entity predicates
+    // took the entity type as "type", and tag predicates a tag ID without the #.
+    if (stonecutter.eval(stonecutter.current.version, '<26.1')) {
+        filesMatching('data/*/advancement/*.json') {
+            filter { String line ->
+                line.replace('"minecraft:entity_type":', '"type":').replaceAll(/("id": *)"#/, '$1"')
+            }
+        }
+    }
+}
+
 artifacts {
-    commonJava sourceSets.main.java.sourceDirectories.singleFile
-    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+    commonJava(collectCommonJava.map { it.destinationDir }) { builtBy(collectCommonJava) }
+    commonResources(collectCommonResources.map { it.destinationDir }) { builtBy(collectCommonResources) }
 }
 
 // Implement mcgradleconventions loader attribute

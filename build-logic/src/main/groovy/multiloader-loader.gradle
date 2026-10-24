@@ -2,28 +2,34 @@ plugins {
     id 'multiloader-common'
 }
 
+// The common project of the same Minecraft version, like :common:26.3.
+def commonPath = ":common:${stonecutter.current.version}"
+
 configurations {
     commonJava {
         canBeResolved = true
+        canBeConsumed = false
     }
     commonResources {
         canBeResolved = true
+        canBeConsumed = false
     }
     // :physics sources are compiled into the loader jar, same as :common.
     physicsJava {
         canBeResolved = true
+        canBeConsumed = false
     }
 }
 
 dependencies {
-    compileOnly(project(':common')) {
+    compileOnly(project(commonPath)) {
         def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
         attributes {
             attribute(loaderAttribute, 'common')
         }
     }
-    commonJava(project(path: ':common', configuration: 'commonJava'))
-    commonResources(project(path: ':common', configuration: 'commonResources'))
+    commonJava(project(path: commonPath, configuration: 'commonJava'))
+    commonResources(project(path: commonPath, configuration: 'commonResources'))
     physicsJava(project(path: ':physics', configuration: 'physicsJava'))
 }
 

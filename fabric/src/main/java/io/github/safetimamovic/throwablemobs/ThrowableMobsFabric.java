@@ -1,6 +1,9 @@
 package io.github.safetimamovic.throwablemobs;
 
+//? if >=26.1 {
 import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
+//?} else
+/*import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;*/
 import io.github.safetimamovic.throwablemobs.behavior.MobProfileReloadListener;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
@@ -23,7 +26,16 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//? if >=26.1 {
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+//?} else {
+/*import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
+*///?}
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -43,35 +55,50 @@ public class ThrowableMobsFabric implements ModInitializer
                         @SuppressWarnings({"unchecked", "rawtypes"})
                         public <T> void register(ResourceKey<? extends Registry<T>> registry, Identifier id, T value)
                         {
+                                //? if >=26.1 {
                                 Registry<T> target = (Registry<T>) BuiltInRegistries.REGISTRY
                                         .getValueOrThrow((ResourceKey) registry);
+                                //?} else
+                                /*Registry<T> target = (Registry<T>) BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) registry);*/
                                 Registry.register(target, id, value);
                         }
                 });
+                //? if >=26.1 {
                 ConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.SERVER, CreatorConfig.SPEC,
                         CreatorConfig.FILE_NAME);
                 ConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.CLIENT, PlayerConfig.SPEC,
                         PlayerConfig.FILE_NAME);
+                var serverbound = PayloadTypeRegistry.serverboundPlay();
+                var clientbound = PayloadTypeRegistry.clientboundPlay();
+                //?} else {
+                /*NeoForgeConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.SERVER, CreatorConfig.SPEC,
+                        CreatorConfig.FILE_NAME);
+                NeoForgeConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.CLIENT, PlayerConfig.SPEC,
+                        PlayerConfig.FILE_NAME);
+                var serverbound = PayloadTypeRegistry.playC2S();
+                var clientbound = PayloadTypeRegistry.playS2C();
+                *///?}
 
-                PayloadTypeRegistry.serverboundPlay().register(DropCarriedPayload.TYPE,
-                        DropCarriedPayload.STREAM_CODEC);
+                serverbound.register(DropCarriedPayload.TYPE, DropCarriedPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(DropCarriedPayload.TYPE,
                         (payload, context) -> CarryManager.onDropRequest(context.player()));
-                PayloadTypeRegistry.serverboundPlay().register(PickUpPayload.TYPE, PickUpPayload.STREAM_CODEC);
+                serverbound.register(PickUpPayload.TYPE, PickUpPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(PickUpPayload.TYPE,
                         (payload, context) -> CarryManager.onPickUpRequest(context.player(), payload.entityId()));
-                PayloadTypeRegistry.serverboundPlay().register(ChargeThrowPayload.TYPE,
-                        ChargeThrowPayload.STREAM_CODEC);
+                serverbound.register(ChargeThrowPayload.TYPE, ChargeThrowPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(ChargeThrowPayload.TYPE,
                         (payload, context) -> ThrowManager.onChargeRequest(context.player()));
-                PayloadTypeRegistry.serverboundPlay().register(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC);
+                serverbound.register(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC);
                 ServerPlayNetworking.registerGlobalReceiver(ThrowPayload.TYPE,
                         (payload, context) -> ThrowManager.onThrowRequest(context.player()));
 
-                PayloadTypeRegistry.clientboundPlay().register(ProfileSyncPayload.TYPE,
-                        ProfileSyncPayload.STREAM_CODEC);
+                clientbound.register(ProfileSyncPayload.TYPE, ProfileSyncPayload.STREAM_CODEC);
+                //? if >=26.1 {
                 ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(MobProfileReloadListener.ID,
                         new MobProfileReloadListener());
+                //?} else {
+                /*ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricReloadListener());
+                *///?}
                 CommonLifecycleEvents.TAGS_LOADED.register((registries, client) ->
                 {
                         if (!client)
@@ -116,4 +143,27 @@ public class ThrowableMobsFabric implements ModInitializer
                         ThrowManager.clear();
                 });
         }
+
+        //? if <26.1 {
+        /*/^* Fabric API's reload listeners before 26.1 need an ID of their own. *^/
+        private static final class FabricReloadListener implements IdentifiableResourceReloadListener
+        {
+                private final MobProfileReloadListener listener = new MobProfileReloadListener();
+
+                @Override
+                public Identifier getFabricId()
+                {
+                        return MobProfileReloadListener.ID;
+                }
+
+                @Override
+                public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager,
+                        ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor,
+                        Executor gameExecutor)
+                {
+                        return listener.reload(barrier, manager, preparationsProfiler, reloadProfiler, backgroundExecutor,
+                                gameExecutor);
+                }
+        }
+        *///?}
 }

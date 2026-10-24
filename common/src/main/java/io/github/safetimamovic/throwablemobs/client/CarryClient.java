@@ -105,10 +105,15 @@ public final class CarryClient
                 LocalCarry.set(localCarried);
                 CatchHighlight.tick(level, player);
                 FlightTrail.tick(level);
+                //? if <26.1
+                /*ShapeCanvas.INSTANCE.clear();*/
                 if (chargeTicks >= 0 && localCarried instanceof Mob mob && ThrowableMobsConfig.hud().showTrajectory()
                         && ThrowableMobsConfig.throwing().allowTrajectory())
                 {
-                        TrajectoryPreview.draw(level, player, mob, chargeTicks);
+                        //? if >=26.1 {
+                        TrajectoryPreview.draw(level, player, mob, chargeTicks, GizmoCanvas.INSTANCE);
+                        //?} else
+                        /*TrajectoryPreview.draw(level, player, mob, chargeTicks, ShapeCanvas.INSTANCE);*/
                 }
         }
 
@@ -192,10 +197,17 @@ public final class CarryClient
         /** "[Left Shift] is also Carry On's Carry key, so picking up is left to it. Rebind with /throwablemobs keybinds." */
         private static void noticeConflict(Minecraft minecraft, KeyMapping other)
         {
+                //? if >=26.1 {
                 minecraft.gui.hud.getChat().addClientSystemMessage(Component.translatable("throwablemobs.conflict",
                         Component.translatable("throwablemobs.prompt.key", other.getTranslatedKeyMessage()),
                         Component.translatable(other.getName()), other.getCategory().label(),
                         ThrowableMobsClientCommand.link("keybinds")));
+                //?} else {
+                /*minecraft.gui.getChat().addMessage(Component.translatable("throwablemobs.conflict",
+                        Component.translatable("throwablemobs.prompt.key", other.getTranslatedKeyMessage()),
+                        Component.translatable(other.getName()), Component.translatable(other.getCategory()),
+                        ThrowableMobsClientCommand.link("keybinds")));
+                *///?}
         }
 
         private static void suppressUse(Minecraft minecraft, KeyMapping ours)
@@ -387,7 +399,12 @@ public final class CarryClient
         private static void lockToCarrier(Entity entity, Player carrier)
         {
                 double height = carrier.getBbHeight();
+                //? if >=26.1 {
                 entity.getInterpolation().cancel();
+                //?} else {
+                /*// Zero steps: drops the interpolation still running towards an older server position.
+                entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot(), 0);
+                *///?}
                 entity.setPos(carrier.getX(), carrier.getY() + height, carrier.getZ());
                 entity.xo = carrier.xo;
                 entity.yo = carrier.yo + height;

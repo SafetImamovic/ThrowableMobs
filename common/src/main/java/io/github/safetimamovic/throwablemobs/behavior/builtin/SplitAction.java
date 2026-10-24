@@ -11,8 +11,11 @@ import io.github.safetimamovic.throwablemobs.api.ImpactResult;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+//? if >=26.1 {
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
+//?} else
+/*import net.minecraft.world.entity.monster.Slime;*/
 
 /**
  * {@code throwablemobs:split}: a slime or magma cube bigger than the smallest size splits into {@code min_pieces} to
@@ -48,7 +51,10 @@ public record SplitAction(int minPieces, int maxPieces) implements BehaviorActio
 
         private boolean split(ServerLevel level, ThrowContext ctx)
         {
+                //? if >=26.1 {
                 if (!(ctx.mob() instanceof AbstractCubeMob cube) || cube.getSize() <= 1)
+                //?} else
+                /*if (!(ctx.mob() instanceof Slime cube) || cube.getSize() <= 1)*/
                 {
                         return false;
                 }
@@ -58,7 +64,10 @@ public record SplitAction(int minPieces, int maxPieces) implements BehaviorActio
                 cube.setSize(size, true);
                 for (int i = 1; i < pieces; i++)
                 {
+                        //? if >=26.1 {
                         AbstractCubeMob piece = cube.getType().create(level, EntitySpawnReason.TRIGGERED);
+                        //?} else
+                        /*Slime piece = cube.getType().create(level);*/
                         if (piece == null)
                         {
                                 continue;
@@ -71,8 +80,12 @@ public record SplitAction(int minPieces, int maxPieces) implements BehaviorActio
                                 piece.setPersistenceRequired();
                         }
                         double spread = cube.getBbWidth() / 2.0;
-                        piece.snapTo(cube.getX() + (random.nextDouble() - 0.5) * spread, cube.getY() + 0.5,
-                                cube.getZ() + (random.nextDouble() - 0.5) * spread, random.nextFloat() * 360.0F, 0.0F);
+                        double x = cube.getX() + (random.nextDouble() - 0.5) * spread;
+                        double z = cube.getZ() + (random.nextDouble() - 0.5) * spread;
+                        //? if >=26.1 {
+                        piece.snapTo(x, cube.getY() + 0.5, z, random.nextFloat() * 360.0F, 0.0F);
+                        //?} else
+                        /*piece.moveTo(x, cube.getY() + 0.5, z, random.nextFloat() * 360.0F, 0.0F);*/
                         level.addFreshEntity(piece);
                 }
                 return true;

@@ -23,7 +23,7 @@
   <a href="https://github.com/SafetImamovic/ThrowableMobs/issues/new/choose"><b>Report a bug</b></a>
 </p>
 
-Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
+Minecraft Java **1.21.1** and **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
 
 <p align="center">
   <img src="docs/public/screenshots/throw-pig.gif" alt="Picking up a pig on a beach, charging the throw and throwing it across the sand" width="640">
@@ -34,7 +34,7 @@ Minecraft Java **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
 
 - **Fabric:** needs [Fabric API](https://modrinth.com/mod/fabric-api) and
   [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port).
-- **NeoForge:** nothing extra.
+- **NeoForge:** 21.1.197 (1.21.1) or 26.3.0.95 (26.3) or newer, nothing extra.
 - Install on both the client and the server.
 
 Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_MOBS.md).
@@ -102,12 +102,12 @@ Guide for pack devs and mod devs: [safetimamovic.github.io/ThrowableMobs](https:
 Requires JDK 25.
 
 ```sh
-./gradlew build                     # jars in fabric/build/libs and neoforge/build/libs
+./gradlew build                     # jars in fabric/versions/<mc>/build/libs and neoforge/versions/<mc>/build/libs
 ./gradlew :physics:test             # unit tests
-./gradlew :fabric:runClient         # dev client (Fabric)
-./gradlew :neoforge:runClient       # dev client (NeoForge); :neoforge:runClient2 for a second one
-./gradlew :fabric:runServer         # dedicated server
-./gradlew :fabric:runClient --debug-jvm   # wait for a debugger on port 5005
+./gradlew :fabric:26.3:runClient         # dev client (Fabric)
+./gradlew :neoforge:26.3:runClient       # dev client (NeoForge); :neoforge:26.3:runClient2 for a second one
+./gradlew :fabric:26.3:runServer         # dedicated server
+./gradlew :fabric:26.3:runClient --debug-jvm   # wait for a debugger on port 5005
 ```
 
 ## Layout

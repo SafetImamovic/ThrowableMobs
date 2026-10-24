@@ -54,7 +54,10 @@ public final class ThrowableMobsClientCommand
         {
                 String command = "/" + Constants.MOD_ID + " " + subcommand;
                 return Component.literal(command).withStyle(style -> style.withColor(ChatFormatting.AQUA)
+                        //? if >=1.21.5 {
                         .withClickEvent(new ClickEvent.SuggestCommand(command)));
+                        //?} else
+                        /*.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)));*/
         }
 
         private static int help()
@@ -73,12 +76,18 @@ public final class ThrowableMobsClientCommand
         private static int open(Supplier<@Nullable Screen> screen)
         {
                 Minecraft minecraft = Minecraft.getInstance();
+                //? if >=26.1 {
                 minecraft.schedule(() -> minecraft.gui.setScreen(screen.get()));
+                //?} else
+                /*minecraft.tell(() -> minecraft.setScreen(screen.get()));*/
                 return 1;
         }
 
         private static void chat(Component message)
         {
+                //? if >=26.1 {
                 Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(message);
+                //?} else
+                /*Minecraft.getInstance().gui.getChat().addMessage(message);*/
         }
 }

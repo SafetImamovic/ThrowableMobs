@@ -13,7 +13,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.BaseFireBlock;
+//? if >=26.1 {
 import net.minecraft.world.level.gamerules.GameRules;
+//?} else
+/*import net.minecraft.world.level.GameRules;*/
 
 /**
  * {@code throwablemobs:ignite}: sets the hit entity on fire for {@code seconds}. On a block hit with
@@ -58,7 +61,10 @@ public record IgniteAction(float seconds, boolean fireOnBlock) implements Behavi
 
         private static void lightFire(ServerLevel level, BlockPos pos)
         {
+                //? if >=26.1 {
                 if (level.getGameRules().get(GameRules.MOB_GRIEFING) && level.getBlockState(pos).isAir())
+                //?} else
+                /*if (level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && level.getBlockState(pos).isAir())*/
                 {
                         level.setBlockAndUpdate(pos, BaseFireBlock.getState(level, pos));
                 }
