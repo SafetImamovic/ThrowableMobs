@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-24
+
 ### Added
 
 - With [YACL](https://modrinth.com/mod/yacl) installed (optional), the settings screen is a YACL one, with every
