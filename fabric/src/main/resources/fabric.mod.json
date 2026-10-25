@@ -36,5 +36,12 @@
     },
     "suggests": {
         "yet_another_config_lib_v3": "${yacl_requirement}"
+    },
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.kofi": "${donate}"
+            }
+        }
     }
 }
