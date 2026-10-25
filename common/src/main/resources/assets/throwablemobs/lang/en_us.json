@@ -147,5 +147,6 @@
     "throwablemobs.configuration.particles": "Particles",
     "throwablemobs.configuration.effect_min_energy": "Effect Min Energy",
     "throwablemobs.configuration.effect_full_energy": "Effect Full Energy",
-    "throwablemobs.configuration.flight_trail": "Flight Trail"
+    "throwablemobs.configuration.flight_trail": "Flight Trail",
+    "throwablemobs.configuration.ragdoll_in_flight": "Ragdoll In Flight"
 }

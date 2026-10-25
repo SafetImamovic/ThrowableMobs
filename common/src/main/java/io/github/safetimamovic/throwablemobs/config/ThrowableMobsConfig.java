@@ -295,7 +295,8 @@ public final class ThrowableMobsConfig
                 FlightPoseStyle flightPose,
                 float spiralSpeed,
                 boolean catchHighlight,
-                boolean flightTrail)
+                boolean flightTrail,
+                boolean ragdollInFlight)
         {
         }
 }

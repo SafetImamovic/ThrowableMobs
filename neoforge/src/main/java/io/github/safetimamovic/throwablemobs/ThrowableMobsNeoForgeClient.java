@@ -4,6 +4,8 @@ import io.github.safetimamovic.throwablemobs.client.CarryClient;
 import io.github.safetimamovic.throwablemobs.client.CarryKeys;
 import io.github.safetimamovic.throwablemobs.client.ConfigScreens;
 import io.github.safetimamovic.throwablemobs.client.ThrowableMobsClientCommand;
+import io.github.safetimamovic.throwablemobs.compat.RagdollifiedCompat;
+import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.function.UnaryOperator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -70,6 +72,11 @@ public class ThrowableMobsNeoForgeClient
                         .addListener((ClientTickEvent.Pre event) -> CarryClient.tickInput(Minecraft.getInstance()));
                 NeoForge.EVENT_BUS
                         .addListener((ClientTickEvent.Post event) -> CarryClient.tick(Minecraft.getInstance()));
+                if (Services.PLATFORM.isModLoaded(RagdollifiedCompat.MOD_ID))
+                {
+                        NeoForge.EVENT_BUS.addListener(
+                                (ClientTickEvent.Post event) -> RagdollifiedCompat.tick(Minecraft.getInstance()));
+                }
                 modEventBus
                         .addListener((RegisterGuiLayersEvent event) -> event.registerAbove(VanillaGuiLayers.CROSSHAIR,
                                 Constants.id("carry_prompt"), CarryClient::renderPrompt));
