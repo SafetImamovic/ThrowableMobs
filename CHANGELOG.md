@@ -5,6 +5,13 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- With [Ragdollified](https://modrinth.com/mod/ragdollified) installed (optional, NeoForge), thrown mobs go limp in the
+  air and get back up where they land. The ragdoll follows the real flight, so hits and landings don't change, and a
+  mob killed by the throw keeps its ragdoll. Player setting `ragdoll_in_flight` (on by default) turns it off. Tested on
+  1.21.1; Ragdollified's 26.3 build doesn't load on NeoForge 26.3.0.95 yet (its own bug).
+
 ## [0.4.1] - 2026-10-24
 
 ### Changed

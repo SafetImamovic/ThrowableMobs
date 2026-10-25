@@ -57,6 +57,9 @@ dependencies {
     // Optional config screen.
     compileOnly("maven.modrinth:yacl:${yacl_version}-neoforge")
     localRuntime("maven.modrinth:yacl:${yacl_version}-neoforge")
+    // Optional ragdolls in flight (compat/RagdollifiedCompat). Not in the run configs: its 26.3 build crashes on
+    // our NeoForge, so drop it into runs/client/mods to test.
+    compileOnly("maven.modrinth:ragdollified:${ragdollified_version}")
 }
 
 // Implement mcgradleconventions loader attribute

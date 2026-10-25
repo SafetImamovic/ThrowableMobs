@@ -44,6 +44,7 @@ public final class PlayerConfig
         private static final BooleanValue CATCH_HIGHLIGHT;
 
         private static final BooleanValue FLIGHT_TRAIL;
+        private static final BooleanValue RAGDOLL_IN_FLIGHT;
 
         static
         {
@@ -114,6 +115,9 @@ public final class PlayerConfig
                 builder.comment("Effects drawn on your screen only.").push("effects");
                 FLIGHT_TRAIL = builder.comment("A faint trail behind fast thrown mobs.")
                         .define("flight_trail", true);
+                RAGDOLL_IN_FLIGHT = builder.comment("With Ragdollified installed (NeoForge), thrown mobs go limp in the",
+                                "air and get back up when they land. Visual only, like flight_pose.")
+                        .define("ragdoll_in_flight", true);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -141,7 +145,8 @@ public final class PlayerConfig
                         get(FLIGHT_POSE),
                         get(SPIRAL_SPEED).floatValue(),
                         get(CATCH_HIGHLIGHT),
-                        get(FLIGHT_TRAIL));
+                        get(FLIGHT_TRAIL),
+                        get(RAGDOLL_IN_FLIGHT));
         }
 
         static boolean enabled()
