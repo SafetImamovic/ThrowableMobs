@@ -11,6 +11,16 @@ Changes per version that players, pack devs and mod devs will notice. Format:
   air and get back up where they land. The ragdoll follows the real flight, so hits and landings don't change, and a
   mob killed by the throw keeps its ragdoll. Player setting `ragdoll_in_flight` (on by default) turns it off. Tested on
   1.21.1; Ragdollified's 26.3 build doesn't load on NeoForge 26.3.0.95 yet (its own bug).
+- Cooldowns between picking up and putting down, so a double press no longer picks a mob up and drops it straight
+  back. Server settings `pick_up_cooldown_ticks` and `put_down_cooldown_ticks` (off by default); each player has their
+  own under `[cooldown]` (6 ticks by default), and the longer one counts.
+
+### Fixed
+
+- Carrying a mob made you faster: on jumps and steps, the mob on your head pushed you forward. Carried mobs no longer
+  push anyone.
+- Shulkers jittered and teleported away while carried, and didn't fly when thrown. They now sit still on your head,
+  fly like other mobs, and stick to a block where they land.
 
 ## [0.4.1] - 2026-10-24
 

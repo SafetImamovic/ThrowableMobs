@@ -37,6 +37,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 //? if >=26.1
 import net.minecraft.world.item.component.SwingAnimation;
@@ -640,6 +641,11 @@ public final class ThrowManager
                 {
                         mob.setNoAi(state.originalNoAi());
                         mob.setNoGravity(state.originalNoGravity());
+                }
+                if (mob instanceof Shulker)
+                {
+                        // Free in flight (ShulkerMixin); snaps back onto the block grid now.
+                        mob.setPos(mob.position());
                 }
                 mob.setDeltaMovement(motion);
                 mob.resetFallDistance();

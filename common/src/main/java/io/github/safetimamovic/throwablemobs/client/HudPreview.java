@@ -99,7 +99,9 @@ final class HudPreview implements ImageRenderer
                         saved.spiralSpeed(),
                         saved.catchHighlight(),
                         saved.flightTrail(),
-                        saved.ragdollInFlight());
+                        saved.ragdollInFlight(),
+                        saved.pickUpCooldownTicks(),
+                        saved.putDownCooldownTicks());
         }
 
         @SuppressWarnings("unchecked")

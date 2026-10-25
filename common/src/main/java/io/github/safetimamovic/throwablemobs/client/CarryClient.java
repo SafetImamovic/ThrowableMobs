@@ -58,6 +58,9 @@ public final class CarryClient
         private static boolean conflictNoticed;
         /** The player's {@code enabled} as the server last heard it; servers start from enabled. */
         private static boolean sentEnabled = true;
+        /** Game time the local carry started and last ended, for the cooldowns; -1 if not since joining. */
+        private static long carryStartedAt = -1;
+        private static long carryEndedAt = -1;
 
         private CarryClient()
         {
@@ -79,6 +82,8 @@ public final class CarryClient
                         conflict = null;
                         conflictNoticed = false;
                         sentEnabled = true;
+                        carryStartedAt = -1;
+                        carryEndedAt = -1;
                         return;
                 }
                 boolean enabled = ThrowableMobsConfig.playerEnabled();
@@ -111,6 +116,17 @@ public final class CarryClient
                         if (state.carrier().equals(player.getUUID()))
                         {
                                 localCarried = entity;
+                        }
+                }
+                if ((LocalCarry.get() == null) != (localCarried == null))
+                {
+                        if (localCarried != null)
+                        {
+                                carryStartedAt = level.getGameTime();
+                        }
+                        else
+                        {
+                                carryEndedAt = level.getGameTime();
                         }
                 }
                 LocalCarry.set(localCarried);
@@ -196,19 +212,29 @@ public final class CarryClient
                 }
                 if (LocalCarry.get() != null)
                 {
-                        if (putDownPressed)
+                        if (putDownPressed && !coolingDown(player, carryStartedAt,
+                                ThrowableMobsConfig.carry().putDownCooldownTicks(),
+                                ThrowableMobsConfig.hud().putDownCooldownTicks()))
                         {
                                 sendToServer.accept(DropCarriedPayload.INSTANCE);
                                 suppressUse(minecraft, CarryKeys.PUT_DOWN);
                         }
                 }
                 else if (pickUpPressed && conflict == null && CarryRules.canUseHands(player)
+                        && !coolingDown(player, carryEndedAt, ThrowableMobsConfig.carry().pickUpCooldownTicks(),
+                                ThrowableMobsConfig.hud().pickUpCooldownTicks())
                         && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob
                         && CarryRules.check(player, mob) == null)
                 {
                         sendToServer.accept(new PickUpPayload(mob.getId()));
                         suppressUse(minecraft, CarryKeys.PICK_UP);
                 }
+        }
+
+        /** The server's cooldown or the player's own, whichever is longer, counted from {@code since}. */
+        private static boolean coolingDown(LocalPlayer player, long since, int serverTicks, int playerTicks)
+        {
+                return since >= 0 && player.level().getGameTime() - since < Math.max(serverTicks, playerTicks);
         }
 
         /** "[Left Shift] is also Carry On's Carry key, so picking up is left to it. Rebind with /throwablemobs keybinds." */
