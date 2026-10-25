@@ -23,6 +23,9 @@ public final class PlayerConfig
 
         private static final BooleanValue ENABLED;
 
+        private static final IntValue PICK_UP_COOLDOWN_TICKS;
+        private static final IntValue PUT_DOWN_COOLDOWN_TICKS;
+
         private static final BooleanValue SHOW_PROMPT;
         private static final EnumValue<HudAnchor> PROMPT_ANCHOR;
         private static final IntValue PROMPT_OFFSET_X;
@@ -55,6 +58,16 @@ public final class PlayerConfig
                                 "and you don't catch mobs thrown at you. Anything you carry is put down. Other",
                                 "players can still throw mobs, and those can still hit you.")
                         .define("enabled", true);
+                builder.pop();
+
+                builder.comment("Short pauses so a double press doesn't pick a mob up and put it straight back down.",
+                        "The server may set longer ones; the longer one counts.").push("cooldown");
+                PICK_UP_COOLDOWN_TICKS = builder.comment("Ticks after putting down or throwing a mob before you can",
+                                "pick one up again (20 = one second). 0 = none.")
+                        .defineInRange("pick_up_cooldown_ticks", 6, 0, 1200);
+                PUT_DOWN_COOLDOWN_TICKS = builder.comment("Ticks after picking up or catching a mob before you can put",
+                                "it down (20 = one second). 0 = none.")
+                        .defineInRange("put_down_cooldown_ticks", 6, 0, 1200);
                 builder.pop();
 
                 builder.comment("The pick-up / put-down / throw prompt.").push("prompt");
@@ -146,7 +159,9 @@ public final class PlayerConfig
                         get(SPIRAL_SPEED).floatValue(),
                         get(CATCH_HIGHLIGHT),
                         get(FLIGHT_TRAIL),
-                        get(RAGDOLL_IN_FLIGHT));
+                        get(RAGDOLL_IN_FLIGHT),
+                        get(PICK_UP_COOLDOWN_TICKS),
+                        get(PUT_DOWN_COOLDOWN_TICKS));
         }
 
         static boolean enabled()

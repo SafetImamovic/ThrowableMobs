@@ -70,6 +70,7 @@ Which mobs can never be carried is set with the tag `#throwablemobs:unthrowable`
 | `default_density` | `400.0` | Density used to get a mob's mass from its hitbox, game-kg per block³. |
 | `allow_villagers` | `true` | Villagers and wandering traders can be picked up. |
 | `owner_only_for_tamed` | `true` | Tamed mobs can only be picked up by their owner. |
+| `pick_up_cooldown_ticks` | `0` | Ticks after putting down or throwing a mob before the same player can pick one up again (20 = one second). 0 = none. Each player can set a longer one in their own settings (`[cooldown]`, 6 ticks by default). |
 
 ## Carry (`[carry]`)
 
@@ -91,6 +92,7 @@ Which mobs can never be carried is set with the tag `#throwablemobs:unthrowable`
 |---|---|---|
 | `put_down_needs_ground` | `true` | The carrier must look at valid ground within reach, so mobs can't be dropped off a skyblock platform. Off: put down in front of the carrier, or at their feet. |
 | `ground_filter` | `DENY_LIST` | Which blocks count as ground (they also need something to stand on). `DENY_LIST`: any block except `#throwablemobs:put_down_ground_denied`. `ALLOW_LIST`: only `#throwablemobs:put_down_ground_allowed`. |
+| `put_down_cooldown_ticks` | `0` | Ticks after picking up or catching a mob before it can be put down (20 = one second). 0 = none. Each player can set a longer one in their own settings (`[cooldown]`, 6 ticks by default). |
 
 ## Throw (`[throw]`)
 

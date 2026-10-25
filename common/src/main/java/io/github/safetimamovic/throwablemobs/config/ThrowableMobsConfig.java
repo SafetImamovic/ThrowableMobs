@@ -205,7 +205,9 @@ public final class ThrowableMobsConfig
                 CarrierLogout onCarrierLogout,
                 int carrierLogoutSeconds,
                 boolean putDownNeedsGround,
-                GroundFilter groundFilter)
+                GroundFilter groundFilter,
+                int pickUpCooldownTicks,
+                int putDownCooldownTicks)
         {
         }
 
@@ -296,7 +298,9 @@ public final class ThrowableMobsConfig
                 float spiralSpeed,
                 boolean catchHighlight,
                 boolean flightTrail,
-                boolean ragdollInFlight)
+                boolean ragdollInFlight,
+                int pickUpCooldownTicks,
+                int putDownCooldownTicks)
         {
         }
 }

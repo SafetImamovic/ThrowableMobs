@@ -43,6 +43,7 @@ public final class CreatorConfig
         private static final DoubleValue DEFAULT_DENSITY;
         private static final BooleanValue ALLOW_VILLAGERS;
         private static final BooleanValue OWNER_ONLY_FOR_TAMED;
+        private static final IntValue PICK_UP_COOLDOWN_TICKS;
 
         private static final DoubleValue SLOWDOWN_FACTOR;
         private static final DoubleValue MAX_SLOWDOWN;
@@ -56,6 +57,7 @@ public final class CreatorConfig
 
         private static final BooleanValue PUT_DOWN_NEEDS_GROUND;
         private static final EnumValue<GroundFilter> GROUND_FILTER;
+        private static final IntValue PUT_DOWN_COOLDOWN_TICKS;
 
         private static final DoubleValue THROW_IMPULSE;
         private static final DoubleValue STRENGTH_EFFECT_BONUS;
@@ -128,6 +130,10 @@ public final class CreatorConfig
                         .define("allow_villagers", true);
                 OWNER_ONLY_FOR_TAMED = builder.comment("Tamed mobs can only be picked up by their owner.")
                         .define("owner_only_for_tamed", true);
+                PICK_UP_COOLDOWN_TICKS = builder.comment("Ticks after putting down or throwing a mob before the same",
+                                "player can pick one up again (20 = one second). 0 = no cooldown. Each player can add",
+                                "a longer one of their own.")
+                        .defineInRange("pick_up_cooldown_ticks", 0, 0, 1200);
                 builder.pop();
 
                 builder.comment("While a mob is carried.").push("carry");
@@ -172,6 +178,10 @@ public final class CreatorConfig
                                 "DENY_LIST: any block except #throwablemobs:put_down_ground_denied.",
                                 "ALLOW_LIST: only #throwablemobs:put_down_ground_allowed.")
                         .defineEnum("ground_filter", GroundFilter.DENY_LIST);
+                PUT_DOWN_COOLDOWN_TICKS = builder.comment("Ticks after picking up or catching a mob before it can be",
+                                "put down (20 = one second). 0 = no cooldown. Each player can add a longer one of",
+                                "their own.")
+                        .defineInRange("put_down_cooldown_ticks", 0, 0, 1200);
                 builder.pop();
 
                 builder.comment("Throwing a carried mob: hold the Throw key to charge, let go to throw.").push("throw");
@@ -333,7 +343,9 @@ public final class CreatorConfig
                         get(ON_CARRIER_LOGOUT),
                         get(CARRIER_LOGOUT_SECONDS),
                         get(PUT_DOWN_NEEDS_GROUND),
-                        get(GROUND_FILTER));
+                        get(GROUND_FILTER),
+                        get(PICK_UP_COOLDOWN_TICKS),
+                        get(PUT_DOWN_COOLDOWN_TICKS));
         }
 
         static ThrowConfig readThrow()

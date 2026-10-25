@@ -83,6 +83,9 @@ public final class CarryManager
         /** {@link CarrierLogout#KEEP_CARRYING}: loaded mobs waiting for their carrier, checked for the time limit. */
         private static final Map<UUID, ResourceKey<Level>> WAITING = new HashMap<>();
 
+        /** Carrier UUID to the game time their last carry ended (put down or thrown), for the pick-up cooldown. */
+        private static final Map<UUID, Long> LET_GO_AT = new HashMap<>();
+
         private CarryManager()
         {
         }
@@ -106,7 +109,7 @@ public final class CarryManager
         public static void onDropRequest(ServerPlayer player)
         {
                 // Put-down still works with the mod off: nothing can be carried by then anyway.
-                if (!player.isSpectator())
+                if (!player.isSpectator() && !putDownCoolingDown(player))
                 {
                         drop(player);
                 }
@@ -116,7 +119,7 @@ public final class CarryManager
         public static void onPickUpRequest(ServerPlayer player, int entityId)
         {
                 if (!enabledFor(player) || !CarryRules.canUseHands(player) || carriedBy(player) != null
-                        || !(player.level().getEntity(entityId) instanceof Mob mob)
+                        || pickUpCoolingDown(player) || !(player.level().getEntity(entityId) instanceof Mob mob)
                         //? if >=26.1 {
                         || !player.isWithinEntityInteractionRange(mob, PICK_UP_REACH_TOLERANCE))
                         //?} else
@@ -196,7 +199,24 @@ public final class CarryManager
                 }
                 CARRIED.remove(player.getUUID());
                 removeSlowdown(player);
+                LET_GO_AT.put(player.getUUID(), player.level().getGameTime());
                 release(mob, at);
+        }
+
+        private static boolean pickUpCoolingDown(ServerPlayer player)
+        {
+                Long letGoAt = LET_GO_AT.get(player.getUUID());
+                return letGoAt != null
+                        && player.level().getGameTime() - letGoAt < ThrowableMobsConfig.carry().pickUpCooldownTicks();
+        }
+
+        /** Counts from the pickup or catch; a carry resumed after a logout keeps its first pickup time. */
+        private static boolean putDownCoolingDown(ServerPlayer player)
+        {
+                Mob mob = carriedBy(player);
+                CarryState state = mob != null ? Services.CARRY_STATE.get(mob) : null;
+                return state != null && mob.level().getGameTime() - state.pickupTick()
+                        < ThrowableMobsConfig.carry().putDownCooldownTicks();
         }
 
         /**
@@ -311,6 +331,7 @@ public final class CarryManager
                 {
                         return null;
                 }
+                LET_GO_AT.put(player.getUUID(), player.level().getGameTime());
                 CarryState state = Services.CARRY_STATE.get(mob);
                 release(mob, mob.position());
                 return state;
@@ -386,6 +407,7 @@ public final class CarryManager
         public static void onLogout(ServerPlayer player)
         {
                 DISABLED_PLAYERS.remove(player.getUUID());
+                LET_GO_AT.remove(player.getUUID());
                 Mob mob = CARRIED.remove(player.getUUID());
                 removeSlowdown(player);
                 if (mob != null && !mob.isRemoved())
@@ -444,6 +466,7 @@ public final class CarryManager
                 CARRIED.clear();
                 LEFT_BEHIND.clear();
                 WAITING.clear();
+                LET_GO_AT.clear();
         }
 
         /** What happens to a carried mob when its carrier leaves the server, per {@code on_carrier_logout}. */
