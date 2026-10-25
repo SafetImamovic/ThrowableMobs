@@ -103,7 +103,8 @@ processResources {
             'java_version'                 : java_version,
             'homepage'                     : homepage,
             'sources'                      : sources,
-            'issues'                       : issues
+            'issues'                       : issues,
+            'donate'                       : donate
     ]
 
     var jsonExpandProps = expandProps.collectEntries {
