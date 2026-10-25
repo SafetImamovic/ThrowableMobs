@@ -16,6 +16,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 - Carrying a mob made you faster: on jumps and steps, the mob on your head pushed you forward. Carried mobs no longer
   push anyone.
+- Shulkers jittered and teleported away while carried, and didn't fly when thrown. They now sit still on your head,
+  fly like other mobs, and stick to a block where they land.
 
 ## [0.4.1] - 2026-10-24
 

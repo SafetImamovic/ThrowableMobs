@@ -4,8 +4,10 @@
   "package": "io.github.safetimamovic.throwablemobs.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
+    "EntityAccessor",
     "LivingEntityMixin",
-    "PlayerMixin"
+    "PlayerMixin",
+    "ShulkerMixin"
   ],
   "client": [
     "LivingEntityRendererMixin",
