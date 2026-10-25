@@ -12,6 +12,11 @@ Changes per version that players, pack devs and mod devs will notice. Format:
   mob killed by the throw keeps its ragdoll. Player setting `ragdoll_in_flight` (on by default) turns it off. Tested on
   1.21.1; Ragdollified's 26.3 build doesn't load on NeoForge 26.3.0.95 yet (its own bug).
 
+### Fixed
+
+- Carrying a mob made you faster: on jumps and steps, the mob on your head pushed you forward. Carried mobs no longer
+  push anyone.
+
 ## [0.4.1] - 2026-10-24
 
 ### Changed
