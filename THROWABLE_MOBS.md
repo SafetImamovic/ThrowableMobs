@@ -860,7 +860,7 @@ Hand-written reference tables rot. Generate them:
 | **M5b — YACL screen** | Optional YACL config screen with live HUD preview and 3D throw scene; the stock screen stays as the fallback (§11). |
 | **M6 — Carry+** | Carry blocks with their contents (chests, furnaces, spawners, modded machines) and throw them; carry and throw players (opt-in); stack mobs (small on big, thrown as a stack); holding animation in first and third person; Carry On compatibility. Goal: the best carry mod, not just the best throw mod. |
 | **M7 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
-| **M8 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. |
+| **M8 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. (Done early: `mc-publish` to both since 0.4.1; [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/throwablemobs) approved 2026-10-25, Modrinth page still in review.) |
 | **M9 — Reach** | 1.20.1 backport, KubeJS integration. |
 | **M10 — Paper plugin** | `paper/` module on shared `physics/`, item-based / sneak+swing controls, action-bar HUD, particle trajectory preview, minigame events API, permissions, Folia decision, docs pages for admins/plugin devs, Hangar + Modrinth + SpigotMC release. |
 | **M11 — Hybrid** (optional) | Optional client mod enhances Paper servers via plugin-messaging channel (real HUD, preview, keybinds). |
