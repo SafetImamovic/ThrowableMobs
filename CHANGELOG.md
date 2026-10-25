@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-25
+
 ### Added
 
 - With [Ragdollified](https://modrinth.com/mod/ragdollified) installed (optional, NeoForge), thrown mobs go limp in the
