@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-26
+
 ### Added
 
 - Chicken radar: a carried chicken screams when a monster comes near, faster and higher the closer it gets, so you can
