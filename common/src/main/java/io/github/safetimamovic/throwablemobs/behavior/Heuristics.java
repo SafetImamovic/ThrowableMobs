@@ -29,10 +29,10 @@ import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
 public final class Heuristics
 {
         private static final Conditions ALWAYS = new Conditions(Optional.empty(), 1.0, Optional.empty(),
-                Optional.empty(), false);
+                Optional.empty(), false, Optional.empty());
 
         private static final Conditions HARD_IMPACT = new Conditions(Optional.of(15.0), 1.0, Optional.empty(),
-                Optional.empty(), false);
+                Optional.empty(), false, Optional.empty());
 
         private Heuristics()
         {
@@ -51,7 +51,7 @@ public final class Heuristics
                 if (mob instanceof Creeper)
                 {
                         behaviors.add(new DataBehavior(Trigger.IMPACT, new Conditions(Optional.of(20.0), 1.0,
-                                Optional.empty(), Optional.empty(), false),
+                                Optional.empty(), Optional.empty(), false, Optional.empty()),
                                 new ExplodeAction(1.5F, 0.01F, 4.0F, 2.0F, false, true)));
                 }
                 //? if >=26.1 {

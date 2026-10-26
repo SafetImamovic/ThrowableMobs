@@ -107,6 +107,7 @@
     "throwablemobs.configuration.behaviors_enabled": "Behaviors Enabled",
     "throwablemobs.configuration.auto_detect_behaviors": "Guess Behaviors for Modded Mobs",
     "throwablemobs.configuration.disabled_behaviors": "Disabled Behaviors",
+    "throwablemobs.configuration.egg_chance": "Chicken Egg Chance",
     "throwablemobs.configuration.prompt": "Prompt",
     "throwablemobs.configuration.show_prompt": "Show Prompt",
     "throwablemobs.configuration.prompt_anchor": "Anchor",

@@ -274,7 +274,7 @@ public final class ThrowableMobsConfig
          *
          * @param disabled behavior type ids that never run
          */
-        public record BehaviorConfig(boolean enabled, boolean autoDetect, Set<Identifier> disabled)
+        public record BehaviorConfig(boolean enabled, boolean autoDetect, Set<Identifier> disabled, double eggChance)
         {
         }
 
