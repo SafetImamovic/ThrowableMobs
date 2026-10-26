@@ -18,6 +18,12 @@ Changes per version that players, pack devs and mod devs will notice. Format:
   Each line can be turned off, and the panel moved to any corner or under the crosshair, in `[carry_info]` of the
   player settings, with a live preview in the config screen.
 
+### Changed
+
+- Spiders, cave spiders, phantoms and horses (with donkeys, mules, skeleton and zombie horses) have hand-set weights.
+  Their hitboxes are mostly air, so they used to weigh far too much: a spider weighed more than a cow. They now fly
+  further and hit softer. Spider 150 (was 706), cave spider 30 (98), phantom 60 (162), horses 600 (about 1250).
+
 ## [0.5.0] - 2026-10-25
 
 ### Added
