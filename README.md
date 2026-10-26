@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="common/src/main/resources/throwablemobs.png" alt="Throwable Mobs icon: a pig flying through the air" width="160">
+  <img src="docs/public/banner.png" alt="Throwable Mobs: pick them up, throw them" width="100%">
 </p>
-
-<h1 align="center">Throwable Mobs</h1>
 
 <p align="center">
   Pick up mobs and throw them. Creepers explode on impact, endermen blink away, slimes bounce and split, chickens float.
