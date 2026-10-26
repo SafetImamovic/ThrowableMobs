@@ -41,6 +41,7 @@ All are optional; every set condition must hold.
 |---|---|---|
 | `min_impact_energy` | number | Only impacts with at least this collision energy. Ignored outside impacts. A hard creeper throw reaches about 46, a short lob stays under 10. |
 | `chance` | 0 – 1 | Rolled every time the trigger fires. `0.25` = one in four. |
+| `chance_setting` | name | Take `chance` from a server setting instead, so admins can change it in game. Only `"egg_chance"` so far (our chicken uses it). |
 | `in_water` | boolean | The mob must (or must not) be in water. |
 | `is_charged` | boolean | The mob must (or must not) be a charged creeper. Other mobs count as not charged. |
 | `first_impact_only` | boolean | Only the first impact of a flight, not later bounces. |

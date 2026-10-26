@@ -176,3 +176,4 @@ What mobs do when picked up, thrown and when they hit something. Set per mob wit
 | `behaviors_enabled` | `true` | Off: no mob behaviors run. Mob profile physics (mass, gravity, bounces) still applies. |
 | `auto_detect_behaviors` | `true` | Guess behaviors for modded mobs from what they are (see [Modded mobs](modded-mobs.md)). A mob profile overrides the guess. |
 | `disabled_behaviors` | `[]` | Behavior types that never run, e.g. `["throwablemobs:explode"]`. |
+| `egg_chance` | `0.25` | Chance a thrown chicken lays an egg when it lands. `0` = never, `1` = every throw. Rolled once per throw. |

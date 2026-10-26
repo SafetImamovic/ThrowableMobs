@@ -11,6 +11,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
   carry one as an early warning. The new `throwablemobs:radar` behavior gives the same to any mob through a mob
   profile, with its own range, rhythm and sound. Servers turn it off with
   `disabled_behaviors = ["throwablemobs:radar"]`.
+- Server setting `egg_chance` (0.25 by default): how often a thrown chicken lays an egg, from never to every throw.
+  Mob profiles can use it with the new `chance_setting` condition.
 
 ## [0.5.0] - 2026-10-25
 

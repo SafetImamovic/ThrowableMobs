@@ -105,6 +105,7 @@ public final class CreatorConfig
         private static final BooleanValue BEHAVIORS_ENABLED;
         private static final BooleanValue AUTO_DETECT_BEHAVIORS;
         private static final ConfigValue<List<? extends String>> DISABLED_BEHAVIORS;
+        private static final DoubleValue EGG_CHANCE;
 
         static
         {
@@ -316,6 +317,9 @@ public final class CreatorConfig
                 DISABLED_BEHAVIORS = builder.comment("Behavior types that never run, e.g. [\"throwablemobs:explode\"].")
                         .defineListAllowEmpty("disabled_behaviors", List.of(), () -> "throwablemobs:explode",
                                 value -> value instanceof String id && Identifier.tryParse(id) != null);
+                EGG_CHANCE = builder.comment("Chance a thrown chicken lays an egg when it lands (0 = never, 1 =",
+                                "every throw). Rolled once per throw.")
+                        .defineInRange("egg_chance", 0.25, 0.0, 1.0);
                 builder.pop();
 
                 SPEC = builder.build();
@@ -408,7 +412,8 @@ public final class CreatorConfig
                                 disabled.add(parsed);
                         }
                 }
-                return new BehaviorConfig(get(BEHAVIORS_ENABLED), get(AUTO_DETECT_BEHAVIORS), Set.copyOf(disabled));
+                return new BehaviorConfig(get(BEHAVIORS_ENABLED), get(AUTO_DETECT_BEHAVIORS), Set.copyOf(disabled),
+                        get(EGG_CHANCE));
         }
 
         static boolean enabled()
