@@ -1,0 +1,7 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:phantom"],
+    "physics": {
+        "mass": 60
+    }
+}

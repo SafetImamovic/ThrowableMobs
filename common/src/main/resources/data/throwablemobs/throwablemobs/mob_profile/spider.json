@@ -1,0 +1,7 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:spider"],
+    "physics": {
+        "mass": 150
+    }
+}

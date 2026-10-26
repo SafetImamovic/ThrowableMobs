@@ -1,0 +1,7 @@
+{
+    "schema_version": 1,
+    "entities": ["minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:skeleton_horse", "minecraft:zombie_horse"],
+    "physics": {
+        "mass": 600
+    }
+}

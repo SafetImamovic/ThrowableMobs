@@ -132,5 +132,9 @@ Default density is 400 game-kg per block³; `throw_impulse` is 150 and `max_thro
 | Creeper | 245 | 0.61 | 46 |
 | Cow | 454 | 0.33 | 25 |
 
+Without a `mass`, a mob weighs its hitbox volume × `default_density`, as if the box were solid. That's far off for mobs
+whose hitbox is mostly air, so ours set it by hand: spider 150 (its box alone gives 706), cave spider 30, phantom 60,
+and horses, donkeys and mules 600 (about 1250 from the box).
+
 Collision energy is `½ × mass × speed²` against a block (against a mob, the reduced mass of the two is used). Use it
 to pick `min_impact_energy` for behaviors: a hard creeper throw reaches about 46, a short lob stays under 10.
