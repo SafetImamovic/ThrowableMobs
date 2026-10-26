@@ -72,7 +72,7 @@ Design, physics model, behavior API and roadmap: [THROWABLE_MOBS.md](THROWABLE_M
 - **Catch:** grab a thrown mob out of the air; an outline shows which ones you can catch. Your own throw only after it
   bounces.
 - **Mob behaviors:** creepers explode, endermen teleport and come for you, slimes and magma cubes bounce and split,
-  blazes and magma cubes set things on fire, chickens float and lay eggs. Modded mobs act like the vanilla mob they're
+  blazes and magma cubes set things on fire, chickens float, lay eggs and scream when a monster is near. Modded mobs act like the vanilla mob they're
   built on.
 - **Effects:** sounds, particles, a flight trail, and 8 advancements in their own tab.
 - **Data-driven:** every behavior and number is set per mob in datapack mob profiles, or globally in the config. Other

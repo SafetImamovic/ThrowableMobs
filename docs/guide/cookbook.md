@@ -68,7 +68,25 @@ The list replaces our creeper's list, so the whole `explode` entry is written ou
     "entities": ["minecraft:chicken"],
     "priority": 10,
     "behaviors": [
-        { "type": "throwablemobs:drop_item", "item": "minecraft:egg", "count": 2 }
+        { "type": "throwablemobs:drop_item", "item": "minecraft:egg", "count": 2 },
+        { "type": "throwablemobs:radar", "trigger": "carry_tick" }
+    ]
+}
+```
+
+`behaviors` replaces the list below it as a whole, so the radar is listed again to keep it.
+
+### A parrot that warns you
+
+Parrots already imitate monsters. Carry one and it calls out the nearest one it can see:
+
+```json
+// data/mypack/throwablemobs/mob_profile/parrot.json
+{
+    "entities": ["minecraft:parrot"],
+    "behaviors": [
+        { "type": "throwablemobs:radar", "trigger": "carry_tick", "range": 24, "line_of_sight": true,
+          "sound": "minecraft:entity.parrot.imitate.zombie" }
     ]
 }
 ```

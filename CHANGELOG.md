@@ -5,6 +5,13 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- Chicken radar: a carried chicken screams when a monster comes near, faster and higher the closer it gets, so you can
+  carry one as an early warning. The new `throwablemobs:radar` behavior gives the same to any mob through a mob
+  profile, with its own range, rhythm and sound. Servers turn it off with
+  `disabled_behaviors = ["throwablemobs:radar"]`.
+
 ## [0.5.0] - 2026-10-25
 
 ### Added

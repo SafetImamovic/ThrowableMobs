@@ -18,5 +18,6 @@ public final class BuiltinBehaviors
                 ThrowableMobsApi.registerBehaviorType(IgniteAction.TYPE);
                 ThrowableMobsApi.registerBehaviorType(DropItemAction.TYPE);
                 ThrowableMobsApi.registerBehaviorType(ParticlesAction.TYPE);
+                ThrowableMobsApi.registerBehaviorType(RadarAction.TYPE);
         }
 }

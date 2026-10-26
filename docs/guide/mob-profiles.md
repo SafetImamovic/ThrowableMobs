@@ -116,7 +116,7 @@ Mob profile of minecraft:chicken, layers (low to high): mypack:chicken < throwab
   mass: 44.8 from hitbox  (default)
   gravity_multiplier: 0.4  (throwablemobs:chicken)
   block_restitution: 0.0 from config  (default)
-  behaviors: [throwablemobs:drop_item on impact]  (throwablemobs:chicken)
+  behaviors: [throwablemobs:drop_item on impact, throwablemobs:radar on carry_tick]  (throwablemobs:chicken)
 ```
 
 Needs op level 2. Use it when a profile doesn't seem to apply: it shows whether the file matched the mob at all and

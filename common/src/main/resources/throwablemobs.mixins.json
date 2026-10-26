@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
     "EntityAccessor",
+    "LivingEntityInvoker",
     "LivingEntityMixin",
     "PlayerMixin",
     "ShulkerMixin"

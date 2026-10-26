@@ -5,6 +5,7 @@
         "gravity_multiplier": 0.4
     },
     "behaviors": [
-        { "type": "throwablemobs:drop_item", "trigger": "impact", "item": "minecraft:egg", "chance": 0.25, "first_impact_only": true }
+        { "type": "throwablemobs:drop_item", "trigger": "impact", "item": "minecraft:egg", "chance": 0.25, "first_impact_only": true },
+        { "type": "throwablemobs:radar", "trigger": "carry_tick" }
     ]
 }
