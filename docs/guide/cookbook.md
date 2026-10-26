@@ -68,7 +68,26 @@ The list replaces our creeper's list, so the whole `explode` entry is written ou
     "entities": ["minecraft:chicken"],
     "priority": 10,
     "behaviors": [
-        { "type": "throwablemobs:drop_item", "item": "minecraft:egg", "count": 2 }
+        { "type": "throwablemobs:drop_item", "item": "minecraft:egg", "count": 2 },
+        { "type": "throwablemobs:radar", "trigger": "carry_tick" }
+    ]
+}
+```
+
+`behaviors` replaces the list below it as a whole, so the radar is listed again to keep it.
+
+### A parrot that warns you
+
+Carry a parrot and it chirps when it sees a monster. Its own chirp, not an imitation: `entity.parrot.imitate.*`
+sounds like the real monster and gets mistaken for one.
+
+```json
+// data/mypack/throwablemobs/mob_profile/parrot.json
+{
+    "entities": ["minecraft:parrot"],
+    "behaviors": [
+        { "type": "throwablemobs:radar", "trigger": "carry_tick", "range": 24, "line_of_sight": true,
+          "sound": "minecraft:entity.parrot.ambient" }
     ]
 }
 ```

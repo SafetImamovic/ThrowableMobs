@@ -123,6 +123,21 @@ Particles around the middle of the mob. With `"trigger": "flight_tick"` it leave
 | `spread` | 0.2 | Blocks around the middle. |
 | `speed` | 0.0 | Particle speed. |
 
+### `throwablemobs:radar`
+
+The mob panics when a monster comes near: it screams, faster and higher the closer the nearest monster is, like a
+Geiger counter. Use it with `"trigger": "carry_tick"` and carry the mob as an early warning. Carried chickens do this by
+default. Monsters are mobs the game counts as enemies (zombies, creepers, slimes, phantoms...), modded ones included.
+
+| Field | Default | Meaning |
+|---|---|---|
+| `range` | 16.0 | Blocks (1 – 64). No monster in range, no sound. |
+| `slowest_interval_ticks` | 40 | Ticks between screams with the monster at the edge of the range (4 – 1200). |
+| `fastest_interval_ticks` | 8 | Ticks between screams with the monster right next to the mob (4 – 1200). |
+| `sound` | the mob's hurt sound | Sound event id, like `"minecraft:block.note_block.bell"`. |
+| `volume` | 1.0 | 0 – 10. Above 1 it carries further, not louder. |
+| `line_of_sight` | false | `true` = only monsters the mob can see. Off, it senses them through walls. |
+
 ## Turning behaviors off
 
 In `config/throwablemobs-server.toml`, section `[behaviors]`:
