@@ -78,7 +78,8 @@ The list replaces our creeper's list, so the whole `explode` entry is written ou
 
 ### A parrot that warns you
 
-Parrots already imitate monsters. Carry one and it calls out the nearest one it can see:
+Carry a parrot and it chirps when it sees a monster. Its own chirp, not an imitation: `entity.parrot.imitate.*`
+sounds like the real monster and gets mistaken for one.
 
 ```json
 // data/mypack/throwablemobs/mob_profile/parrot.json
@@ -86,7 +87,7 @@ Parrots already imitate monsters. Carry one and it calls out the nearest one it 
     "entities": ["minecraft:parrot"],
     "behaviors": [
         { "type": "throwablemobs:radar", "trigger": "carry_tick", "range": 24, "line_of_sight": true,
-          "sound": "minecraft:entity.parrot.imitate.zombie" }
+          "sound": "minecraft:entity.parrot.ambient" }
     ]
 }
 ```

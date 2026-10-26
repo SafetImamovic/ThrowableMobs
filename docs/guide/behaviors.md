@@ -134,7 +134,7 @@ default. Monsters are mobs the game counts as enemies (zombies, creepers, slimes
 | `range` | 16.0 | Blocks (1 – 64). No monster in range, no sound. |
 | `slowest_interval_ticks` | 40 | Ticks between screams with the monster at the edge of the range (4 – 1200). |
 | `fastest_interval_ticks` | 8 | Ticks between screams with the monster right next to the mob (4 – 1200). |
-| `sound` | the mob's hurt sound | Sound event id, like `"minecraft:entity.parrot.imitate.zombie"`. |
+| `sound` | the mob's hurt sound | Sound event id, like `"minecraft:block.note_block.bell"`. |
 | `volume` | 1.0 | 0 – 10. Above 1 it carries further, not louder. |
 | `line_of_sight` | false | `true` = only monsters the mob can see. Off, it senses them through walls. |
 
