@@ -63,6 +63,28 @@ public final class ThrowableMobsConfig
                 return PlayerConfig.read();
         }
 
+        /** Current player settings for the carry info panel. */
+        public static CarryInfoConfig carryInfo()
+        {
+                return PlayerConfig.readCarryInfo();
+        }
+
+        /** Where the carry info panel sits: a corner of the screen, or centred under the crosshair. */
+        public enum CarryInfoAnchor
+        {
+                TOP_LEFT,
+                TOP_RIGHT,
+                BOTTOM_LEFT,
+                BOTTOM_RIGHT,
+                CROSSHAIR
+        }
+
+        /** Player settings for the carry info panel, see {@link PlayerConfig}. */
+        public record CarryInfoConfig(boolean show, CarryInfoAnchor anchor, int offsetX, int offsetY,
+                boolean health, boolean weight, boolean traits, boolean radar)
+        {
+        }
+
         /** Where a HUD element (prompt, charge bar) is drawn from; its offsets move it from there. */
         public enum HudAnchor
         {

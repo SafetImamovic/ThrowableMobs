@@ -8,9 +8,12 @@ import io.github.safetimamovic.throwablemobs.api.BehaviorAction;
 import io.github.safetimamovic.throwablemobs.api.BehaviorType;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
 import io.github.safetimamovic.throwablemobs.mixin.LivingEntityInvoker;
+import io.github.safetimamovic.throwablemobs.network.RadarStatusPayload;
+import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,7 +24,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * {@code throwablemobs:radar}: the mob panics when a monster comes near, louder in rhythm the closer the nearest one
  * is, like a Geiger counter. Use with {@code "trigger": "carry_tick"}. Monsters are anything vanilla counts as an
- * enemy ({@link Enemy}), so modded monsters work too.
+ * enemy ({@link Enemy}), so modded monsters work too. Each scan also tells the carrier what the mob senses, for the
+ * carry HUD.
  */
 public record RadarAction(double range, int slowestIntervalTicks, int fastestIntervalTicks,
         Optional<SoundEvent> sound, float volume, boolean lineOfSight) implements BehaviorAction
@@ -61,13 +65,17 @@ public record RadarAction(double range, int slowestIntervalTicks, int fastestInt
                 LivingEntity nearest = nearestMonster(mob);
                 if (nearest == null)
                 {
+                        report(ctx.player(), mob, null, 0.0F, false);
                         return;
                 }
+                float distance = (float) Math.sqrt(mob.distanceToSqr(nearest));
                 // 0 = right next to the mob, 1 = at the edge of the range.
-                float far = (float) Mth.clamp(Math.sqrt(mob.distanceToSqr(nearest)) / range, 0.0, 1.0);
+                float far = (float) Mth.clamp(distance / range, 0.0, 1.0);
                 int interval = Math.round(Mth.lerp(far, fastestIntervalTicks, slowestIntervalTicks) / SCAN_TICKS)
                         * SCAN_TICKS;
-                if (time % Math.max(SCAN_TICKS, interval) != 0)
+                boolean screams = time % Math.max(SCAN_TICKS, interval) == 0;
+                report(ctx.player(), mob, nearest, distance, screams);
+                if (!screams)
                 {
                         return;
                 }
@@ -79,6 +87,16 @@ public record RadarAction(double range, int slowestIntervalTicks, int fastestInt
                 }
                 float pitch = 1.0F + 0.5F * (1.0F - far) + (level.getRandom().nextFloat() - 0.5F) * 0.1F;
                 level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), scream, mob.getSoundSource(), volume, pitch);
+        }
+
+        private void report(@Nullable ServerPlayer carrier, Mob mob, @Nullable LivingEntity nearest, float distance,
+                boolean pinged)
+        {
+                if (carrier != null)
+                {
+                        Services.PLATFORM.sendToPlayer(carrier, new RadarStatusPayload(mob.getId(),
+                                nearest == null ? -1 : nearest.getId(), distance, (float) range, pinged));
+                }
         }
 
         private @Nullable LivingEntity nearestMonster(Mob mob)

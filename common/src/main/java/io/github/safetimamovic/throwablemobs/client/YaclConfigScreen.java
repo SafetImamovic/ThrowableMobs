@@ -69,7 +69,7 @@ final class YaclConfigScreen
                 return YetAnotherConfigLib.createBuilder()
                         .title(Component.translatable(KEY + "title"))
                         .category(category(PlayerConfig.SPEC, "throwablemobs.yacl.player", null,
-                                Map.of("prompt", hud, "charge_bar", hud), playerOptions))
+                                Map.of("prompt", hud, "charge_bar", hud, "carry_info", hud), playerOptions))
                         .category(category(CreatorConfig.SPEC, "throwablemobs.yacl.server", lock, Map.of(),
                                 new HashMap<>()))
                         .save(() ->

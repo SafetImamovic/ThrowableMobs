@@ -3,6 +3,7 @@ package io.github.safetimamovic.throwablemobs;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfileReloadListener;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
+import io.github.safetimamovic.throwablemobs.carry.RadarStatus;
 import io.github.safetimamovic.throwablemobs.carry.ThrowManager;
 import io.github.safetimamovic.throwablemobs.config.CreatorConfig;
 import io.github.safetimamovic.throwablemobs.config.PlayerConfig;
@@ -11,6 +12,7 @@ import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.network.PlayerEnabledPayload;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
+import io.github.safetimamovic.throwablemobs.network.RadarStatusPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import io.github.safetimamovic.throwablemobs.platform.NeoForgeCarryStateAccess;
 import net.minecraft.core.Registry;
@@ -77,7 +79,10 @@ public class ThrowableMobsNeoForge
                         .playToServer(ThrowPayload.TYPE, ThrowPayload.STREAM_CODEC,
                                 (payload, context) -> ThrowManager.onThrowRequest((ServerPlayer) context.player()))
                         .playToClient(ProfileSyncPayload.TYPE, ProfileSyncPayload.STREAM_CODEC,
-                                (payload, context) -> MobProfiles.onSync(payload)));
+                                (payload, context) -> MobProfiles.onSync(payload))
+                        .playToClient(RadarStatusPayload.TYPE, RadarStatusPayload.STREAM_CODEC,
+                                (payload, context) -> RadarStatus.onStatus(payload,
+                                        context.player().level().getGameTime())));
 
                 IEventBus bus = NeoForge.EVENT_BUS;
                 bus.addListener(ThrowableMobsNeoForge::onEntityInteract);
