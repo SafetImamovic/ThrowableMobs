@@ -321,7 +321,7 @@ public final class CarryClient
 
         /**
          * HUD layer under the crosshair: "[Shift] + [Right Button] to pick up", "Can't pick this one up", or, while
-         * carrying, put down and throw, plus the charge bar while charging.
+         * carrying, put down and throw, plus the charge bar while charging and the carry info panel.
          */
         public static void renderPrompt(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker)
         {
@@ -332,6 +332,7 @@ public final class CarryClient
                 {
                         return;
                 }
+                CarryInfoHud.render(graphics);
                 if (chargeTicks >= 0 && config.showChargeBar() && LocalCarry.get() != null)
                 {
                         int max = ThrowableMobsConfig.throwing().maxChargeTicks();

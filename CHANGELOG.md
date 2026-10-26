@@ -13,6 +13,10 @@ Changes per version that players, pack devs and mod devs will notice. Format:
   `disabled_behaviors = ["throwablemobs:radar"]`.
 - Server setting `egg_chance` (0.25 by default): how often a thrown chicken lays an egg, from never to every throw.
   Mob profiles can use it with the new `chance_setting` condition.
+- Carry info panel: while carrying, a small panel shows the mob's name, health, weight and traits (Floaty, Bouncy,
+  Heavy), and for mobs with a radar, the nearest monster it senses and how far away it is, flashing with each scream.
+  Each line can be turned off, and the panel moved to any corner or under the crosshair, in `[carry_info]` of the
+  player settings, with a live preview in the config screen.
 
 ## [0.5.0] - 2026-10-25
 

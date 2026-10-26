@@ -1,5 +1,7 @@
 package io.github.safetimamovic.throwablemobs.config;
 
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryInfoAnchor;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryInfoConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.FlightPoseStyle;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudAnchor;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudConfig;
@@ -37,6 +39,15 @@ public final class PlayerConfig
         private static final IntValue CHARGE_BAR_OFFSET_Y;
         private static final IntValue CHARGE_BAR_WIDTH;
         private static final IntValue CHARGE_BAR_HEIGHT;
+
+        private static final BooleanValue SHOW_CARRY_INFO;
+        private static final EnumValue<CarryInfoAnchor> CARRY_INFO_ANCHOR;
+        private static final IntValue CARRY_INFO_OFFSET_X;
+        private static final IntValue CARRY_INFO_OFFSET_Y;
+        private static final BooleanValue SHOW_HEALTH;
+        private static final BooleanValue SHOW_WEIGHT;
+        private static final BooleanValue SHOW_TRAITS;
+        private static final BooleanValue SHOW_RADAR;
 
         private static final BooleanValue SHOW_TRAJECTORY;
         private static final EnumValue<TrajectoryStyle> TRAJECTORY_STYLE;
@@ -98,6 +109,31 @@ public final class PlayerConfig
                         .defineInRange("charge_bar_width", 120, 1, 1024);
                 CHARGE_BAR_HEIGHT = builder.comment("Height in GUI pixels.")
                         .defineInRange("charge_bar_height", 10, 1, 256);
+                builder.pop();
+
+                builder.comment("A panel about the mob you carry: name, health, weight, traits, and what it senses",
+                        "if it has a radar (carried chickens do).").push("carry_info");
+                SHOW_CARRY_INFO = builder.comment("Show the panel while carrying a mob.")
+                        .define("show_carry_info", true);
+                CARRY_INFO_ANCHOR = builder.comment("Where it sits: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, or",
+                                "CROSSHAIR (centred under it).")
+                        .defineEnum("carry_info_anchor", CarryInfoAnchor.TOP_LEFT);
+                CARRY_INFO_OFFSET_X = builder.comment("Distance from the left or right edge of the screen, in GUI",
+                                "pixels. With CROSSHAIR: positive moves it right.")
+                        .defineInRange("carry_info_offset_x", 4, -4096, 4096);
+                CARRY_INFO_OFFSET_Y = builder.comment("Distance from the top or bottom edge of the screen, in GUI",
+                                "pixels. With CROSSHAIR: positive moves it down.")
+                        .defineInRange("carry_info_offset_y", 4, -4096, 4096);
+                SHOW_HEALTH = builder.comment("The mob's health next to its name.")
+                        .define("show_health", true);
+                SHOW_WEIGHT = builder.comment("Its weight: heavier mobs fly shorter and hit harder.")
+                        .define("show_weight", true);
+                SHOW_TRAITS = builder.comment("Floaty (falls slowly), Bouncy (bounces off blocks), Heavy (near the",
+                                "most you can lift).")
+                        .define("show_traits", true);
+                SHOW_RADAR = builder.comment("What its radar senses: the nearest monster and how far away it is.",
+                                "Only for mobs with a radar.")
+                        .define("show_radar", true);
                 builder.pop();
 
                 builder.comment("The preview of where a thrown mob will fly and land, shown while charging (if the",
@@ -162,6 +198,13 @@ public final class PlayerConfig
                         get(RAGDOLL_IN_FLIGHT),
                         get(PICK_UP_COOLDOWN_TICKS),
                         get(PUT_DOWN_COOLDOWN_TICKS));
+        }
+
+        static CarryInfoConfig readCarryInfo()
+        {
+                return new CarryInfoConfig(get(SHOW_CARRY_INFO), get(CARRY_INFO_ANCHOR), get(CARRY_INFO_OFFSET_X),
+                        get(CARRY_INFO_OFFSET_Y), get(SHOW_HEALTH), get(SHOW_WEIGHT), get(SHOW_TRAITS),
+                        get(SHOW_RADAR));
         }
 
         static boolean enabled()

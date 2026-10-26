@@ -105,7 +105,8 @@ left to that mod and a chat message says so; rebind either one to use both.
 - `config/throwablemobs-server.toml`: gameplay, synced from the server (throw strength, bounciness, damage, behaviors,
   what happens to carried mobs when players leave). Every setting:
   [Server config](https://safetimamovic.github.io/ThrowableMobs/guide/server-config).
-- `config/throwablemobs-client.toml`: personal (prompt, charge bar, trajectory style, flight pose), editable in game.
+- `config/throwablemobs-client.toml`: personal (prompt, charge bar, carry info panel, trajectory style, flight pose),
+  editable in game.
 - Datapacks: tags and mob profiles per mob, reload with `/reload`. Check a mob with `/throwablemobs profile <mob>`.
 
 Guide for pack devs and mod devs: [safetimamovic.github.io/ThrowableMobs](https://safetimamovic.github.io/ThrowableMobs/)

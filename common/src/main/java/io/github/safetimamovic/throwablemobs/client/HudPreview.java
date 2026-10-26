@@ -2,6 +2,7 @@ package io.github.safetimamovic.throwablemobs.client;
 
 import dev.isxander.yacl3.gui.image.ImageRenderer;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryInfoConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HudConfig;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import java.util.function.Function;
@@ -10,9 +11,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The prompt and charge bar in YACL's description pane, live: a scaled-down screen with the values being edited, not
- * yet saved, drawn by the HUD's own code. The charge bar fills over and over. The prompt keeps its real text size, or
- * it couldn't be read, so only its position is to scale.
+ * The prompt, charge bar and carry info panel in YACL's description pane, live: a scaled-down screen with the values
+ * being edited, not yet saved, drawn by the HUD's own code. The charge bar fills over and over. Text keeps its real
+ * size, or it couldn't be read, so only its position is to scale.
  */
 final class HudPreview implements ImageRenderer
 {
@@ -74,6 +75,12 @@ final class HudPreview implements ImageRenderer
                         int promptY = y + Math.round(CarryClient.promptY(guiHeight, config) * scale);
                         CarryClient.drawPrompt(graphics, promptX, promptY, CarryClient.samplePrompt(), null);
                 }
+                CarryInfoConfig carryInfo = carryInfoConfig();
+                if (carryInfo.show())
+                {
+                        CarryInfoHud.draw(graphics, x, y, renderWidth, height, scale, carryInfo,
+                                CarryInfoHud.sampleLines(carryInfo));
+                }
                 graphics.disableScissor();
                 return height;
         }
@@ -102,6 +109,20 @@ final class HudPreview implements ImageRenderer
                         saved.ragdollInFlight(),
                         saved.pickUpCooldownTicks(),
                         saved.putDownCooldownTicks());
+        }
+
+        private CarryInfoConfig carryInfoConfig()
+        {
+                CarryInfoConfig saved = ThrowableMobsConfig.carryInfo();
+                return new CarryInfoConfig(
+                        value("show_carry_info", saved.show()),
+                        value("carry_info_anchor", saved.anchor()),
+                        value("carry_info_offset_x", saved.offsetX()),
+                        value("carry_info_offset_y", saved.offsetY()),
+                        value("show_health", saved.health()),
+                        value("show_weight", saved.weight()),
+                        value("show_traits", saved.traits()),
+                        value("show_radar", saved.radar()));
         }
 
         @SuppressWarnings("unchecked")

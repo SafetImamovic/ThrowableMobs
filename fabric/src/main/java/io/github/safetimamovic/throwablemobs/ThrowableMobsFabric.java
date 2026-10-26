@@ -15,6 +15,7 @@ import io.github.safetimamovic.throwablemobs.network.DropCarriedPayload;
 import io.github.safetimamovic.throwablemobs.network.PickUpPayload;
 import io.github.safetimamovic.throwablemobs.network.PlayerEnabledPayload;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
+import io.github.safetimamovic.throwablemobs.network.RadarStatusPayload;
 import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -97,6 +98,7 @@ public class ThrowableMobsFabric implements ModInitializer
                         (payload, context) -> ThrowManager.onThrowRequest(context.player()));
 
                 clientbound.register(ProfileSyncPayload.TYPE, ProfileSyncPayload.STREAM_CODEC);
+                clientbound.register(RadarStatusPayload.TYPE, RadarStatusPayload.STREAM_CODEC);
                 //? if >=26.1 {
                 ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(MobProfileReloadListener.ID,
                         new MobProfileReloadListener());

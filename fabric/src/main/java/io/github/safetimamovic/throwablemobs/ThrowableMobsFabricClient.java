@@ -5,11 +5,13 @@ import fuzs.forgeconfigapiport.fabric.api.v5.client.ConfigScreenFactoryRegistry;
 //?} else
 /*import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.client.ConfigScreenFactoryRegistry;*/
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
+import io.github.safetimamovic.throwablemobs.carry.RadarStatus;
 import io.github.safetimamovic.throwablemobs.client.CarryClient;
 import io.github.safetimamovic.throwablemobs.client.CarryKeys;
 import io.github.safetimamovic.throwablemobs.client.ConfigScreens;
 import io.github.safetimamovic.throwablemobs.client.ThrowableMobsClientCommand;
 import io.github.safetimamovic.throwablemobs.network.ProfileSyncPayload;
+import io.github.safetimamovic.throwablemobs.network.RadarStatusPayload;
 //? if >=26.1
 import net.minecraft.client.KeyMapping;
 import net.fabricmc.api.ClientModInitializer;
@@ -50,6 +52,8 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                 });
                 ClientPlayNetworking.registerGlobalReceiver(ProfileSyncPayload.TYPE,
                         (payload, context) -> MobProfiles.onSync(payload));
+                ClientPlayNetworking.registerGlobalReceiver(RadarStatusPayload.TYPE,
+                        (payload, context) -> RadarStatus.onStatus(payload, context.player().level().getGameTime()));
                 // Opened from Mod Menu, through Forge Config API Port.
                 UnaryOperator<@Nullable Screen> configScreen = ConfigScreens.withYacl(
                         parent -> new ConfigurationScreen(Constants.MOD_ID, parent, ThrowableMobsFabricClient::filter));

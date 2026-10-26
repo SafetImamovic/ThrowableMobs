@@ -1,5 +1,8 @@
 package io.github.safetimamovic.throwablemobs.platform.services;
 
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
+
 public interface IPlatformHelper
 {
 
@@ -30,6 +33,9 @@ public interface IPlatformHelper
          *
          * @return The name of the environment type.
          */
+        /** Sends {@code payload} to {@code player}, if their client has the mod. */
+        void sendToPlayer(ServerPlayer player, CustomPacketPayload payload);
+
         default String getEnvironmentName()
         {
 
