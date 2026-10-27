@@ -17,6 +17,10 @@ dependencies {
     "${mod('implementation')}"("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
     "${mod('implementation')}"("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_version}")
     "${mod('localRuntime')}"("maven.modrinth:modmenu:${modmenu_version}")
+    if (stonecutter.eval(stonecutter.current.version, '<1.20.2')) {
+        // ModMenuIntegration: Forge Config API Port hands Mod Menu the config screen from 1.20.2 on.
+        modCompileOnly("maven.modrinth:modmenu:${modmenu_version}")
+    }
     // Optional config screen.
     "${mod('compileOnly')}"("maven.modrinth:yacl:${yacl_version}-fabric")
     "${mod('localRuntime')}"("maven.modrinth:yacl:${yacl_version}-fabric")

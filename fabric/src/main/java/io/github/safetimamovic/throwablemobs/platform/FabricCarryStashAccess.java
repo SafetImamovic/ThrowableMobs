@@ -1,3 +1,5 @@
+//? if >=1.20.5 {
+// Before 1.20.5 Services uses the shared platform.legacy implementation instead.
 package io.github.safetimamovic.throwablemobs.platform;
 
 import io.github.safetimamovic.throwablemobs.Constants;
@@ -33,3 +35,4 @@ public final class FabricCarryStashAccess implements ICarryStashAccess
                 player.removeAttached(CARRY_STASH);
         }
 }
+//?}

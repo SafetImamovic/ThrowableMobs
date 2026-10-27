@@ -2,8 +2,14 @@ package io.github.safetimamovic.throwablemobs;
 
 //? if >=26.1 {
 import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
-//?} else
-/*import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;*/
+//?} else if >=1.20.2 {
+/*import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
+*///?} else {
+/*import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
+import io.github.safetimamovic.throwablemobs.platform.legacy.EntityStateSyncPayload;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
+import net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents;
+*///?}
 import io.github.safetimamovic.throwablemobs.behavior.MobProfileReloadListener;
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.carry.CarryManager;
@@ -72,10 +78,17 @@ public class ThrowableMobsFabric implements ModInitializer
                         PlayerConfig.FILE_NAME);
                 var serverbound = PayloadTypeRegistry.serverboundPlay();
                 var clientbound = PayloadTypeRegistry.clientboundPlay();
-                //?} else {
+                //?} else if >=1.20.2 {
                 /*NeoForgeConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.SERVER, CreatorConfig.SPEC,
                         CreatorConfig.FILE_NAME);
                 NeoForgeConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.CLIENT, PlayerConfig.SPEC,
+                        PlayerConfig.FILE_NAME);
+                var serverbound = PayloadTypeRegistry.playC2S();
+                var clientbound = PayloadTypeRegistry.playS2C();
+                *///?} else {
+                /*ForgeConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.SERVER, CreatorConfig.SPEC,
+                        CreatorConfig.FILE_NAME);
+                ForgeConfigRegistry.INSTANCE.register(Constants.MOD_ID, ModConfig.Type.CLIENT, PlayerConfig.SPEC,
                         PlayerConfig.FILE_NAME);
                 var serverbound = PayloadTypeRegistry.playC2S();
                 var clientbound = PayloadTypeRegistry.playS2C();
@@ -99,6 +112,22 @@ public class ThrowableMobsFabric implements ModInitializer
 
                 clientbound.register(ProfileSyncPayload.TYPE, ProfileSyncPayload.STREAM_CODEC);
                 clientbound.register(RadarStatusPayload.TYPE, RadarStatusPayload.STREAM_CODEC);
+                //? if <1.20.5 {
+                /*// No synced attachments before 1.20.5: the mod syncs carry and throw state itself.
+                clientbound.register(EntityStateSyncPayload.TYPE, EntityStateSyncPayload.STREAM_CODEC);
+                EntityTrackingEvents.START_TRACKING.register((entity, player) ->
+                        EntityStateSyncPayload.onStartTracking(entity, player));
+                // The client's channels only arrive after the join's data pack sync below, which therefore can't
+                // send the profiles yet: send them once the client says it has the channel.
+                S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) ->
+                {
+                        if (channels.contains(ProfileSyncPayload.TYPE.id()))
+                        {
+                                server.execute(() -> ServerPlayNetworking.send(handler.getPlayer(),
+                                        MobProfiles.syncPayload()));
+                        }
+                });
+                *///?}
                 //? if >=26.1 {
                 ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(MobProfileReloadListener.ID,
                         new MobProfileReloadListener());

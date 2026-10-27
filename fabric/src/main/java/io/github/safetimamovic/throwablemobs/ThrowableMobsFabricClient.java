@@ -2,7 +2,7 @@ package io.github.safetimamovic.throwablemobs;
 
 //? if >=26.1 {
 import fuzs.forgeconfigapiport.fabric.api.v5.client.ConfigScreenFactoryRegistry;
-//?} else
+//?} else if >=1.20.2
 /*import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.client.ConfigScreenFactoryRegistry;*/
 import io.github.safetimamovic.throwablemobs.behavior.MobProfiles;
 import io.github.safetimamovic.throwablemobs.carry.RadarStatus;
@@ -32,9 +32,15 @@ import java.util.function.UnaryOperator;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
+//? if >=1.20.2 {
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen.Context;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen.ConfigurationSectionScreen.Element;
+//?} else {
+/*import io.github.safetimamovic.throwablemobs.platform.legacy.EntityStateClient;
+import net.fabricmc.fabric.api.client.networking.v1.C2SPlayChannelEvents;
+import io.github.safetimamovic.throwablemobs.platform.legacy.EntityStateSyncPayload;
+*///?}
 import org.jspecify.annotations.Nullable;
 
 public class ThrowableMobsFabricClient implements ClientModInitializer
@@ -54,11 +60,21 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                         (payload, context) -> MobProfiles.onSync(payload));
                 ClientPlayNetworking.registerGlobalReceiver(RadarStatusPayload.TYPE,
                         (payload, context) -> RadarStatus.onStatus(payload, context.player().level().getGameTime()));
+                //? if >=1.20.2 {
                 // Opened from Mod Menu, through Forge Config API Port.
                 UnaryOperator<@Nullable Screen> configScreen = ConfigScreens.withYacl(
                         parent -> new ConfigurationScreen(Constants.MOD_ID, parent, ThrowableMobsFabricClient::filter));
                 ConfigScreenFactoryRegistry.INSTANCE.register(Constants.MOD_ID,
                         (modId, parent) -> configScreen.apply(parent));
+                //?} else {
+                /*// No stock config screen before 1.20.2, only YACL's; Mod Menu gets it from ModMenuIntegration.
+                UnaryOperator<@Nullable Screen> configScreen = ModMenuIntegration.CONFIG_SCREEN;
+                ClientPlayNetworking.registerGlobalReceiver(EntityStateSyncPayload.TYPE,
+                        (payload, context) -> EntityStateClient.onSync(payload));
+                // The server's channels arrive after joining; until then payloads to it are dropped.
+                C2SPlayChannelEvents.REGISTER.register((handler, sender, client, channels) ->
+                        client.execute(CarryClient::resendEnabled));
+                *///?}
                 ThrowableMobsClientCommand.init(configScreen);
                 ClientCommandRegistrationCallback.EVENT
                         .register((dispatcher, buildContext) -> ThrowableMobsClientCommand.register(dispatcher));
@@ -89,6 +105,7 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                 *///?}
         }
 
+        //? if >=1.20.2 {
         /** The stock screen greys out the player's {@code enabled} while the server has the mod off. */
         private static Element filter(Context context, String key, Element original)
         {
@@ -100,4 +117,5 @@ public class ThrowableMobsFabricClient implements ClientModInitializer
                 ConfigScreens.showLockedByServer(widget);
                 return new Element(original.name(), original.tooltip(), widget, false);
         }
+        //?}
 }
