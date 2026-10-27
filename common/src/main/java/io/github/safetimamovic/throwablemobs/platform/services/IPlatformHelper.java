@@ -2,6 +2,8 @@ package io.github.safetimamovic.throwablemobs.platform.services;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+//? if <1.20.5
+/*import net.minecraft.world.entity.Entity;*/
 
 public interface IPlatformHelper
 {
@@ -35,6 +37,11 @@ public interface IPlatformHelper
          */
         /** Sends {@code payload} to {@code player}, if their client has the mod. */
         void sendToPlayer(ServerPlayer player, CustomPacketPayload payload);
+
+        //? if <1.20.5 {
+        /*/^* Sends {@code payload} to every player that sees {@code entity}, if their client has the mod. 1.20.1 only. *^/
+        void sendToTracking(Entity entity, CustomPacketPayload payload);
+        *///?}
 
         default String getEnvironmentName()
         {

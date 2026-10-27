@@ -39,7 +39,7 @@ abstract class LivingEntityRendererMixin
         {
                 FlightPose.apply(state, poseStack);
         }
-        //?} else {
+        //?} else if >=1.20.5 {
         /*// No render state before 1.21.2: each step asks FlightPose about the entity itself.
 
         /^* The body faces the flight direction. *^/
@@ -62,8 +62,32 @@ abstract class LivingEntityRendererMixin
                                 entity.getBbHeight() / scale / 2.0F);
                 }
         }
+        *///?} else {
+        /*// Before 1.20.5 setupRotations has no scale (there is no scale attribute yet).
 
-        /^* The head looks straight ahead, along the body. *^/
+        /^* The body faces the flight direction. *^/
+        @ModifyVariable(method = "setupRotations", at = @At("HEAD"), argsOnly = true, ordinal = 1)
+        private float throwablemobs$flightBodyRot(float bodyRot, LivingEntity entity, PoseStack poseStack, float bob,
+                float yBodyRot, float partialTick)
+        {
+                Angles angles = FlightPose.of(entity, entity.tickCount + partialTick);
+                return angles != null ? angles.bodyRot() : bodyRot;
+        }
+
+        @Inject(method = "setupRotations", at = @At("TAIL"))
+        private void throwablemobs$applyFlightPose(LivingEntity entity, PoseStack poseStack, float bob, float bodyRot,
+                float partialTick, CallbackInfo ci)
+        {
+                Angles angles = FlightPose.of(entity, entity.tickCount + partialTick);
+                if (angles != null && angles.tilt() != null)
+                {
+                        FlightPose.tilt(poseStack, angles.tilt(), angles.pitch(), angles.spin(),
+                                entity.getBbHeight() / 2.0F);
+                }
+        }
+        *///?}
+        //? if <1.21.2 {
+        /*/^* The head looks straight ahead, along the body. *^/
         @WrapOperation(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;"
                 + "Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE",
                 target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Lnet/minecraft/world/entity/Entity;FFFFF)V"))

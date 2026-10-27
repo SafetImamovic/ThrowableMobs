@@ -41,7 +41,10 @@ public record IgniteAction(float seconds, boolean fireOnBlock) implements Behavi
         @Override
         public void run(ThrowContext ctx)
         {
+                //? if >=1.20.5 {
                 ctx.mob().igniteForSeconds(seconds);
+                //?} else
+                /*ctx.mob().setSecondsOnFire(Math.round(seconds));*/
         }
 
         @Override
@@ -50,7 +53,10 @@ public record IgniteAction(float seconds, boolean fireOnBlock) implements Behavi
                 Entity target = ctx.target();
                 if (target != null)
                 {
+                        //? if >=1.20.5 {
                         target.igniteForSeconds(seconds);
+                        //?} else
+                        /*target.setSecondsOnFire(Math.round(seconds));*/
                 }
                 else if (fireOnBlock)
                 {

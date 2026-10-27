@@ -5,6 +5,11 @@ import io.github.safetimamovic.throwablemobs.platform.services.ICarryStashAccess
 import io.github.safetimamovic.throwablemobs.platform.services.ICarryStateAccess;
 import io.github.safetimamovic.throwablemobs.platform.services.IPlatformHelper;
 import io.github.safetimamovic.throwablemobs.platform.services.IThrowStateAccess;
+//? if <1.20.5 {
+/*import io.github.safetimamovic.throwablemobs.platform.legacy.LegacyCarryStashAccess;
+import io.github.safetimamovic.throwablemobs.platform.legacy.LegacyCarryStateAccess;
+import io.github.safetimamovic.throwablemobs.platform.legacy.LegacyThrowStateAccess;
+*///?}
 
 import java.util.ServiceLoader;
 
@@ -19,6 +24,7 @@ public class Services
         // mod is loaded.
         public static final IPlatformHelper PLATFORM = load(IPlatformHelper.class);
 
+        //? if >=1.20.5 {
         // Carry state attachment (persistent + synced to tracking clients).
         public static final ICarryStateAccess CARRY_STATE = load(ICarryStateAccess.class);
 
@@ -27,6 +33,14 @@ public class Services
 
         // Mob a player took along when they logged out (persistent with the player, not synced).
         public static final ICarryStashAccess CARRY_STASH = load(ICarryStashAccess.class);
+        //?} else {
+        /*// Before 1.20.5 neither loader has synced data attachments: the same mixin-backed state on both.
+        public static final ICarryStateAccess CARRY_STATE = new LegacyCarryStateAccess();
+
+        public static final IThrowStateAccess THROW_STATE = new LegacyThrowStateAccess();
+
+        public static final ICarryStashAccess CARRY_STASH = new LegacyCarryStashAccess();
+        *///?}
 
         // This code is used to load a service for the current environment. Your implementation of the service must be defined
         // manually by including a text file in META-INF/services named with the fully qualified class name of the service.

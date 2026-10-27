@@ -12,6 +12,7 @@ import java.util.Locale;
 import net.minecraft.network.chat.Component;
 //? if >=26.1
 import net.minecraft.world.entity.EntityReference;
+//? if >=1.21
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -89,7 +90,10 @@ public final class CarryRules
                 {
                         return Denial.RIDING;
                 }
+                //? if >=1.21 {
                 if (mob instanceof Leashable leashable && leashable.isLeashed())
+                //?} else
+                /*if (mob.isLeashed())*/
                 {
                         return Denial.LEASHED;
                 }

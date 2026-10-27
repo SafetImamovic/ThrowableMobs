@@ -16,6 +16,7 @@ import io.github.safetimamovic.throwablemobs.network.ThrowPayload;
 import io.github.safetimamovic.throwablemobs.physics.ThrowPhysics;
 import io.github.safetimamovic.throwablemobs.platform.Services;
 import java.util.function.Consumer;
+//? if >=1.21
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -72,6 +73,14 @@ public final class CarryClient
                 sendToServer = sender;
         }
 
+        //? if <1.20.5 {
+        /*/^* Tells the server the player's {@code enabled} again, for when it couldn't hear it yet (1.20.1 Fabric). *^/
+        public static void resendEnabled()
+        {
+                sentEnabled = true;
+        }
+
+        *///?}
         public static void tick(Minecraft minecraft)
         {
                 ClientLevel level = minecraft.level;
@@ -323,7 +332,10 @@ public final class CarryClient
          * HUD layer under the crosshair: "[Shift] + [Right Button] to pick up", "Can't pick this one up", or, while
          * carrying, put down and throw, plus the charge bar while charging and the carry info panel.
          */
+        //? if >=1.21 {
         public static void renderPrompt(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker)
+        //?} else
+        /*public static void renderPrompt(GuiGraphicsExtractor graphics, float partialTick)*/
         {
                 Minecraft minecraft = Minecraft.getInstance();
                 LocalPlayer player = minecraft.player;
@@ -479,9 +491,12 @@ public final class CarryClient
                 double height = carrier.getBbHeight();
                 //? if >=26.1 {
                 entity.getInterpolation().cancel();
-                //?} else {
+                //?} else if >=1.20.3 {
                 /*// Zero steps: drops the interpolation still running towards an older server position.
                 entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot(), 0);
+                *///?} else {
+                /*entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot(), 0,
+                        false);
                 *///?}
                 entity.setPos(carrier.getX(), carrier.getY() + height, carrier.getZ());
                 entity.xo = carrier.xo;

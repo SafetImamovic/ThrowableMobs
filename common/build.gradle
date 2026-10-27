@@ -1,10 +1,17 @@
 plugins {
     id 'multiloader-common'
-    id 'net.neoforged.moddev'
 }
 
-neoForge {
-    neoFormVersion = neo_form_version
+// NeoForm (vanilla Minecraft) starts at 1.20.2; older versions get vanilla from Forge's MCP config instead.
+def legacy = stonecutter.eval(stonecutter.current.version, '<1.20.2')
+apply plugin: legacy ? 'net.neoforged.moddev.legacyforge' : 'net.neoforged.moddev'
+
+(legacy ? legacyForge : neoForge).with {
+    if (legacy) {
+        mcpVersion = mcp_version
+    } else {
+        neoFormVersion = neo_form_version
+    }
     // Automatically enable AccessTransformers if the file exists
     def at = file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
@@ -27,9 +34,19 @@ dependencies {
 
     // NeoForge's config API (ModConfigSpec). NeoForge has it built in; on Fabric, Forge Config API Port provides the
     // same classes, so config specs can live in common.
-    compileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${forgeconfigapiport_version}")
+    // Before 1.20.2 there is no NeoForge API to port: the specs use Forge's ForgeConfigSpec (same builder API).
+    if (legacy) {
+        compileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-common:${forgeconfigapiport_version}")
+    } else {
+        compileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${forgeconfigapiport_version}")
+    }
     // Optional; its API is the same on both loaders, and the NeoForge jar uses Mojang's names like :common does.
-    compileOnly("maven.modrinth:yacl:${yacl_version}-neoforge") { transitive = false }
+    // The Forge jar (1.20.1) uses SRG names, which modCompileOnly maps back to Mojang's.
+    if (legacy) {
+        modCompileOnly("maven.modrinth:yacl:${yacl_version}-forge") { transitive = false }
+    } else {
+        compileOnly("maven.modrinth:yacl:${yacl_version}-neoforge") { transitive = false }
+    }
 }
 
 configurations {
@@ -67,6 +84,37 @@ def collectCommonResources = tasks.register('collectCommonResources', Sync) {
             filter { String line ->
                 line.replaceAll(/("background": *"[a-z0-9_.-]+):([^"]+)"/, '$1:textures/$2.png"')
             }
+        }
+    }
+    // Item stacks (advancement icons) named their item "item" before 1.20.5.
+    if (stonecutter.eval(stonecutter.current.version, '<1.20.5')) {
+        filesMatching('data/*/advancement/*.json') {
+            def inIcon = false
+            filter { String line ->
+                def out = inIcon ? line.replace('"id":', '"item":') : line
+                inIcon = line.contains('"icon"')
+                out
+            }
+        }
+    }
+    // Forge 1.20.1 lists the mod's resources as incompatible unless they declare its pack format.
+    if (stonecutter.eval(stonecutter.current.version, '<1.20.2')) {
+        filesMatching('pack.mcmeta') {
+            filter { String line -> line.replaceAll(/(?<="pack_format": )\d+/, '15') }
+        }
+    }
+    // Icons of items added later.
+    if (stonecutter.eval(stonecutter.current.version, '<1.21')) {
+        filesMatching('data/*/advancement/*.json') {
+            filter { String line -> line.replace('"minecraft:wind_charge"', '"minecraft:feather"') }
+        }
+    }
+    // Data pack folders of built-in registries were plural before 1.21. Last, so the filters above match first.
+    if (stonecutter.eval(stonecutter.current.version, '<1.21')) {
+        eachFile {
+            path = path.replace('/advancement/', '/advancements/')
+                    .replace('/tags/entity_type/', '/tags/entity_types/')
+                    .replace('/tags/block/', '/tags/blocks/')
         }
     }
 }

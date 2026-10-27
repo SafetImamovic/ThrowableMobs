@@ -86,7 +86,10 @@ processResources {
             'fabric_loader_requirement'    : fabric_loader_requirement,
             'fabric_api_requirement'       : fabric_api_requirement,
             'forgeconfigapiport_requirement': forgeconfigapiport_requirement,
-            'neoforge_version_range'       : neoforge_version_range,
+            // Each version has NeoForge or Forge (1.20.1), not both; the other's keys are empty.
+            'neoforge_version_range'       : findProperty('neoforge_version_range') ?: '',
+            'forge_version_range'          : findProperty('forge_version_range') ?: '',
+            'forge_loader_version_range'   : findProperty('forge_loader_version_range') ?: '',
             'yacl_requirement'             : yacl_requirement,
             'yacl_version_range'           : yacl_version_range,
             'fabric_version'               : fabric_version,
@@ -97,7 +100,8 @@ processResources {
             'mod_id'                       : mod_id,
             'license'                      : license,
             'description'                  : project.description,
-            'neoforge_version'             : neoforge_version,
+            'neoforge_version'             : findProperty('neoforge_version') ?: '',
+            'forge_version'                : findProperty('forge_version') ?: '',
             'neoforge_loader_version_range': neoforge_loader_version_range,
             'credits'                      : credits,
             'java_version'                 : java_version,
@@ -119,13 +123,17 @@ processResources {
         expand jsonExpandProps
     }
 
-    // Mixins whose target class only exists in some Minecraft versions, with the versions they're for; the other
-    // versions' mixin configs leave their line out (so none of them may be the last entry of a list).
-    def versionedMixins = ['LivingEntityRenderStateMixin': '>=1.21.2', 'KeyMappingMixin': '<26.1']
-    filesMatching('*.mixins.json') {
+    // Mixins (and entrypoints) whose classes only exist in some Minecraft versions, with the versions they're for; the
+    // other versions' mixin configs and fabric.mod.json leave their line out (so none of them may be the last entry of
+    // a list or object).
+    def versionedClasses = ['LivingEntityRenderStateMixin': '>=1.21.2', 'KeyMappingMixin': '<26.1',
+                            'CriteriaTriggersInvoker': '<1.20.2', 'EntityStateMixin': '<1.20.5',
+                            'ModMenuIntegration': '<1.20.2']
+    filesMatching(['*.mixins.json', 'fabric.mod.json']) {
         filter { String line ->
-            versionedMixins.any { name, versions ->
-                line.contains("\"${name}\"") && !stonecutter.eval(stonecutter.current.version, versions)
+            versionedClasses.any { name, versions ->
+                (line.contains("\"${name}\"") || line.contains(".${name}\""))
+                        && !stonecutter.eval(stonecutter.current.version, versions)
             } ? null : line
         }
     }
@@ -147,7 +155,13 @@ publishing {
     }
 }
 
+// Sources are UTF-8; Java 17 (1.20.1) would read them in the system encoding, which on Windows isn't.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 // Don't demand @param/@return on every method; still report real javadoc errors.
 tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
     options.addStringOption('Xdoclint:all,-missing', '-quiet')
 }

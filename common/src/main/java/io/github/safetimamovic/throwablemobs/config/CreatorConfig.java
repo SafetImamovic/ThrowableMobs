@@ -315,8 +315,11 @@ public final class CreatorConfig
                                 "for the mob overrides the guess.")
                         .define("auto_detect_behaviors", true);
                 DISABLED_BEHAVIORS = builder.comment("Behavior types that never run, e.g. [\"throwablemobs:explode\"].")
+                        //? if >=1.20.5 {
                         .defineListAllowEmpty("disabled_behaviors", List.of(), () -> "throwablemobs:explode",
                                 value -> value instanceof String id && Identifier.tryParse(id) != null);
+                        //?} else
+                        /*.defineListAllowEmpty(List.of("disabled_behaviors"), List::of, value -> value instanceof String id && Identifier.tryParse(id) != null);*/
                 EGG_CHANCE = builder.comment("Chance a thrown chicken lays an egg when it lands (0 = never, 1 =",
                                 "every throw). Rolled once per throw.")
                         .defineInRange("egg_chance", 0.25, 0.0, 1.0);
