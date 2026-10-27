@@ -4,13 +4,14 @@ Gameplay rules live in `config/throwablemobs-server.toml`. The server sends them
 the same rules. To use different rules for one world, put a copy in that world's `serverconfig/` folder (Fabric) or
 `syncedconfig/` folder (NeoForge); it wins over the global file.
 
-On **1.21.1** the file is per world: `serverconfig/throwablemobs-server.toml` in the world's folder, made on first load
-(from `defaultconfigs/throwablemobs-server.toml` if you put one there).
+On **1.20.1** and **1.21.1** the file is per world: `serverconfig/throwablemobs-server.toml` in the world's folder,
+made on first load (from `defaultconfigs/throwablemobs-server.toml` if you put one there).
 
 Each player's own settings (prompt, charge bar, trajectory style, flight pose) are in
 `config/throwablemobs-client.toml` and can be changed in game with `/throwablemobs config`. With
 [YACL](https://modrinth.com/mod/yacl) installed, that screen also shows this file's settings; they can be changed there
-in your own world (singleplayer or LAN host), and on 26.3 from the title screen too.
+in your own world (singleplayer or LAN host), and on 26.3 from the title screen too. On 1.20.1 there is no settings
+screen without YACL; edit the files instead.
 
 Per-mob numbers and behaviors don't belong here: set them with [mob profiles](mob-profiles.md) and [tags](tags.md).
 

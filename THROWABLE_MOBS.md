@@ -861,7 +861,7 @@ Hand-written reference tables rot. Generate them:
 | **M6 — Carry+** | Carry blocks with their contents (chests, furnaces, spawners, modded machines) and throw them; carry and throw players (opt-in); stack mobs (small on big, thrown as a stack); holding animation in first and third person; Carry On compatibility. Goal: the best carry mod, not just the best throw mod. |
 | **M7 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
 | **M8 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. (Done early: `mc-publish` to both since 0.4.1; [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/throwablemobs) approved 2026-10-25, Modrinth page still in review.) |
-| **M9 — Backport 1.20.1** | 1.20.1 on **Fabric + Forge** as a third Stonecutter version next to 1.21.1 and 26.3. The Forge jar also covers NeoForge 1.20.1 (a Forge fork at 47.1), so there is no NeoForge 1.20.1 build. New `forge/` loader module, built only for 1.20.1. Biggest jobs: networking without payloads, carry/throw state without attachments, singular → plural data folders. Details in the 1.20.1 backport notes (§19). Decided 2026-10-27, after Adjustability M13/M11/1.0 ship. |
+| **M9 — Backport 1.20.1** | 1.20.1 on **Fabric + Forge** as a third Stonecutter version next to 1.21.1 and 26.3. The Forge jar also covers NeoForge 1.20.1 (a Forge fork at 47.1), so there is no NeoForge 1.20.1 build. New `forge/` loader module, built only for 1.20.1. Biggest jobs: networking without payloads, carry/throw state without attachments, singular → plural data folders. Details in the 1.20.1 backport notes (§19). Decided and built 2026-10-27, not yet played in game. |
 | **M9b — KubeJS** | KubeJS integration. |
 | **M10 — Paper plugin** | `paper/` module on shared `physics/`, item-based / sneak+swing controls, action-bar HUD, particle trajectory preview, minigame events API, permissions, Folia decision, docs pages for admins/plugin devs, Hangar + Modrinth + SpigotMC release. |
 | **M11 — Hybrid** (optional) | Optional client mod enhances Paper servers via plugin-messaging channel (real HUD, preview, keybinds). |
@@ -903,22 +903,25 @@ Settled 2026-10-02:
 
 ### 1.20.1 backport notes (M9)
 
-Planned 2026-10-27. Check each item against the real 1.20.1 APIs before starting; most of this is from memory of the
-1.20.x → 1.20.5 / 1.21 changes.
+Built 2026-10-27. `./gradlew build` builds all three versions. On 1.20.1,
+GameTest smoke runs (state store, NBT round trip, criterion registration) passed on Fabric, Forge 47.4.28 and NeoForge
+47.1.106, and dev clients reached the title screen and built the YACL screen on all three. Play-tested in game on
+Fabric and Forge 1.20.1.
 
-| Area | 1.21.1 / 26.3 | 1.20.1 |
+| Area | 1.21.1 / 26.3 | 1.20.1, as built |
 |---|---|---|
-| Java | 21 / 25 | **17**. No pattern matching in `switch`, no sequenced collections; keep `physics/` on Java 17 syntax. |
-| Loaders | Fabric + NeoForge | **Fabric + Forge 47.x**. `forge/` module via ModDevGradle's `legacyforge` plugin (handles reobf and the mixin refmap), entrypoints on Forge's `@Mod` / `MinecraftForge.EVENT_BUS`. `neoforge/` is not built for 1.20.1. |
-| Networking | `CustomPacketPayload` + `StreamCodec` (7 payloads in `network/`, plus `CarryClient`) | No payload types. Each payload becomes a plain record with `encode(FriendlyByteBuf)` / `decode(FriendlyByteBuf)`; register through Fabric's `ServerPlayNetworking` / `ClientPlayNetworking` channel API and Forge's `SimpleChannel`. Put this behind `IPlatformHelper` so `common` sends records, not loader types. |
-| Entity state | Fabric Data Attachment API / NeoForge attachments (`*CarryStateAccess`, `*CarryStashAccess`, `*ThrowStateAccess`) | No attachments. Forge: capabilities (`AttachCapabilitiesEvent`, plus manual client sync). Fabric: a mixin field on `Entity` saved through `addAdditionalSaveData` / `readAdditionalSaveData`, synced with our own packet (no Cardinal Components dependency). `ICarryStateAccess` already hides this. |
-| Data folders | `advancement/`, `tags/entity_type/`, … (singular) | Plural (`advancements/`, `tags/entity_types/`). Generate or copy them per version in the build rather than keeping two trees by hand. `damage_type/` exists since 1.19.4. |
-| Item data | Data components | NBT tags. Only matters for carried block contents (M6) and any item the mod adds. |
-| Names | `ResourceLocation` (1.21.1), `Identifier` (26.3) | `ResourceLocation` with the public constructor (`ResourceLocation.fromNamespaceAndPath` is 1.21+). |
-| Config | Forge Config API Port 21.1.x | Forge Config API Port 8.x on Fabric; Forge's own config on Forge. |
-| Optional mods | YACL, Mod Menu, Ragdollified | YACL and Mod Menu have 1.20.1 builds. Ragdollified on 1.20.1: **verify**, else compile out its hook with `//? if`. |
-| GameTests | `runGametest` / `runGameTestServer` | Older GameTest API (`@GameTest` on static methods, Forge `@GameTestHolder`). Fabric 1.21.1 `runGametest` already fails ("No test functions were given"), so expect to spend time here. |
-| Publishing | `mc-publish`, fabric + neoforge jars | Add the forge jar for 1.20.1 only; on Modrinth/CurseForge mark it Forge **and** NeoForge 1.20.1. |
+| Java | 21 / 25 | **17**. `:physics` and `common` compile for 17 too: no `Math.clamp`, `List.getLast`, switch patterns or record patterns. Compile and javadoc use UTF-8 explicitly (Java 17 on Windows reads cp1252). |
+| Loaders | Fabric + NeoForge | **Fabric + Forge**. `forge/` uses ModDevGradle's `legacyforge` plugin, built for 1.20.1 only (`settings.gradle`); `neoforge/` skips 1.20.1. The Forge jar declares `forge [47.1,)`, so it also loads on NeoForge 1.20.1 (47.1.x). `common` gets vanilla from Forge's MCP config (`mcp_version`), since NeoForm starts at 1.20.2. |
+| Version-only code | — | `<branch>/versions/1.20.1/src` holds classes only that version compiles: the stand-ins below, the 1.20.1-only mixins, `ModMenuIntegration`. |
+| Networking | `CustomPacketPayload` + `StreamCodec` | Small stand-ins for both in `common/versions/1.20.1/src` (`network/codec`), and for Fabric API's `PayloadTypeRegistry` / `ServerPlayNetworking` / `ClientPlayNetworking` in `fabric/versions/1.20.1/src`. Stonecutter swaps the imports (`stonecutter.gradle`, `<1.20.5`), so payload classes and the Fabric entrypoints stay one source. Payloads go over a plain channel named after their type; Forge uses one `EventNetworkChannel` per payload (`ForgeNetwork`), optional on both ends. |
+| Entity state | Data attachments, synced | No synced attachments on either loader: `EntityStateMixin` (common, 1.20.1 only) holds carry/throw state and the stash on every entity and saves them under the attachment IDs. `platform/legacy` has the `Services` implementations and `EntityStateSyncPayload`, sent on change and when a player starts tracking the entity. Same code on Fabric and Forge. |
+| Advancements | Codec criteria, trigger registry | JSON criteria (`createInstance` / `serializeToJson`), registered through `CriteriaTriggersInvoker`. |
+| Data | `advancement/`, `tags/entity_type/`, `"id"` icons | `collectCommonResources` rewrites for older versions: plural folders, `"item"` icons, full background texture paths (`<1.21.5`, also fixes 1.21.1), `wind_charge` icon → feather, `pack_format` 15. |
+| Config | NeoForge `ModConfigSpec` (FCAP on Fabric) | Forge's `ForgeConfigSpec` (same builder; Stonecutter renames it), Forge Config API Port 8 on Fabric. **No stock config screen**: the settings screen is YACL's only; without YACL, Mod Menu and Forge's mod list show no config button. |
+| Mixins | Fabric/NeoForge bundle MixinExtras | Forge 1.20.1 doesn't: the jar carries `mixinextras-forge` (jar-in-jar). The mixin annotation processor writes `throwablemobs.refmap.json` for Forge; the jar manifest lists the mixin config. |
+| Optional mods | YACL, Mod Menu, Ragdollified | YACL 3.6.6 and Mod Menu 7.2.2. **Ragdollified not hooked up yet** on Forge 1.20.1 (it exists there, Forge only). |
+| Publishing | fabric + neoforge jars | `release.yml` attaches the forge jar; `publish.yml` publishes 1.20.1 Fabric, and the Forge jar as both Forge and NeoForge. |
+| Minimum versions | tested | Fabric Loader 0.15, Fabric API 0.92, FCAP 8.0, Forge 47.1 are declared, **not tested**; built against Loader 0.19.5, Fabric API 0.92.12, FCAP 8.0.3, Forge 47.4.28. |
 
 ---
 

@@ -5,6 +5,12 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- Minecraft 1.20.1, on Fabric (Fabric API and Forge Config API Port 8) and Forge (47.1 or newer). The Forge jar also
+  runs on NeoForge 1.20.1. Same features as on the newer versions, except that 1.20.1 has no stock settings screen:
+  install [YACL](https://modrinth.com/mod/yacl) to change settings in game, or edit the config files.
+
 ### Fixed
 
 - 1.21.1: the advancement tab's hay background was missing.

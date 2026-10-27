@@ -51,6 +51,7 @@ Useful tasks:
 ./gradlew :physics:test             # unit tests
 ./gradlew :fabric:26.3:runClient         # dev client (Fabric)
 ./gradlew :neoforge:26.3:runClient       # dev client (NeoForge)
+./gradlew :forge:1.20.1:runClient        # dev client (Forge, 1.20.1 only)
 ./gradlew :fabric:26.3:runServer         # dedicated server — test multiplayer features here
 ./gradlew :fabric:26.3:runClient --debug-jvm   # waits for a debugger on port 5005
 ```
@@ -67,7 +68,7 @@ New guide pages also go in the sidebar in `docs/.vitepress/config.mts`.
 
 Any editor works. IntelliJ IDEA (with the Minecraft Development plugin) and Neovim (nvim-jdtls) are both used; see [THROWABLE_MOBS.md §5](THROWABLE_MOBS.md#5-dev-environment-jdk-gradle-neovim).
 
-**Project layout:** almost all code lives in `common/` and must only use vanilla Minecraft. Loader-specific code goes in `fabric/` or `neoforge/` and is reached from `common` through `platform/Services`. If you find yourself writing the same logic twice in both loader modules, it probably belongs in `common`.
+**Project layout:** almost all code lives in `common/` and must only use vanilla Minecraft. Loader-specific code goes in `fabric/` or `neoforge/` (and `forge/`, built for 1.20.1 only) and is reached from `common` through `platform/Services`. If you find yourself writing the same logic twice in both loader modules, it probably belongs in `common`. Classes that only one Minecraft version compiles go in `<module>/versions/<version>/src`; see [THROWABLE_MOBS.md §19](THROWABLE_MOBS.md#19-decisions) for 1.20.1's.
 
 ## Branching: GitHub flow
 
@@ -166,7 +167,7 @@ onImpact(ImpactContext).
 
 1. Fork the repo (or create a branch if you have write access) from `master`.
 2. Make your changes as atomic commits.
-3. Make sure `./gradlew build` passes locally, and test in-game on **both Fabric and NeoForge** if you touched gameplay.
+3. Make sure `./gradlew build` passes locally, and test in-game on **both Fabric and NeoForge** if you touched gameplay (and on Forge 1.20.1 if you touched 1.20.1 code).
 4. Open a PR **against `master`**. CI doesn't run on PRs (to save Actions minutes); a maintainer can run the Build
    workflow on the branch by hand, which attaches the jars to the run so reviewers can test them.
 5. Fill in the PR template:
@@ -183,7 +184,9 @@ If you add something players will notice, add a line under `## [Unreleased]` in 
 
 ## Code style
 
-- **Java 25**, 8-space indentation, braces on their own line (Allman), ≤ 120 characters per line.
+- **Java 25**, 8-space indentation, braces on their own line (Allman), ≤ 120 characters per line. `common` and
+  `physics` also build for 1.20.1 on Java 17: no Java 21 APIs or syntax there (`Math.clamp`, `List.getLast`, switch
+  and record patterns).
 - Follow the style of the surrounding code. Use Mojang's names (the game is unobfuscated since 26.1).
 - Names: `PascalCase` classes, `camelCase` methods/fields, `UPPER_SNAKE_CASE` constants.
 - Keep `common` free of loader imports. No `net.fabricmc` or `net.neoforged` imports outside the loader modules. One exception: NeoForge's config API (`ModConfigSpec`) in `common/config`, which Forge Config API Port provides on Fabric.
@@ -204,7 +207,7 @@ If you add something players will notice, add a line under `## [Unreleased]` in 
 
 [Open a bug report](https://github.com/SafetImamovic/ThrowableMobs/issues/new/choose). The form asks for:
 
-- Minecraft version, loader (Fabric/NeoForge) and loader version, Throwable Mobs version.
+- Minecraft version, loader (Fabric/NeoForge/Forge) and loader version, Throwable Mobs version.
 - Other installed mods (or the modpack name and version).
 - Steps to reproduce, what you expected, and what happened.
 - The **full** `latest.log` and any crash report, uploaded to [mclo.gs](https://mclo.gs) rather than pasted into the issue.
