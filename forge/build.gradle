@@ -1,0 +1,93 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev.legacyforge'
+}
+
+// MinecraftForge, for 1.20.1 only (settings.gradle). The Forge jar also runs on NeoForge 1.20.1 (47.1).
+legacyForge {
+    version = forge_version
+    // Automatically enable AccessTransformers if the file exists
+    def at = rootProject.file('common/src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    runs {
+        configureEach {
+            systemProperty('forge.enabledGameTestNamespaces', mod_id)
+            ideName = "Forge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+        client {
+            client()
+            gameDirectory = this.mkdir(this.file('runs/client'))
+        }
+        server {
+            server()
+            gameDirectory = this.mkdir(this.file('runs/server'))
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// Forge's runtime is in SRG names: the mixin annotation processor writes the refmap that maps our targets to them.
+mixin {
+    add(sourceSets.main, "${mod_id}.refmap.json")
+    config("${mod_id}.mixins.json")
+}
+
+// For the run configs only, not published, as in NeoForge's MDK.
+configurations {
+    localRuntime
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    annotationProcessor('org.spongepowered:mixin:0.8.5:processor')
+    // Fabric and NeoForge bundle MixinExtras; Forge 1.20.1 doesn't, so the jar carries it (same version as :common).
+    compileOnly(annotationProcessor('io.github.llamalad7:mixinextras-common:0.5.3'))
+    implementation(jarJar('io.github.llamalad7:mixinextras-forge:0.5.3')) {
+        version {
+            strictly '[0.5.3,)'
+            prefer '0.5.3'
+        }
+    }
+    // Optional config screen. modCompileOnly maps its SRG names to Mojang's.
+    modCompileOnly("maven.modrinth:yacl:${yacl_version}-forge")
+    modRuntimeOnly("maven.modrinth:yacl:${yacl_version}-forge")
+}
+
+// Forge 1.20.1 finds mixin configs in the manifest, not in mods.toml.
+jar {
+    manifest.attributes('MixinConfigs': "${mod_id}.mixins.json")
+}
+
+// The shared mixin config names the refmap only here: Fabric remaps mixins without one.
+processResources {
+    filesMatching("${mod_id}.mixins.json") {
+        filter { String line ->
+            line.contains('"package"') ? "${line}\n  \"refmap\": \"${mod_id}.refmap.json\"," : line
+        }
+    }
+}
+
+// Implement mcgradleconventions loader attribute
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations.named(variant) {
+        attributes {
+            attribute(loaderAttribute, 'forge')
+        }
+    }
+}
+sourceSets.configureEach {
+    [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName].each { variant ->
+        configurations.named(variant) {
+            attributes {
+                attribute(loaderAttribute, 'forge')
+            }
+        }
+    }
+}
