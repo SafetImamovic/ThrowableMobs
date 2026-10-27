@@ -28,7 +28,7 @@ public final class ThrowPhysics
          */
         public static double carrySlowdown(double mass, double maxMass, double factor, double maxSlowdown)
         {
-                return Math.clamp(mass / maxMass * factor, 0.0, maxSlowdown);
+                return clamp(mass / maxMass * factor, 0.0, maxSlowdown);
         }
 
         /**
@@ -37,7 +37,7 @@ public final class ThrowPhysics
          */
         public static double chargeFraction(int ticks, int maxTicks)
         {
-                double x = Math.clamp((double) ticks / maxTicks, 0.0, 1.0);
+                double x = clamp((double) ticks / maxTicks, 0.0, 1.0);
                 return (x * x + 2.0 * x) / 3.0;
         }
 
@@ -177,7 +177,7 @@ public final class ThrowPhysics
                 {
                         return 0.0;
                 }
-                return Math.clamp(p.subtract(start).dot(d) / lengthSqr, 0.0, 1.0);
+                return clamp(p.subtract(start).dot(d) / lengthSqr, 0.0, 1.0);
         }
 
         /** Distance from {@code p} to the segment {@code start → end}: a fast mob can pass a player between two ticks. */
@@ -238,7 +238,13 @@ public final class ThrowPhysics
                 {
                         return value > floor ? 1.0 : 0.0;
                 }
-                return Math.clamp((value - floor) / (full - floor), 0.0, 1.0);
+                return clamp((value - floor) / (full - floor), 0.0, 1.0);
+        }
+
+        /** {@code Math.clamp}, which is Java 21; this module also builds for Java 17 (Minecraft 1.20.1). */
+        private static double clamp(double value, double min, double max)
+        {
+                return Math.min(max, Math.max(min, value));
         }
 
         /** Plain 3D vector, so this module stays free of Minecraft's {@code Vec3}. */

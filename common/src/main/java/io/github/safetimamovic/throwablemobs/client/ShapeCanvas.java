@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -69,9 +70,9 @@ public final class ShapeCanvas implements PreviewCanvas
                         return;
                 }
                 Minecraft minecraft = Minecraft.getInstance();
-                Vec3 camera = minecraft.gameRenderer.getMainCamera().getPosition();
-                PoseStack poseStack = new PoseStack();
-                poseStack.translate(-camera.x, -camera.y, -camera.z);
+                Camera camera = minecraft.gameRenderer.getMainCamera();
+                PoseStack poseStack = Vertices.cameraPose(camera);
+                poseStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
                 PoseStack.Pose pose = poseStack.last();
                 MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
 
@@ -82,10 +83,10 @@ public final class ShapeCanvas implements PreviewCanvas
                         {
                                 AABB box = fill.box();
                                 float y = (float) fill.y();
-                                quads.addVertex(pose, (float) box.minX, y, (float) box.minZ).setColor(fill.color());
-                                quads.addVertex(pose, (float) box.minX, y, (float) box.maxZ).setColor(fill.color());
-                                quads.addVertex(pose, (float) box.maxX, y, (float) box.maxZ).setColor(fill.color());
-                                quads.addVertex(pose, (float) box.maxX, y, (float) box.minZ).setColor(fill.color());
+                                Vertices.fill(quads, pose, (float) box.minX, y, (float) box.minZ, fill.color());
+                                Vertices.fill(quads, pose, (float) box.minX, y, (float) box.maxZ, fill.color());
+                                Vertices.fill(quads, pose, (float) box.maxX, y, (float) box.maxZ, fill.color());
+                                Vertices.fill(quads, pose, (float) box.maxX, y, (float) box.minZ, fill.color());
                         }
                 }
                 buffers.endBatch(RenderType.debugQuads());
@@ -141,8 +142,8 @@ public final class ShapeCanvas implements PreviewCanvas
 
         private static void vertex(VertexConsumer lines, PoseStack.Pose pose, Vec3 at, int color, Vec3 normal)
         {
-                lines.addVertex(pose, (float) at.x, (float) at.y, (float) at.z).setColor(color)
-                        .setNormal(pose, (float) normal.x, (float) normal.y, (float) normal.z);
+                Vertices.line(lines, pose, (float) at.x, (float) at.y, (float) at.z, color, (float) normal.x,
+                        (float) normal.y, (float) normal.z);
         }
 
         private static float alpha(int color)

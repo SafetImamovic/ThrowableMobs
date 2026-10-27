@@ -36,7 +36,10 @@ public final class DropTarget
         {
                 Level level = player.level();
                 Vec3 eye = player.getEyePosition();
+                //? if >=1.20.5 {
                 Vec3 reach = eye.add(player.getViewVector(1.0F).scale(player.blockInteractionRange()));
+                //?} else
+                /*Vec3 reach = eye.add(player.getViewVector(1.0F).scale(Versioned.blockReach(player)));*/
                 BlockHitResult hit = level.clip(new ClipContext(eye, reach, ClipContext.Block.COLLIDER,
                         ClipContext.Fluid.NONE, player));
                 if (hit.getType() != HitResult.Type.BLOCK || hit.getDirection() == Direction.DOWN)

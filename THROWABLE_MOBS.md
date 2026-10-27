@@ -61,7 +61,7 @@ What changed since you last modded (assuming you left somewhere around 1.16–1.
 |---|---|---|---|
 | **Fabric** | Very active, first to update to new versions. | Lightweight/vanilla+, performance packs, latest-version players. | ✅ Yes |
 | **NeoForge** | Very active, dominant for large modpacks. | Big kitchen-sink modpacks (ATM, etc.). | ✅ Yes |
-| **MinecraftForge** | Still releases (26.1 builds exist), but many mods skipped it for 26.2/26.3. | Legacy packs, older versions. | ⚠️ Optional. Only if you backport to ≤1.20.1, where Forge still rules. |
+| **MinecraftForge** | Still releases (26.1 builds exist), but many mods skipped it for 26.2/26.3. | Legacy packs, older versions. | ✅ **1.20.1 only (M9)**, where Forge still rules. Not for 1.21.1 / 26.x. |
 | **Quilt** | Fabric-compatible, tiny share. | Runs most Fabric mods. | Free via Fabric build — don't target explicitly. |
 | **Paper** (server plugins) | Plugins, not mods. Hard-forked from Spigot (announced Dec 2024), API diverging. | Public servers & minigame networks with **vanilla clients** — the biggest audience for this mechanic. | ✅ **Later (M10)**, as a separate plugin sharing the `physics` module. See §16. |
 | **Spigot / Bukkit** | Legacy, falling behind Paper. | Older servers. | ❌ Target Paper API only. |
@@ -861,7 +861,8 @@ Hand-written reference tables rot. Generate them:
 | **M6 — Carry+** | Carry blocks with their contents (chests, furnaces, spawners, modded machines) and throw them; carry and throw players (opt-in); stack mobs (small on big, thrown as a stack); holding animation in first and third person; Carry On compatibility. Goal: the best carry mod, not just the best throw mod. |
 | **M7 — Polish** | HUD, sounds/particles, full vanilla roster, advancements, soft-landing / breakable block tags. |
 | **M8 — Release 1.0** | Docs site (§17) with generated references + JSON Schema + cookbook, example datapack, GameTests, CI publishing (jars + docs), Modrinth + CurseForge pages. (Done early: `mc-publish` to both since 0.4.1; [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/throwablemobs) approved 2026-10-25, Modrinth page still in review.) |
-| **M9 — Reach** | 1.20.1 backport, KubeJS integration. |
+| **M9 — Backport 1.20.1** | 1.20.1 on **Fabric + Forge** as a third Stonecutter version next to 1.21.1 and 26.3. The Forge jar also covers NeoForge 1.20.1 (a Forge fork at 47.1), so there is no NeoForge 1.20.1 build. New `forge/` loader module, built only for 1.20.1. Biggest jobs: networking without payloads, carry/throw state without attachments, singular → plural data folders. Details in the 1.20.1 backport notes (§19). Decided and built 2026-10-27, not yet played in game. |
+| **M9b — KubeJS** | KubeJS integration. |
 | **M10 — Paper plugin** | `paper/` module on shared `physics/`, item-based / sneak+swing controls, action-bar HUD, particle trajectory preview, minigame events API, permissions, Folia decision, docs pages for admins/plugin devs, Hangar + Modrinth + SpigotMC release. |
 | **M11 — Hybrid** (optional) | Optional client mod enhances Paper servers via plugin-messaging channel (real HUD, preview, keybinds). |
 
@@ -874,10 +875,10 @@ Settled 2026-10-02:
 | Topic | Decision |
 |---|---|
 | Mod id / name | `throwablemobs` / "Throwable Mobs", package `io.github.safetimamovic.throwablemobs` |
-| Versions | **26.3 first**, then a **backport** (target: 1.21.1) via Stonecutter once M3 is done — the core needs to be stable before the build gets multi-version complexity. 2026-10-11: 1.21.1 right after catching (M5), 1.20.1 later (M9). |
+| Versions | **26.3 first**, then a **backport** (target: 1.21.1) via Stonecutter once M3 is done — the core needs to be stable before the build gets multi-version complexity. 2026-10-11: 1.21.1 right after catching (M5), 1.20.1 later (M9). 2026-10-27: 1.20.1 confirmed, on Fabric + Forge. Adjustability stays off 1.20.1 unless players ask (data components and data-driven enchantments are its core). |
 | Goal | **The best carry mod and the best carry + throw mod** (2026-10-11): match Carry On on carrying (blocks with contents, players, stacking, animation, M6) and stay ahead on throwing. |
 | Thrown blocks (M6 sketch) | **Energy-based landing, highly configurable** (2026-10-11). Soft landing: the block is placed where it lands, facing its flight direction, contents and data kept. Hard landing (collision energy over `block_break_energy`): breaks like mining, block item drops and contents spill. Hitting a mob: damage from mass and speed like a thrown mob, then it falls on. Can't be placed (no space, claim, `mobGriefing` off): drops as an item that keeps its contents, never loses data. Valuable blocks in `#throwablemobs:never_break_on_impact` (spawners and similar by default) always place or drop with their data. Mass from the block, plus its contents. Knobs to expect: a global landing mode (energy / always place / always break), `block_break_energy`, whether contents spill, and per-block overrides through block profiles (like mob profiles) and tags. Own thrown-block entity: vanilla's falling block drops the plain block and loses contents when it can't place. |
-| Loaders | Fabric + NeoForge. **No MinecraftForge.** |
+| Loaders | Fabric + NeoForge. **MinecraftForge only for 1.20.1** (2026-10-27, M9): that's where Forge players are, and one Forge jar runs on NeoForge 1.20.1 too. No Forge build for 1.21.1 or 26.x: few players, and its networking and event bus have drifted from NeoForge. |
 | Defaults | **Balanced survival.** But every number is configurable and per-mob behavior is data-driven, so goofy packs can crank it (explosion power, impulse, `max_mass`, unthrowable list). Consider shipping a built-in "chaos" datapack/config preset players can enable. |
 | Players throwable | Config option, **off by default**. |
 | Villagers | **Throwable by default.** |
@@ -899,6 +900,28 @@ Settled 2026-10-02:
 ### Backport notes (for later)
 
 1.21.1 differs from 26.x in ways Stonecutter handles with `//? if` blocks: Java 21 instead of 25, obfuscated game (Loom needs `mappings loom.officialMojangMappings()`; Fabric uses the old remapping `fabric-loom` plugin), `ResourceLocation` instead of `Identifier`, older entity save API, older Fabric API names in places. Keep version-sensitive calls behind small helper methods in `common` so the `//? if` blocks stay few.
+
+### 1.20.1 backport notes (M9)
+
+Built 2026-10-27. `./gradlew build` builds all three versions. On 1.20.1,
+GameTest smoke runs (state store, NBT round trip, criterion registration) passed on Fabric, Forge 47.4.28 and NeoForge
+47.1.106, and dev clients reached the title screen and built the YACL screen on all three. Play-tested in game on
+Fabric and Forge 1.20.1.
+
+| Area | 1.21.1 / 26.3 | 1.20.1, as built |
+|---|---|---|
+| Java | 21 / 25 | **17**. `:physics` and `common` compile for 17 too: no `Math.clamp`, `List.getLast`, switch patterns or record patterns. Compile and javadoc use UTF-8 explicitly (Java 17 on Windows reads cp1252). |
+| Loaders | Fabric + NeoForge | **Fabric + Forge**. `forge/` uses ModDevGradle's `legacyforge` plugin, built for 1.20.1 only (`settings.gradle`); `neoforge/` skips 1.20.1. The Forge jar declares `forge [47.1,)`, so it also loads on NeoForge 1.20.1 (47.1.x). `common` gets vanilla from Forge's MCP config (`mcp_version`), since NeoForm starts at 1.20.2. |
+| Version-only code | — | `<branch>/versions/1.20.1/src` holds classes only that version compiles: the stand-ins below, the 1.20.1-only mixins, `ModMenuIntegration`. |
+| Networking | `CustomPacketPayload` + `StreamCodec` | Small stand-ins for both in `common/versions/1.20.1/src` (`network/codec`), and for Fabric API's `PayloadTypeRegistry` / `ServerPlayNetworking` / `ClientPlayNetworking` in `fabric/versions/1.20.1/src`. Stonecutter swaps the imports (`stonecutter.gradle`, `<1.20.5`), so payload classes and the Fabric entrypoints stay one source. Payloads go over a plain channel named after their type; Forge uses one `EventNetworkChannel` per payload (`ForgeNetwork`), optional on both ends. |
+| Entity state | Data attachments, synced | No synced attachments on either loader: `EntityStateMixin` (common, 1.20.1 only) holds carry/throw state and the stash on every entity and saves them under the attachment IDs. `platform/legacy` has the `Services` implementations and `EntityStateSyncPayload`, sent on change and when a player starts tracking the entity. Same code on Fabric and Forge. |
+| Advancements | Codec criteria, trigger registry | JSON criteria (`createInstance` / `serializeToJson`), registered through `CriteriaTriggersInvoker`. |
+| Data | `advancement/`, `tags/entity_type/`, `"id"` icons | `collectCommonResources` rewrites for older versions: plural folders, `"item"` icons, full background texture paths (`<1.21.5`, also fixes 1.21.1), `wind_charge` icon → feather, `pack_format` 15. |
+| Config | NeoForge `ModConfigSpec` (FCAP on Fabric) | Forge's `ForgeConfigSpec` (same builder; Stonecutter renames it), Forge Config API Port 8 on Fabric. **No stock config screen**: the settings screen is YACL's only; without YACL, Mod Menu and Forge's mod list show no config button. |
+| Mixins | Fabric/NeoForge bundle MixinExtras | Forge 1.20.1 doesn't: the jar carries `mixinextras-forge` (jar-in-jar). The mixin annotation processor writes `throwablemobs.refmap.json` for Forge; the jar manifest lists the mixin config. |
+| Optional mods | YACL, Mod Menu, Ragdollified | YACL 3.6.6 and Mod Menu 7.2.2. **Ragdollified not hooked up yet** on Forge 1.20.1 (it exists there, Forge only). |
+| Publishing | fabric + neoforge jars | `release.yml` attaches the forge jar; `publish.yml` publishes 1.20.1 Fabric, and the Forge jar as both Forge and NeoForge. |
+| Minimum versions | tested | Fabric Loader 0.15, Fabric API 0.92, FCAP 8.0, Forge 47.1 are declared, **not tested**; built against Loader 0.19.5, Fabric API 0.92.12, FCAP 8.0.3, Forge 47.4.28. |
 
 ---
 

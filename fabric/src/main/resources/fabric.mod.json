@@ -19,6 +19,7 @@
         "main": [
             "io.github.safetimamovic.throwablemobs.ThrowableMobsFabric"
         ],
+        "modmenu": ["io.github.safetimamovic.throwablemobs.ModMenuIntegration"],
         "client": [
             "io.github.safetimamovic.throwablemobs.ThrowableMobsFabricClient"
         ]

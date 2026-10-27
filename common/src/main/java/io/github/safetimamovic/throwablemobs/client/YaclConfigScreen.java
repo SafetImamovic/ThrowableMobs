@@ -31,6 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+//? if >=1.20.2
 import net.neoforged.neoforge.common.ModConfigSpec.Range;
 import org.jspecify.annotations.Nullable;
 
@@ -149,6 +150,7 @@ final class YaclConfigScreen
                         return option(spec, (ConfigValue<Boolean>) value, lock, preview,
                                 TickBoxControllerBuilder::create);
                 }
+                //? if >=1.20.2 {
                 if (initial instanceof Integer)
                 {
                         Range<Integer> range = value.getSpec().getRange();
@@ -163,6 +165,21 @@ final class YaclConfigScreen
                                 ? DoubleFieldControllerBuilder.create(option)
                                 : DoubleFieldControllerBuilder.create(option).range(range.getMin(), range.getMax()));
                 }
+                //?} else {
+                /*double[] range = bounds(spec, value);
+                if (initial instanceof Integer)
+                {
+                        return option(spec, (ConfigValue<Integer>) value, lock, preview, option -> range == null
+                                ? IntegerFieldControllerBuilder.create(option)
+                                : IntegerFieldControllerBuilder.create(option).range((int) range[0], (int) range[1]));
+                }
+                if (initial instanceof Double)
+                {
+                        return option(spec, (ConfigValue<Double>) value, lock, preview, option -> range == null
+                                ? DoubleFieldControllerBuilder.create(option)
+                                : DoubleFieldControllerBuilder.create(option).range(range[0], range[1]));
+                }
+                *///?}
                 if (initial instanceof Enum<?>)
                 {
                         return enumOption(spec, (ConfigValue) value, lock, preview);
@@ -170,6 +187,20 @@ final class YaclConfigScreen
                 throw new IllegalArgumentException("No YACL control for config value " + value.getPath());
         }
 
+        //? if <1.20.2 {
+        /*/^*
+         * Min and max of a value's range, or null if it has none or only one end. Forge's Range class is package-private
+         * before 1.20.2 (NeoForge made it public), so this reads its "min ~ max" text instead.
+         *^/
+        private static double @Nullable [] bounds(ModConfigSpec spec, ConfigValue<?> value)
+        {
+                Object range = valueSpec(spec, value).getRange();
+                String[] ends = range == null ? new String[0] : range.toString().split(" ~ ");
+                return ends.length == 2 ? new double[] {Double.parseDouble(ends[0]), Double.parseDouble(ends[1])}
+                        : null;
+        }
+
+        *///?}
         private static <E extends Enum<E>> Option<E> enumOption(ModConfigSpec spec, ConfigValue<E> value,
                 @Nullable Component lock, @Nullable ImageRenderer preview)
         {
@@ -183,8 +214,8 @@ final class YaclConfigScreen
                 @Nullable ImageRenderer preview, Function<Option<T>, ControllerBuilder<T>> controller)
         {
                 return Option.<T>createBuilder()
-                        .name(name(value))
-                        .description(description(value, lock, preview))
+                        .name(name(spec, value))
+                        .description(description(spec, value, lock, preview))
                         .binding(value.getDefault(), () -> spec.isLoaded() ? value.get() : value.getDefault(),
                                 value::set)
                         .controller(controller)
@@ -199,8 +230,8 @@ final class YaclConfigScreen
         {
                 ConfigValue<List<String>> list = (ConfigValue<List<String>>) value;
                 return ListOption.<String>createBuilder()
-                        .name(name(value))
-                        .description(description(value, lock, preview))
+                        .name(name(spec, value))
+                        .description(description(spec, value, lock, preview))
                         .binding(List.copyOf(list.getDefault()),
                                 () -> new ArrayList<>(spec.isLoaded() ? list.get() : list.getDefault()), list::set)
                         .controller(StringControllerBuilder::create)
@@ -209,20 +240,30 @@ final class YaclConfigScreen
                         .build();
         }
 
-        private static Component name(ConfigValue<?> value)
+        private static Component name(ModConfigSpec spec, ConfigValue<?> value)
         {
-                String key = value.getSpec().getTranslationKey();
-                return Component.translatable(key != null ? key : KEY + value.getPath().getLast());
+                String key = valueSpec(spec, value).getTranslationKey();
+                List<String> path = value.getPath();
+                return Component.translatable(key != null ? key : KEY + path.get(path.size() - 1));
+        }
+
+        /** How {@code value} is defined: comment, translation key, range. */
+        private static ModConfigSpec.ValueSpec valueSpec(ModConfigSpec spec, ConfigValue<?> value)
+        {
+                //? if >=1.20.2 {
+                return value.getSpec();
+                //?} else
+                /*return spec.getSpec().get(value.getPath());*/
         }
 
         /**
          * The spec comment without the lines NeoForge adds (the controls show ranges and choices), then the lock, then
          * the preview if there is one.
          */
-        private static OptionDescription description(ConfigValue<?> value, @Nullable Component lock,
-                @Nullable ImageRenderer preview)
+        private static OptionDescription description(ModConfigSpec spec, ConfigValue<?> value,
+                @Nullable Component lock, @Nullable ImageRenderer preview)
         {
-                String comment = value.getSpec().getComment();
+                String comment = valueSpec(spec, value).getComment();
                 String text = comment == null ? "" : Arrays.stream(comment.split("\n"))
                         .filter(line -> !line.startsWith("Range:") && !line.startsWith("Allowed Values:")
                                 && !line.startsWith("Default:"))

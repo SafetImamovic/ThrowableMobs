@@ -12,6 +12,7 @@ import java.util.Locale;
 import net.minecraft.network.chat.Component;
 //? if >=26.1
 import net.minecraft.world.entity.EntityReference;
+//? if >=1.21
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -75,9 +76,12 @@ public final class CarryRules
                 {
                         return Denial.ALREADY_CARRIED;
                 }
+                // Creative players with creative_carries_anything skip what's about the mob's kind and weight.
+                boolean anything = config.creativeCarriesAnything() && player.isCreative();
                 // Ender dragon: multipart, its parts can't follow a carrier.
-                if (mob.getType().builtInRegistryHolder().is(ModTags.UNTHROWABLE) || mob instanceof EnderDragon
-                        || (!config.allowVillagers() && mob instanceof AbstractVillager))
+                boolean forbidden = mob.getType().builtInRegistryHolder().is(ModTags.UNTHROWABLE)
+                        || (!config.allowVillagers() && mob instanceof AbstractVillager);
+                if (mob instanceof EnderDragon || (forbidden && !anything))
                 {
                         return Denial.UNTHROWABLE;
                 }
@@ -89,11 +93,14 @@ public final class CarryRules
                 {
                         return Denial.RIDING;
                 }
+                //? if >=1.21 {
                 if (mob instanceof Leashable leashable && leashable.isLeashed())
+                //?} else
+                /*if (mob.isLeashed())*/
                 {
                         return Denial.LEASHED;
                 }
-                if (mass(mob) > config.maxMass())
+                if (!anything && mass(mob) > config.maxMass())
                 {
                         return Denial.TOO_HEAVY;
                 }

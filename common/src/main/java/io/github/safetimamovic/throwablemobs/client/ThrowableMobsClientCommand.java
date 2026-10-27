@@ -9,7 +9,10 @@ import java.util.function.UnaryOperator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+//? if >=1.20.5 {
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+//?} else
+/*import net.minecraft.client.gui.screens.controls.KeyBindsScreen;*/
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;

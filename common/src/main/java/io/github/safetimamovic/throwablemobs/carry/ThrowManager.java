@@ -118,7 +118,7 @@ public final class ThrowManager
                 double speed = ThrowPhysics.launchSpeed(impulse(player, config), charge, CarryRules.mass(mob),
                         config.maxThrowSpeed());
                 Vec3 velocity = player.getLookAngle().scale(speed)
-                        .add(player.getKnownMovement().scale(config.inheritVelocity()));
+                        .add(Versioned.knownMovement(player).scale(config.inheritVelocity()));
                 mob.setDeltaMovement(velocity);
                 FLYING.put(mob, new Flight(player.getUUID(), velocity, mob.position(), 0, 0, mob.position(),
                         CAUGHT_FROM.remove(player.getUUID())));
@@ -318,7 +318,7 @@ public final class ThrowManager
                                 continue;
                         }
                         OptionalDouble fraction = catchFraction(player, start, flight.velocity(),
-                                player.connection.latency() / 50.0, config);
+                                Versioned.latency(player) / 50.0, config);
                         if (fraction.isPresent() && fraction.getAsDouble() < firstFraction)
                         {
                                 first = player;
@@ -402,10 +402,11 @@ public final class ThrowManager
                 Services.THROW_STATE.remove(mob);
                 CarryManager.catchMob(catcher, mob, state);
 
-                Vec3 relative = flight.velocity().subtract(catcher.getKnownMovement());
+                Vec3 relative = flight.velocity().subtract(Versioned.knownMovement(catcher));
                 double momentum = CarryRules.mass(mob) * relative.length();
                 double resistance = catcher.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-                catcher.push(relative.normalize().scale(momentum * config.recoil() * Math.max(0.0, 1.0 - resistance)));
+                Vec3 recoil = relative.normalize().scale(momentum * config.recoil() * Math.max(0.0, 1.0 - resistance));
+                catcher.push(recoil.x, recoil.y, recoil.z);
                 // Players move on their own client; without this the push never reaches it.
                 catcher.syncVelocity = true;
                 if (config.damage() && canHurtPlayer(catcher, flight.thrower(), ThrowableMobsConfig.throwing()))
@@ -435,7 +436,7 @@ public final class ThrowManager
         {
                 double m1 = CarryRules.mass(mob);
                 double m2 = mass(target);
-                Vec3 relative = flight.velocity().subtract(target.getKnownMovement());
+                Vec3 relative = flight.velocity().subtract(Versioned.knownMovement(target));
                 double energy = ThrowPhysics.collisionEnergy(m1, m2, relative.length());
                 double damage = ThrowPhysics.impactDamage(energy, config.damagePerEnergy(), config.minImpactEnergy(),
                         config.maxImpactDamage());
@@ -467,7 +468,7 @@ public final class ThrowManager
                 }
                 // The damage type is in #minecraft:no_knockback, so this push is the only knockback.
                 hurt(level, target, mobSource(level, THROWN_MOB, mob, thrower), result.targetDamage(), thrower);
-                target.push(push);
+                target.push(push.x, push.y, push.z);
                 target.needsSync = true;
                 // Players move on their own client; without this the knockback never reaches it.
                 target.syncVelocity = true;

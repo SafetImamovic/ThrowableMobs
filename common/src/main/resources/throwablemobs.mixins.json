@@ -4,7 +4,9 @@
   "package": "io.github.safetimamovic.throwablemobs.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
+    "CriteriaTriggersInvoker",
     "EntityAccessor",
+    "EntityStateMixin",
     "LivingEntityInvoker",
     "LivingEntityMixin",
     "PlayerMixin",

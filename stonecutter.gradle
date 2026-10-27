@@ -6,6 +6,8 @@ plugins {
     id 'net.fabricmc.fabric-loom-remap' version '1.18.2' apply false
     // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
     id 'net.neoforged.moddev' version '2.0.148' apply false
+    // ModDevGradle for MinecraftForge and NeoForge 1.20.1 (Forge 47), same version as the one above
+    id 'net.neoforged.moddev.legacyforge' version '2.0.148' apply false
 }
 
 // The version the sources in */src are written for; switch with the "Set active project" tasks.
@@ -36,6 +38,28 @@ stonecutter.parameters {
             replace('GuiGraphicsExtractor', 'GuiGraphics')
             replace('graphics.text(', 'graphics.drawString(')
             replace('graphics.centeredText(', 'graphics.drawCenteredString(')
+        }
+        // Payloads and stream codecs came in 1.20.5; 1.20.1 gets the small stand-ins in
+        // common/versions/1.20.1/src (network/codec), and plain FriendlyByteBufs.
+        string(eval(current.version, '<1.20.5')) {
+            replace('net.minecraft.network.codec.', 'io.github.safetimamovic.throwablemobs.network.codec.')
+            replace('net.minecraft.network.protocol.common.custom.CustomPacketPayload',
+                    'io.github.safetimamovic.throwablemobs.network.codec.CustomPacketPayload')
+            replace('RegistryFriendlyByteBuf', 'FriendlyByteBuf')
+            replace('UUIDUtil.STREAM_CODEC', 'ByteBufCodecs.UUID_CODEC')
+            // Fabric API's payload networking likewise, with stand-ins in fabric/versions/1.20.1/src.
+            replace('net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry',
+                    'io.github.safetimamovic.throwablemobs.platform.network.PayloadTypeRegistry')
+            replace('net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking',
+                    'io.github.safetimamovic.throwablemobs.platform.network.ServerPlayNetworking')
+            replace('net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking',
+                    'io.github.safetimamovic.throwablemobs.platform.network.ClientPlayNetworking')
+        }
+        // NeoForge's config API is Forge's, renamed in 1.20.2 (NeoForge 20.2).
+        string(eval(current.version, '<1.20.2')) {
+            replace('net.neoforged.neoforge.common.ModConfigSpec', 'net.minecraftforge.common.ForgeConfigSpec')
+            replace('ModConfigSpec', 'ForgeConfigSpec')
+            replace('net.neoforged.fml.config.ModConfig', 'net.minecraftforge.fml.config.ModConfig')
         }
     }
 }

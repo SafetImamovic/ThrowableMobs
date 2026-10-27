@@ -217,6 +217,7 @@ public final class ThrowableMobsConfig
                 double defaultDensity,
                 boolean allowVillagers,
                 boolean ownerOnlyForTamed,
+                boolean creativeCarriesAnything,
                 double slowdownFactor,
                 double maxSlowdown,
                 boolean protectFromSuffocation,

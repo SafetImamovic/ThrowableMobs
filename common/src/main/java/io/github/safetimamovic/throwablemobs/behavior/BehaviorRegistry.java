@@ -32,7 +32,10 @@ public final class BehaviorRegistry
 
         /** Reads a behavior action by its {@code "type"} field, from the same object as the other fields. */
         public static final MapCodec<BehaviorAction> ACTION_MAP_CODEC = TYPE_CODEC
+                //? if >=1.20.5 {
                 .dispatchMap("type", BehaviorAction::type, BehaviorType::codec);
+                //?} else
+                /*.dispatchMap("type", BehaviorAction::type, type -> type.codec().codec());*/
 
         private BehaviorRegistry()
         {

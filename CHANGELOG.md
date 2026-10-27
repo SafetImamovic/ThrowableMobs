@@ -5,6 +5,19 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Added
+
+- Server setting `creative_carries_anything` (off by default): players in creative mode can pick up any mob, however
+  heavy, ignoring `#throwablemobs:unthrowable`, `allow_villagers` and `max_mass`. Other players' pets and the ender
+  dragon stay off limits.
+- Minecraft 1.20.1, on Fabric (Fabric API and Forge Config API Port 8) and Forge (47.1 or newer). The Forge jar also
+  runs on NeoForge 1.20.1. Same features as on the newer versions, except that 1.20.1 has no stock settings screen:
+  install [YACL](https://modrinth.com/mod/yacl) to change settings in game, or edit the config files.
+
+### Fixed
+
+- 1.21.1: the advancement tab's hay background was missing.
+
 ## [0.6.0] - 2026-10-26
 
 ### Added

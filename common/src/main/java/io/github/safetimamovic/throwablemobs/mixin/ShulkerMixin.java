@@ -18,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Shulker.class)
 abstract class ShulkerMixin
 {
-        @ModifyExpressionValue(method = {"tick", "setPos"}, at = @At(value = "INVOKE", target = "isPassenger()Z"))
+        @ModifyExpressionValue(method = {"tick", "setPos"}, at = @At(value = "INVOKE",
+                target = "Lnet/minecraft/world/entity/monster/Shulker;isPassenger()Z"))
         private boolean throwablemobs$freeWhileHeld(boolean passenger)
         {
                 return passenger || throwablemobs$held();

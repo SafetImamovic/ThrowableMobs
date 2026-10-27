@@ -49,6 +49,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+//? if >=1.21
 import net.minecraft.world.level.portal.TeleportTransition;
 //? if >=26.1
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -63,7 +64,10 @@ import org.jspecify.annotations.Nullable;
  */
 public final class CarryManager
 {
+        //? if >=1.21 {
         private static final Identifier SLOWDOWN_ID = Constants.id("carry_slowdown");
+        //?} else
+        /*private static final UUID SLOWDOWN_ID = UUID.nameUUIDFromBytes("throwablemobs:carry_slowdown".getBytes());*/
 
         /** Extra reach allowed for pick-up requests, for movement between the client's check and the server's. */
         private static final double PICK_UP_REACH_TOLERANCE = 3.0;
@@ -122,8 +126,10 @@ public final class CarryManager
                         || pickUpCoolingDown(player) || !(player.level().getEntity(entityId) instanceof Mob mob)
                         //? if >=26.1 {
                         || !player.isWithinEntityInteractionRange(mob, PICK_UP_REACH_TOLERANCE))
-                        //?} else
-                        /*|| !player.canInteractWithEntity(mob, PICK_UP_REACH_TOLERANCE))*/
+                        //?} else if >=1.20.5 {
+                        /*|| !player.canInteractWithEntity(mob, PICK_UP_REACH_TOLERANCE))
+                        *///?} else
+                        /*|| !Versioned.withinReach(player, mob.getBoundingBox(), PICK_UP_REACH_TOLERANCE))*/
                 {
                         return;
                 }
@@ -347,10 +353,25 @@ public final class CarryManager
                 CarryState state = Services.CARRY_STATE.get(mob);
                 //? if >=26.1 {
                 Entity arrived = mob.teleport(new TeleportTransition(carrier.level(), carrier.position()
-                //?} else
-                /*Entity arrived = mob.changeDimension(new TeleportTransition(carrier.serverLevel(), carrier.position()*/
                         .add(0.0, carrier.getBbHeight(), 0.0), Vec3.ZERO, carrier.getYRot(), mob.getXRot(),
                         TeleportTransition.DO_NOTHING));
+                //?} else if >=1.21 {
+                /*Entity arrived = mob.changeDimension(new TeleportTransition(carrier.serverLevel(), carrier.position()
+                        .add(0.0, carrier.getBbHeight(), 0.0), Vec3.ZERO, carrier.getYRot(), mob.getXRot(),
+                        TeleportTransition.DO_NOTHING));
+                *///?} else {
+                /*// Before 1.21 changeDimension always goes through portal placement; do its copy step by hand.
+                Entity arrived = mob.getType().create(carrier.serverLevel());
+                if (arrived != null)
+                {
+                        arrived.restoreFrom(mob);
+                        arrived.moveTo(carrier.getX(), carrier.getY() + carrier.getBbHeight(), carrier.getZ(),
+                                carrier.getYRot(), mob.getXRot());
+                        arrived.setDeltaMovement(Vec3.ZERO);
+                        mob.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+                        carrier.serverLevel().addDuringTeleport(arrived);
+                }
+                *///?}
                 if (state != null && arrived instanceof Mob arrivedMob && !arrivedMob.isRemoved())
                 {
                         hold(carrier, arrivedMob, state);
@@ -721,7 +742,10 @@ public final class CarryManager
         {
                 AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
                 AttributeModifier slowdown = speed != null ? speed.getModifier(SLOWDOWN_ID) : null;
+                //? if >=1.21 {
                 return slowdown != null ? 1.0 + slowdown.amount() : 1.0;
+                //?} else
+                /*return slowdown != null ? 1.0 + slowdown.getAmount() : 1.0;*/
         }
 
         /** Transient modifier: not saved, so a crash can't leave a player permanently slowed. */
@@ -733,8 +757,11 @@ public final class CarryManager
                 AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
                 if (speed != null && slowdown > 0.0)
                 {
+                        //? if >=1.21 {
                         speed.addOrUpdateTransientModifier(new AttributeModifier(SLOWDOWN_ID, -slowdown,
                                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                        //?} else
+                        /*speed.addTransientModifier(new AttributeModifier(SLOWDOWN_ID, "throwablemobs:carry_slowdown", -slowdown, AttributeModifier.Operation.MULTIPLY_TOTAL));*/
                 }
         }
 

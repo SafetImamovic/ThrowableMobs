@@ -25,7 +25,7 @@
   <a href="https://ko-fi.com/safetimamovic"><b>Support on Ko-fi</b></a>
 </p>
 
-Minecraft Java **1.21.1** and **26.3** · **Fabric** + **NeoForge** · MIT · **Beta**
+Minecraft Java **1.20.1**, **1.21.1** and **26.3** · **Fabric**, **NeoForge** and **Forge** (1.20.1) · MIT · **Beta**
 
 <p align="center">
   <img src="docs/public/screenshots/throw-pig.gif" alt="Picking up a pig on a beach, charging the throw and throwing it across the sand" width="640">
@@ -38,12 +38,13 @@ Minecraft Java **1.21.1** and **26.3** · **Fabric** + **NeoForge** · MIT · **
 
 Install on both the client and the server. Optional mods are client only.
 
-| | Minecraft 1.21.1 | Minecraft 26.3 |
-|---|---|---|
-| **Fabric, required** | [Fabric Loader](https://fabricmc.net/use/) 0.16.0+<br>[Fabric API](https://modrinth.com/mod/fabric-api) 0.109.0+<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 21.1.0+ | [Fabric Loader](https://fabricmc.net/use/) 0.19.5+<br>[Fabric API](https://modrinth.com/mod/fabric-api)<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 26.3.1+ |
-| **NeoForge, required** | [NeoForge](https://neoforged.net/) 21.1.197+ | [NeoForge](https://neoforged.net/) 26.3.0.95+ |
-| **Optional** (both loaders) | [YACL](https://modrinth.com/mod/yacl) 3.8.2+: a nicer settings screen | [YACL](https://modrinth.com/mod/yacl) 3.9.7+: a nicer settings screen |
-| **Optional** (NeoForge) | [Ragdollified](https://modrinth.com/mod/ragdollified) 1.1.1+: thrown mobs go limp in the air | [Ragdollified](https://modrinth.com/mod/ragdollified) 1.1.1+ (its 26.3 build doesn't load yet) |
+| | Minecraft 1.20.1 | Minecraft 1.21.1 | Minecraft 26.3 |
+|---|---|---|---|
+| **Fabric, required** | [Fabric Loader](https://fabricmc.net/use/) 0.15.0+<br>[Fabric API](https://modrinth.com/mod/fabric-api) 0.92.0+<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 8.0.0+ | [Fabric Loader](https://fabricmc.net/use/) 0.16.0+<br>[Fabric API](https://modrinth.com/mod/fabric-api) 0.109.0+<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 21.1.0+ | [Fabric Loader](https://fabricmc.net/use/) 0.19.5+<br>[Fabric API](https://modrinth.com/mod/fabric-api)<br>[Forge Config API Port](https://modrinth.com/mod/forge-config-api-port) 26.3.1+ |
+| **NeoForge, required** | [NeoForge](https://neoforged.net/) 47.1+ (use the Forge jar) | [NeoForge](https://neoforged.net/) 21.1.197+ | [NeoForge](https://neoforged.net/) 26.3.0.95+ |
+| **Forge, required** | [Forge](https://files.minecraftforge.net/) 47.1+ | — | — |
+| **Optional** (every loader) | [YACL](https://modrinth.com/mod/yacl) 3.6.6+: the only settings screen on 1.20.1 | [YACL](https://modrinth.com/mod/yacl) 3.8.2+: a nicer settings screen | [YACL](https://modrinth.com/mod/yacl) 3.9.7+: a nicer settings screen |
+| **Optional** (NeoForge) | — | [Ragdollified](https://modrinth.com/mod/ragdollified) 1.1.1+: thrown mobs go limp in the air | [Ragdollified](https://modrinth.com/mod/ragdollified) 1.1.1+ (its 26.3 build doesn't load yet) |
 
 ### Tested with
 
