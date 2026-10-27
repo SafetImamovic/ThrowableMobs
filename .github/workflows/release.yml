@@ -1,4 +1,4 @@
-# Pushing a tag like v0.1.0 builds every Minecraft version on both loaders and creates a GitHub Release with the mod
+# Pushing a tag like v0.1.0 builds every Minecraft version on every loader and creates a GitHub Release with the mod
 # jars, their sources and the version's section of CHANGELOG.md. Then publish.yml publishes that release to Modrinth
 # and CurseForge. See CONTRIBUTING.md, "Releasing".
 name: Release
@@ -67,6 +67,8 @@ jobs:
             fabric/versions/*/build/libs/throwablemobs-fabric-*-${{ steps.version.outputs.version }}-sources.jar
             neoforge/versions/*/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}.jar
             neoforge/versions/*/build/libs/throwablemobs-neoforge-*-${{ steps.version.outputs.version }}-sources.jar
+            forge/versions/*/build/libs/throwablemobs-forge-*-${{ steps.version.outputs.version }}.jar
+            forge/versions/*/build/libs/throwablemobs-forge-*-${{ steps.version.outputs.version }}-sources.jar
 
   # One Modrinth and one CurseForge version per Minecraft version and loader, from the release just made (publish.yml).
   publish:

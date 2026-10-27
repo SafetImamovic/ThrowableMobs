@@ -33,6 +33,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - minecraft: '1.20.1'
+            loader: fabric
+            label: Fabric
+            java: 17
+            dependencies: |
+              fabric-api(required){modrinth:P7dR8mSH}{curseforge:306612}
+              forgeconfigapiport(required){modrinth:ohNO6lps}{curseforge:547434}
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
+          # The Forge jar also runs on NeoForge 1.20.1, so it's listed for both.
+          - minecraft: '1.20.1'
+            loader: forge
+            loaders: forge neoforge
+            label: Forge
+            java: 17
+            dependencies: |
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
           - minecraft: '1.21.1'
             loader: fabric
             java: 21
@@ -91,11 +107,11 @@ jobs:
           curseforge-id: ${{ vars.CURSE_ID }}
           curseforge-token: ${{ secrets.CURSE_TOKEN }}
           files: ${{ steps.release.outputs.files }}
-          name: Throwable Mobs ${{ steps.release.outputs.version }} (${{ matrix.loader == 'fabric' && 'Fabric' || 'NeoForge' }} ${{ matrix.minecraft }})
+          name: Throwable Mobs ${{ steps.release.outputs.version }} (${{ matrix.label || (matrix.loader == 'fabric' && 'Fabric' || 'NeoForge') }} ${{ matrix.minecraft }})
           version: ${{ steps.release.outputs.version }}
           version-type: ${{ steps.release.outputs.type }}
           changelog-file: release-notes.md
-          loaders: ${{ matrix.loader }}
+          loaders: ${{ matrix.loaders || matrix.loader }}
           game-versions: ${{ matrix.minecraft }}
           java: ${{ matrix.java }}
           dependencies: ${{ matrix.dependencies }}
