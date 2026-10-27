@@ -5,6 +5,10 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Fixed
+
+- 1.21.1: the advancement tab's hay background was missing.
+
 ## [0.6.0] - 2026-10-26
 
 ### Added

@@ -61,6 +61,14 @@ def collectCommonResources = tasks.register('collectCommonResources', Sync) {
             }
         }
     }
+    // Advancement backgrounds were full texture paths before 1.21.5.
+    if (stonecutter.eval(stonecutter.current.version, '<1.21.5')) {
+        filesMatching('data/*/advancement/*.json') {
+            filter { String line ->
+                line.replaceAll(/("background": *"[a-z0-9_.-]+):([^"]+)"/, '$1:textures/$2.png"')
+            }
+        }
+    }
 }
 
 artifacts {
