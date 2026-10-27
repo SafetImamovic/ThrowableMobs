@@ -42,6 +42,7 @@ public final class CreatorConfig
         private static final DoubleValue MAX_MASS;
         private static final DoubleValue DEFAULT_DENSITY;
         private static final BooleanValue ALLOW_VILLAGERS;
+        private static final BooleanValue CREATIVE_CARRIES_ANYTHING;
         private static final BooleanValue OWNER_ONLY_FOR_TAMED;
         private static final IntValue PICK_UP_COOLDOWN_TICKS;
 
@@ -131,6 +132,10 @@ public final class CreatorConfig
                         .define("allow_villagers", true);
                 OWNER_ONLY_FOR_TAMED = builder.comment("Tamed mobs can only be picked up by their owner.")
                         .define("owner_only_for_tamed", true);
+                CREATIVE_CARRIES_ANYTHING = builder.comment("Players in creative mode can pick up any mob, however",
+                                "heavy: #throwablemobs:unthrowable, allow_villagers and max_mass don't apply to",
+                                "them. Other players' pets, the ender dragon and players stay off limits.")
+                        .define("creative_carries_anything", false);
                 PICK_UP_COOLDOWN_TICKS = builder.comment("Ticks after putting down or throwing a mob before the same",
                                 "player can pick one up again (20 = one second). 0 = no cooldown. Each player can add",
                                 "a longer one of their own.")
@@ -340,6 +345,7 @@ public final class CreatorConfig
                         get(DEFAULT_DENSITY),
                         get(ALLOW_VILLAGERS),
                         get(OWNER_ONLY_FOR_TAMED),
+                        get(CREATIVE_CARRIES_ANYTHING),
                         get(SLOWDOWN_FACTOR),
                         get(MAX_SLOWDOWN),
                         get(PROTECT_FROM_SUFFOCATION),

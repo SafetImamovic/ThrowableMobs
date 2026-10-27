@@ -47,6 +47,7 @@
     "throwablemobs.configuration.default_density": "Default Density",
     "throwablemobs.configuration.allow_villagers": "Allow Villagers",
     "throwablemobs.configuration.owner_only_for_tamed": "Owner Only for Tamed Mobs",
+    "throwablemobs.configuration.creative_carries_anything": "Creative Carries Anything",
     "throwablemobs.configuration.pick_up_cooldown_ticks": "Pick-Up Cooldown (Ticks)",
     "throwablemobs.configuration.carry": "Carrying",
     "throwablemobs.configuration.slowdown_factor": "Slowdown Factor",

@@ -71,6 +71,7 @@ Which mobs can never be carried is set with the tag `#throwablemobs:unthrowable`
 | `default_density` | `400.0` | Density used to get a mob's mass from its hitbox, game-kg per block³. |
 | `allow_villagers` | `true` | Villagers and wandering traders can be picked up. |
 | `owner_only_for_tamed` | `true` | Tamed mobs can only be picked up by their owner. |
+| `creative_carries_anything` | `false` | Players in creative mode can pick up any mob, however heavy: `#throwablemobs:unthrowable`, `allow_villagers` and `max_mass` don't apply to them. Other players' pets, the ender dragon and players stay off limits. |
 | `pick_up_cooldown_ticks` | `0` | Ticks after putting down or throwing a mob before the same player can pick one up again (20 = one second). 0 = none. Each player can set a longer one in their own settings (`[cooldown]`, 6 ticks by default). |
 
 ## Carry (`[carry]`)
