@@ -19,6 +19,11 @@ dependencies {
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
+// Sources are UTF-8; Java 17 would read them in the system encoding, which on Windows isn't.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 tasks.named('test', Test) {
     useJUnitPlatform()
 }
