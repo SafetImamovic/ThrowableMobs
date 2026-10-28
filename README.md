@@ -14,6 +14,7 @@
   <a href="https://safetimamovic.github.io/ThrowableMobs/"><img src="https://img.shields.io/badge/docs-online-f28c28" alt="Docs"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
   <a href="https://ko-fi.com/safetimamovic"><img src="https://img.shields.io/badge/Ko--fi-support-ff5e5b?logo=kofi&logoColor=white" alt="Support on Ko-fi"></a>
+  <a href="https://github.com/sponsors/SafetImamovic"><img src="https://img.shields.io/badge/GitHub-Sponsor-ea4aaa?logo=githubsponsors&amp;logoColor=white" alt="GitHub Sponsors"></a>
 </p>
 
 <p align="center">
