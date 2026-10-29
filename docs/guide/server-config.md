@@ -88,6 +88,24 @@ Which mobs can never be carried is set with the tag `#throwablemobs:unthrowable`
 | `on_carrier_logout` | `PUT_DOWN` | See [When a carrier leaves the server](#when-a-carrier-leaves-the-server). |
 | `carrier_logout_seconds` | `60` | See above. `0` = forever. |
 
+## Hunger costs (`[hunger]`)
+
+These server settings add vanilla food exhaustion, so saturation drains before visible hunger. Four exhaustion
+drains one saturation point, or one food point (half a drumstick) once saturation is empty. Each cost can be set to
+`0` to disable it; set all four to `0` to disable all extra hunger costs. Changes apply immediately, and the settings
+also appear under **Hunger Costs** in the server config screen.
+
+| Setting | Default | What it does |
+|---|---|---|
+| `pick_up_exhaustion` | `0.1` | Exhaustion per successful pickup. Failed requests and catches cost nothing. |
+| `walk_exhaustion_per_block` | `0.01` | Extra exhaustion per horizontal block walked or sneaked on the ground while carrying. |
+| `sprint_exhaustion_per_block` | `0.05` | Extra exhaustion per horizontal block sprinted on the ground while carrying, instead of the walking cost. Adds to vanilla sprint exhaustion. |
+| `throw_exhaustion` | `0.2` | Exhaustion per successful throw, regardless of charge. Cancelled charges cost nothing. |
+
+At the defaults, walking 400 blocks while carrying adds 4 exhaustion; sprinting 80 blocks adds the same, on top of
+vanilla costs. Costs are the same for every mob. Standing still, putting down, swimming, climbing, riding and flying
+add no carrying exhaustion. Creative and spectator players pay no extra costs. Hunger never blocks putting a mob down.
+
 ## Put down (`[put_down]`)
 
 | Setting | Default | What it does |

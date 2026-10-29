@@ -5,6 +5,25 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-29
+
+### Added
+
+- Server-side hunger costs for picking up, walking/sneaking or sprinting while carrying, and throwing mobs. Four
+  settings in `[hunger]` control vanilla food exhaustion; set any to 0 to disable that cost. Creative and spectator
+  players are exempt. Standing still, catching, putting down and cancelled throws have no extra cost.
+
+### Changed
+
+- Shared key bindings no longer disable picking up mobs or hide the pickup prompt. Removed automatic yielding to
+  other mods and the generic key conflict chat notice. When Carry On is installed, a notice explains the shared
+  defaults once per world join without disabling pickup.
+
+### Fixed
+
+- Mod list artwork: package the banner, use the supported logo field on older NeoForge, and provide Catalogue with
+  the square icon separately from the banner.
+
 ## [0.7.0] - 2026-10-27
 
 ### Added

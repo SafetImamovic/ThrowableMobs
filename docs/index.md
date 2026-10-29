@@ -59,8 +59,9 @@ features; on 1.20.1 the settings screen needs [YACL](https://modrinth.com/mod/ya
 | Throw | Hold Right Click while carrying, let go to throw |
 | Cancel throw | Left Click while charging |
 
-Rebind them under Controls → Throwable Mobs, or type `/throwablemobs keybinds`. With Carry On installed, it gets the
-shared keys and a chat message explains how to rebind.
+Rebind them under Controls → Throwable Mobs, or type `/throwablemobs keybinds`. Shared bindings do not disable
+Throwable Mobs. If another mod also handles the same input, rebind either mod to give each its own controls.
+With Carry On installed, a chat notice explains the shared defaults once per world join; pickup stays enabled.
 
 ## Commands
 

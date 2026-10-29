@@ -53,10 +53,8 @@ public final class CarryClient
         private static boolean suppressingAttack;
         /** Ticks the Throw key has been held while carrying, for the charge bar; -1 when not charging. */
         private static int chargeTicks = -1;
-        /** Another mod's key on our pick-up key, checked each tick; while set, picking up is left to that mod. */
-        private static @Nullable KeyMapping conflict;
-        /** The chat notice about {@link #conflict} went out; once per world joined. */
-        private static boolean conflictNoticed;
+        /** Check for Carry On once per world joined; the notice never changes input handling. */
+        private static boolean carryOnNoticeChecked;
         /** The player's {@code enabled} as the server last heard it; servers start from enabled. */
         private static boolean sentEnabled = true;
         /** Game time the local carry started and last ended, for the cooldowns; -1 if not since joining. */
@@ -88,12 +86,19 @@ public final class CarryClient
                 if (level == null || player == null)
                 {
                         LocalCarry.set(null);
-                        conflict = null;
-                        conflictNoticed = false;
+                        carryOnNoticeChecked = false;
                         sentEnabled = true;
                         carryStartedAt = -1;
                         carryEndedAt = -1;
                         return;
+                }
+                if (!carryOnNoticeChecked)
+                {
+                        carryOnNoticeChecked = true;
+                        if (Services.PLATFORM.isModLoaded("carryon"))
+                        {
+                                noticeCarryOn(minecraft);
+                        }
                 }
                 boolean enabled = ThrowableMobsConfig.playerEnabled();
                 if (enabled != sentEnabled)
@@ -101,12 +106,6 @@ public final class CarryClient
                         // The server assumes enabled, so only a change from that needs telling.
                         sendToServer.accept(new PlayerEnabledPayload(enabled));
                         sentEnabled = enabled;
-                }
-                conflict = CarryKeys.foreignConflict(minecraft.options);
-                if (conflict != null && !conflictNoticed)
-                {
-                        noticeConflict(minecraft, conflict);
-                        conflictNoticed = true;
                 }
 
                 Entity localCarried = null;
@@ -229,7 +228,7 @@ public final class CarryClient
                                 suppressUse(minecraft, CarryKeys.PUT_DOWN);
                         }
                 }
-                else if (pickUpPressed && conflict == null && CarryRules.canUseHands(player)
+                else if (pickUpPressed && CarryRules.canUseHands(player)
                         && !coolingDown(player, carryEndedAt, ThrowableMobsConfig.carry().pickUpCooldownTicks(),
                                 ThrowableMobsConfig.hud().pickUpCooldownTicks())
                         && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob
@@ -246,20 +245,14 @@ public final class CarryClient
                 return since >= 0 && player.level().getGameTime() - since < Math.max(serverTicks, playerTicks);
         }
 
-        /** "[Left Shift] is also Carry On's Carry key, so picking up is left to it. Rebind with /throwablemobs keybinds." */
-        private static void noticeConflict(Minecraft minecraft, KeyMapping other)
+        private static void noticeCarryOn(Minecraft minecraft)
         {
+                Component notice = Component.translatable("throwablemobs.compat.carryon",
+                        ThrowableMobsClientCommand.link("keybinds"));
                 //? if >=26.1 {
-                minecraft.gui.hud.getChat().addClientSystemMessage(Component.translatable("throwablemobs.conflict",
-                        Component.translatable("throwablemobs.prompt.key", other.getTranslatedKeyMessage()),
-                        Component.translatable(other.getName()), other.getCategory().label(),
-                        ThrowableMobsClientCommand.link("keybinds")));
-                //?} else {
-                /*minecraft.gui.getChat().addMessage(Component.translatable("throwablemobs.conflict",
-                        Component.translatable("throwablemobs.prompt.key", other.getTranslatedKeyMessage()),
-                        Component.translatable(other.getName()), Component.translatable(other.getCategory()),
-                        ThrowableMobsClientCommand.link("keybinds")));
-                *///?}
+                minecraft.gui.hud.getChat().addClientSystemMessage(notice);
+                //?} else
+                /*minecraft.gui.getChat().addMessage(notice);*/
         }
 
         private static void suppressUse(Minecraft minecraft, KeyMapping ours)
@@ -381,7 +374,7 @@ public final class CarryClient
                 else if (minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof Mob mob)
                 {
                         Component keys = inputKeys(CarryKeys.PICK_UP);
-                        if (!CarryRules.canUseHands(player) || keys == null || conflict != null)
+                        if (!CarryRules.canUseHands(player) || keys == null)
                         {
                                 return;
                         }
