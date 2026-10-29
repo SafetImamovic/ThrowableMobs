@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-29
+
 ### Added
 
 - Server-side hunger costs for picking up, walking/sneaking or sprinting while carrying, and throwing mobs. Four
