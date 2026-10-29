@@ -10,8 +10,11 @@ hero:
     alt: A pig flying through the air
   actions:
     - theme: brand
-      text: Download
+      text: Download on CurseForge
       link: https://www.curseforge.com/minecraft/mc-mods/throwablemobs
+    - theme: alt
+      text: Download on Modrinth
+      link: https://modrinth.com/mod/throwablemobs
     - theme: alt
       text: Read the guide
       link: /guide/

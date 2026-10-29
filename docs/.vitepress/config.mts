@@ -28,6 +28,7 @@ export default defineConfig({
         text: 'Links',
         items: [
           { text: 'Download (CurseForge)', link: 'https://www.curseforge.com/minecraft/mc-mods/throwablemobs' },
+          { text: 'Download (Modrinth)', link: 'https://modrinth.com/mod/throwablemobs' },
           { text: 'Download (GitHub releases)', link: `${repo}/releases` },
           { text: 'Changelog', link: `${repo}/blob/master/CHANGELOG.md` },
           { text: 'Report a bug', link: `${repo}/issues/new/choose` },

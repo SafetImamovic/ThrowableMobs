@@ -18,6 +18,7 @@
 </p>
 
 <p align="center">
+  <a href="https://modrinth.com/mod/throwablemobs"><b>Download on Modrinth</b></a> ·
   <a href="https://www.curseforge.com/minecraft/mc-mods/throwablemobs"><b>Download on CurseForge</b></a> ·
   <a href="https://github.com/SafetImamovic/ThrowableMobs/releases"><b>GitHub releases</b></a> ·
   <a href="https://safetimamovic.github.io/ThrowableMobs/"><b>Docs</b></a> ·
