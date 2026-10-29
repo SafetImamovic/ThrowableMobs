@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/release.yml"><img src="https://github.com/SafetImamovic/ThrowableMobs/actions/workflows/release.yml/badge.svg" alt="Release"></a>
-  <a href="https://modrinth.com/mod/throwablemobs"><img src="https://img.shields.io/modrinth/dt/throwablemobs?logo=modrinth&label=Modrinth&color=00af5c" alt="Modrinth downloads"></a>
+  <a href="https://modrinth.com/mod/throwablemobs"><img src="https://img.shields.io/badge/Modrinth-Download-00af5c?logo=modrinth&amp;logoColor=white" alt="Download on Modrinth"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/throwablemobs"><img src="https://img.shields.io/curseforge/dt/1763809?logo=curseforge&label=CurseForge&color=f16436" alt="CurseForge downloads"></a>
   <a href="https://github.com/SafetImamovic/ThrowableMobs/releases"><img src="https://img.shields.io/github/v/release/SafetImamovic/ThrowableMobs?include_prereleases&sort=semver&label=release" alt="Latest release"></a>
   <a href="https://safetimamovic.github.io/ThrowableMobs/"><img src="https://img.shields.io/badge/docs-online-f28c28" alt="Docs"></a>
