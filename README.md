@@ -53,7 +53,7 @@ Install on both the client and the server. Optional mods are client only.
 |---|---|---|---|
 | [YACL](https://modrinth.com/mod/yacl) 3.8.2 | 1.21.1 | Fabric, NeoForge | Works: the settings screen is YACL's |
 | [YACL](https://modrinth.com/mod/yacl) 3.9.7 | 26.3 | Fabric, NeoForge | Works. On NeoForge, a warning about YACL's `logoFile` shows at startup; that's YACL's own metadata ([fix pending](https://github.com/isXander/YetAnotherConfigLib/pull/359)), click Proceed |
-| [Carry On](https://modrinth.com/mod/carry-on) | 26.3 | Fabric | Works. Both use Left Shift + Right Click: Carry On does the picking up and a chat message explains how to rebind ours |
+| [Carry On](https://modrinth.com/mod/carry-on) | 26.3 | Fabric | Both default to Left Shift + Right Click. Throwable Mobs no longer yields shared keys; compatibility needs retesting |
 | [Carry On](https://modrinth.com/mod/carry-on) 2.12.0 | 26.3 | NeoForge | Carry On itself doesn't load on NeoForge 26.3 (its own bug) |
 | [Ragdollified](https://modrinth.com/mod/ragdollified) 1.1.1 | 1.21.1 | NeoForge | Works: thrown mobs ragdoll in the air (setting `ragdoll_in_flight`), and a mob killed by a throw keeps its ragdoll and the throw's momentum |
 | [Ragdollified](https://modrinth.com/mod/ragdollified) 1.1.1 | 26.3 | NeoForge | Ragdollified itself doesn't load on NeoForge 26.3.0.95 (its own bug) |
@@ -90,8 +90,11 @@ All rebindable under Controls → Throwable Mobs, or with `/throwablemobs keybin
 | Throw (hold to charge, let go to throw) | Right Button while carrying |
 | Cancel throw | Left Button while charging |
 
-The defaults match Carry On's. If another mod has a key on Left Shift (or on whatever starts a pick-up), picking up is
-left to that mod and a chat message says so; rebind either one to use both.
+Shared bindings do not disable Throwable Mobs. If another mod also handles the same input, rebind either mod to
+give each its own controls. When Carry On is installed, a chat notice explains the shared defaults once per world join.
+
+Picking up, carrying on foot and throwing add small hunger costs in survival. Server settings in `[hunger]` control
+each exhaustion cost; set them to `0` to disable them. See [server config](docs/guide/server-config.md#hunger-costs-hunger).
 
 ## Commands
 

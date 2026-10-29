@@ -119,6 +119,15 @@ processResources {
         expand expandProps
     }
 
+    // NeoForge before 26.1 exposes one logo/banner; the separate iconFile/bannerFile fields came later.
+    if (stonecutter.eval(stonecutter.current.version, '<26.1')) {
+        filesMatching('META-INF/neoforge.mods.toml') {
+            filter { String line ->
+                line.startsWith('iconFile=') ? null : line.replace('bannerFile=', 'logoFile=')
+            }
+        }
+    }
+
     filesMatching(['pack.mcmeta', 'fabric.mod.json', '*.mixins.json']) {
         expand jsonExpandProps
     }

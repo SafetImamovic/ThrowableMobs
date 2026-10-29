@@ -9,6 +9,7 @@ import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.CarryCon
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.DimensionChange;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.EffectsConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.GroundFilter;
+import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.HungerConfig;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfCatch;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.SelfDamage;
 import io.github.safetimamovic.throwablemobs.config.ThrowableMobsConfig.ThrowConfig;
@@ -37,6 +38,11 @@ public final class CreatorConfig
         public static final ModConfigSpec SPEC;
 
         private static final BooleanValue ENABLED;
+
+        private static final DoubleValue PICK_UP_EXHAUSTION;
+        private static final DoubleValue WALK_EXHAUSTION_PER_BLOCK;
+        private static final DoubleValue SPRINT_EXHAUSTION_PER_BLOCK;
+        private static final DoubleValue THROW_EXHAUSTION;
 
         private static final BooleanValue REQUIRE_EMPTY_HAND;
         private static final DoubleValue MAX_MASS;
@@ -330,6 +336,23 @@ public final class CreatorConfig
                         .defineInRange("egg_chance", 0.25, 0.0, 1.0);
                 builder.pop();
 
+                builder.comment("Extra food exhaustion for carrying and throwing, in addition to vanilla costs.",
+                                "4 exhaustion drains 1 saturation point, or 1 food point (half a drumstick) once",
+                                "saturation is empty. Creative and spectator players are exempt. Set any cost to 0",
+                                "to disable it. Standing still, catching and putting down have no extra cost.")
+                        .push("hunger");
+                PICK_UP_EXHAUSTION = builder.comment("Exhaustion for each successful pickup.")
+                        .defineInRange("pick_up_exhaustion", 0.1, 0.0, 100.0);
+                WALK_EXHAUSTION_PER_BLOCK = builder.comment("Extra exhaustion per horizontal block walked or sneaked",
+                                "on the ground while carrying. No cost for swimming, climbing, riding or flying.")
+                        .defineInRange("walk_exhaustion_per_block", 0.01, 0.0, 100.0);
+                SPRINT_EXHAUSTION_PER_BLOCK = builder.comment("Extra exhaustion per horizontal block sprinted on the",
+                                "ground while carrying. Replaces the walking cost; vanilla sprint exhaustion still applies.")
+                        .defineInRange("sprint_exhaustion_per_block", 0.05, 0.0, 100.0);
+                THROW_EXHAUSTION = builder.comment("Exhaustion for each successful throw. Cancelled charges cost nothing.")
+                        .defineInRange("throw_exhaustion", 0.2, 0.0, 100.0);
+                builder.pop();
+
                 SPEC = builder.build();
         }
 
@@ -359,6 +382,12 @@ public final class CreatorConfig
                         get(GROUND_FILTER),
                         get(PICK_UP_COOLDOWN_TICKS),
                         get(PUT_DOWN_COOLDOWN_TICKS));
+        }
+
+        static HungerConfig readHunger()
+        {
+                return new HungerConfig(get(PICK_UP_EXHAUSTION), get(WALK_EXHAUSTION_PER_BLOCK),
+                        get(SPRINT_EXHAUSTION_PER_BLOCK), get(THROW_EXHAUSTION));
         }
 
         static ThrowConfig readThrow()

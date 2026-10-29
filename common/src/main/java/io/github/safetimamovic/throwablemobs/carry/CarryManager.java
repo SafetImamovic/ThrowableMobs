@@ -152,6 +152,7 @@ public final class CarryManager
                 hold(player, mob, new CarryState(player.getUUID(), mob.isNoAi(), mob.isNoGravity(),
                         mob.level().getGameTime()));
                 ThrowManager.forgetCatch(player);
+                CarryHunger.pickUp(player);
                 ModTriggers.THROW_EVENT.trigger(player, Event.PICKUP, mob, 0.0, 0.0);
                 Hooks.pickup(mob, player);
         }

@@ -123,6 +123,7 @@ public final class ThrowManager
                 FLYING.put(mob, new Flight(player.getUUID(), velocity, mob.position(), 0, 0, mob.position(),
                         CAUGHT_FROM.remove(player.getUUID())));
                 ThrowEffects.thrown((ServerLevel) mob.level(), mob, charge);
+                CarryHunger.thrown(player);
                 ModTriggers.THROW_EVENT.trigger(player, Event.THROW, mob, charge, 0.0);
                 Hooks.thrown(mob, player, velocity);
         }

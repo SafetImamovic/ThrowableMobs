@@ -33,6 +33,18 @@ public final class ThrowableMobsConfig
                 return CreatorConfig.read();
         }
 
+        /** Server-controlled extra exhaustion for lifting, carrying and throwing. */
+        public static HungerConfig hunger()
+        {
+                return CreatorConfig.readHunger();
+        }
+
+        /** Exhaustion per successful action or horizontal block walked/sprinted while carrying. */
+        public record HungerConfig(double pickUpExhaustion, double walkExhaustionPerBlock,
+                double sprintExhaustionPerBlock, double throwExhaustion)
+        {
+        }
+
         /** Current creator settings for throwing, flight and impacts. */
         public static ThrowConfig throwing()
         {
