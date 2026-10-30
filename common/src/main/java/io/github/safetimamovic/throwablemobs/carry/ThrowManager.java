@@ -39,7 +39,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
-//? if >=26.1
+//? if >=26.3
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -417,7 +417,7 @@ public final class ThrowManager
                                 thrower);
                 }
                 ThrowEffects.caught(level, mob, momentum);
-                //? if >=26.1 {
+                //? if >=26.3 {
                 catcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                 //?} else
                 /*catcher.swing(InteractionHand.MAIN_HAND, true);*/

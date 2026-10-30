@@ -32,12 +32,12 @@ include('physics')
 // properties (dependency versions, Java) are in versions/<minecraft version>/gradle.properties.
 stonecutter {
     create(rootProject) {
-        versions('1.20.1', '1.21.1', '26.3')
+        versions('1.20.1', '1.21.1', '26.2', '26.3')
         vcsVersion = '26.3'
         branch('common')
         branch('fabric')
         // NeoForge 1.20.1 is a fork of Forge 47 and runs the Forge jar, so it has no build of its own there.
-        branch('neoforge') { versions('1.21.1', '26.3') }
+        branch('neoforge') { versions('1.21.1', '26.2', '26.3') }
         // MinecraftForge only where its players are; see THROWABLE_MOBS.md §2.
         branch('forge') { versions('1.20.1') }
     }
