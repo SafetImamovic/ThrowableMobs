@@ -61,6 +61,18 @@ jobs:
             java: 21
             dependencies: |
               yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
+          - minecraft: '26.2'
+            loader: fabric
+            java: 25
+            dependencies: |
+              fabric-api(required){modrinth:P7dR8mSH}{curseforge:306612}
+              forgeconfigapiport(required){modrinth:ohNO6lps}{curseforge:547434}
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
+          - minecraft: '26.2'
+            loader: neoforge
+            java: 25
+            dependencies: |
+              yacl(optional){modrinth:1eAoo2KR}{curseforge:667299}
           - minecraft: '26.3'
             loader: fabric
             java: 25
