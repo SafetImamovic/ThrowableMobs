@@ -11,8 +11,9 @@ import io.github.safetimamovic.throwablemobs.api.ImpactResult;
 import io.github.safetimamovic.throwablemobs.api.ThrowContext;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-//? if >=26.1 {
+//? if >=26.1
 import net.minecraft.world.entity.EntitySpawnReason;
+//? if >=26.2 {
 import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
 //?} else
 /*import net.minecraft.world.entity.monster.Slime;*/
@@ -51,7 +52,7 @@ public record SplitAction(int minPieces, int maxPieces) implements BehaviorActio
 
         private boolean split(ServerLevel level, ThrowContext ctx)
         {
-                //? if >=26.1 {
+                //? if >=26.2 {
                 if (!(ctx.mob() instanceof AbstractCubeMob cube) || cube.getSize() <= 1)
                 //?} else
                 /*if (!(ctx.mob() instanceof Slime cube) || cube.getSize() <= 1)*/
@@ -64,9 +65,11 @@ public record SplitAction(int minPieces, int maxPieces) implements BehaviorActio
                 cube.setSize(size, true);
                 for (int i = 1; i < pieces; i++)
                 {
-                        //? if >=26.1 {
+                        //? if >=26.2 {
                         AbstractCubeMob piece = cube.getType().create(level, EntitySpawnReason.TRIGGERED);
-                        //?} else
+                        //?} else if >=26.1 {
+                        /*Slime piece = cube.getType().create(level, EntitySpawnReason.TRIGGERED);
+                        *///?} else
                         /*Slime piece = cube.getType().create(level);*/
                         if (piece == null)
                         {

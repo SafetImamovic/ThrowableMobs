@@ -16,7 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enderman;
-//? if >=26.1 {
+//? if >=26.2 {
 import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
 //?} else
 /*import net.minecraft.world.entity.monster.Slime;*/
@@ -54,7 +54,7 @@ public final class Heuristics
                                 Optional.empty(), Optional.empty(), false, Optional.empty()),
                                 new ExplodeAction(1.5F, 0.01F, 4.0F, 2.0F, false, true)));
                 }
-                //? if >=26.1 {
+                //? if >=26.2 {
                 if (mob instanceof AbstractCubeMob)
                 //?} else
                 /*if (mob instanceof Slime)*/
