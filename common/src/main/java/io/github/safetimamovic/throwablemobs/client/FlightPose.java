@@ -118,7 +118,7 @@ public final class FlightPose
 
         private static void rotate(PoseStack poseStack, Axis axis, float degrees)
         {
-                //? if >=26.1 {
+                //? if >=26.3 {
                 poseStack.rotateDegrees(axis, degrees);
                 //?} else
                 /*poseStack.mulPose(axis.rotationDegrees(degrees));*/

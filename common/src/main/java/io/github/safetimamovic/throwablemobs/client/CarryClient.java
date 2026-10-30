@@ -249,9 +249,11 @@ public final class CarryClient
         {
                 Component notice = Component.translatable("throwablemobs.compat.carryon",
                         ThrowableMobsClientCommand.link("keybinds"));
-                //? if >=26.1 {
+                //? if >=26.2 {
                 minecraft.gui.hud.getChat().addClientSystemMessage(notice);
-                //?} else
+                //?} else if >=26.1 {
+                /*minecraft.gui.getChat().addClientSystemMessage(notice);
+                *///?} else
                 /*minecraft.gui.getChat().addMessage(notice);*/
         }
 

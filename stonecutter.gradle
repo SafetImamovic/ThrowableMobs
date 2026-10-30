@@ -27,11 +27,15 @@ stonecutter.parameters {
         // Renamed fields and classes; the exact versions weren't checked, only 1.21.1 and 26.3 are built.
         string(eval(current.version, '<26.1')) {
             replace('MobEffects.STRENGTH', 'MobEffects.DAMAGE_BOOST')
-            replace('.syncVelocity', '.hurtMarked')
             replace('.needsSync', '.hasImpulse')
             replace('npc.villager.AbstractVillager', 'npc.AbstractVillager')
-            replace('Enderman', 'EnderMan')
             replace('level.getMinY()', 'level.getMinBuildHeight()')
+        }
+        // Enderman was EnderMan until 26.3.
+        string(eval(current.version, '<26.3')) {
+            replace('Enderman', 'EnderMan')
+            replace('.syncVelocity', '.hurtMarked')
+            replace('sound.identifier()', 'sound.location()')
         }
         // GUI drawing before 26.1: GuiGraphics, and drawString for text.
         string(eval(current.version, '<26.1')) {

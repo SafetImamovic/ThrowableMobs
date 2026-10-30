@@ -35,10 +35,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
-//? if >=26.1 {
+//? if >=26.1
 import net.minecraft.world.entity.EntitySpawnReason;
+//? if >=26.2
 import net.minecraft.world.entity.EntitySpawnRequest;
-//?}
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -569,7 +569,7 @@ public final class CarryManager
                         return false;
                 }
                 Services.CARRY_STASH.remove(player);
-                //? if >=26.1 {
+                //? if >=26.2 {
                 ServerLevel level = player.level();
                 Entity entity = EntityType.loadEntityRecursive(tag, level,
                         new EntitySpawnRequest(EntitySpawnReason.LOAD, true), loaded ->
@@ -578,7 +578,15 @@ public final class CarryManager
                                         loaded.getYRot(), loaded.getXRot());
                                 return loaded;
                         });
-                //?} else {
+                //?} else if >=26.1 {
+                /*ServerLevel level = player.level();
+                Entity entity = EntityType.loadEntityRecursive(tag, level, EntitySpawnReason.LOAD, loaded ->
+                {
+                        loaded.snapTo(player.getX(), player.getY() + player.getBbHeight(), player.getZ(),
+                                loaded.getYRot(), loaded.getXRot());
+                        return loaded;
+                });
+                *///?} else {
                 /*ServerLevel level = player.serverLevel();
                 Entity entity = EntityType.loadEntityRecursive(tag, level, loaded ->
                 {

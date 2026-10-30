@@ -79,18 +79,22 @@ public final class ThrowableMobsClientCommand
         private static int open(Supplier<@Nullable Screen> screen)
         {
                 Minecraft minecraft = Minecraft.getInstance();
-                //? if >=26.1 {
+                //? if >=26.2 {
                 minecraft.schedule(() -> minecraft.gui.setScreen(screen.get()));
-                //?} else
+                //?} else if >=26.1 {
+                /*minecraft.schedule(() -> minecraft.setScreen(screen.get()));
+                *///?} else
                 /*minecraft.tell(() -> minecraft.setScreen(screen.get()));*/
                 return 1;
         }
 
         private static void chat(Component message)
         {
-                //? if >=26.1 {
+                //? if >=26.2 {
                 Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(message);
-                //?} else
+                //?} else if >=26.1 {
+                /*Minecraft.getInstance().gui.getChat().addClientSystemMessage(message);
+                *///?} else
                 /*Minecraft.getInstance().gui.getChat().addMessage(message);*/
         }
 }
