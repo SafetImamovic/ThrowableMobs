@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-30
+
 ### Added
 
 - Minecraft 26.1.2, on Fabric and NeoForge (26.1.2.125 or newer). Same features as 26.3; on NeoForge the server config
