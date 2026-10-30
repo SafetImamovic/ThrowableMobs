@@ -7,6 +7,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ### Added
 
+- Minecraft 26.1.2, on Fabric and NeoForge (26.1.2.125 or newer). Same features as 26.3; on NeoForge the server config
+  is per world, in the world's `serverconfig/` folder, as on 1.21.1.
 - Minecraft 26.2, on Fabric and NeoForge (26.2.0.93 or newer). Same features as 26.3; on NeoForge the server config is
   per world, in the world's `serverconfig/` folder, as on 1.21.1.
 

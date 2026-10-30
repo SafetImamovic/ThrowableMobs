@@ -4,7 +4,7 @@ Gameplay rules live in `config/throwablemobs-server.toml`. The server sends them
 the same rules. To use different rules for one world, put a copy in that world's `serverconfig/` folder (Fabric) or
 `syncedconfig/` folder (NeoForge); it wins over the global file.
 
-On **1.20.1**, **1.21.1** and NeoForge **26.2** the file is per world: `serverconfig/throwablemobs-server.toml` in the world's folder,
+On **1.20.1**, **1.21.1** and NeoForge **26.1** and **26.2** the file is per world: `serverconfig/throwablemobs-server.toml` in the world's folder,
 made on first load (from `defaultconfigs/throwablemobs-server.toml` if you put one there).
 
 Each player's own settings (prompt, charge bar, trajectory style, flight pose) are in
