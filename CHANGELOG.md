@@ -5,6 +5,8 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-16
+
 ### Fixed
 
 - NeoForge: throwing a modded mob with a custom model (like a Creeper Overhaul creeper) no longer crashes the game
