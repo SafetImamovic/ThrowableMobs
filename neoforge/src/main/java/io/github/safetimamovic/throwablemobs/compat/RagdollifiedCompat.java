@@ -152,7 +152,18 @@ public final class RagdollifiedCompat
                         .spawnTransform(new RagdollSpawnTransform(entity.position(), entity.yBodyRot, entity.getXRot(),
                                 movement(entity).scale(20.0), false))
                         .build();
-                RagdollHandle handle = RagdollifiedApi.spawn(entity, options);
+                RagdollHandle handle;
+                try
+                {
+                        handle = RagdollifiedApi.spawn(entity, options);
+                }
+                catch (IllegalStateException e)
+                {
+                        // Ragdollified couldn't queue one (a modded model it can't rig, like a GeckoLib mob): the mob
+                        // flies as usual instead of taking the client down.
+                        Constants.LOG.debug("Ragdollified has no ragdoll for {}, it flies as usual", entity.getType(), e);
+                        return null;
+                }
                 // Not exists() yet: Ragdollified builds the ragdoll on the next frame, until then it's only pending.
                 if (handle == null)
                 {
