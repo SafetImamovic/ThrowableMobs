@@ -62,6 +62,8 @@ dependencies {
     compileOnly("maven.modrinth:ragdollified:${ragdollified_version}")
 }
 
+apply from: rootProject.file('neoforge/compat-mods.gradle')
+
 // Implement mcgradleconventions loader attribute
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
