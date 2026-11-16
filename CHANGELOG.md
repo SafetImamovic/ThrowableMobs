@@ -5,6 +5,11 @@ Changes per version that players, pack devs and mod devs will notice. Format:
 
 ## [Unreleased]
 
+### Fixed
+
+- NeoForge: throwing a modded mob with a custom model (like a Creeper Overhaul creeper) no longer crashes the game
+  when Ragdollified is installed. Ragdollified can't ragdoll those mobs, so they fly as usual.
+
 ## [0.9.0] - 2026-10-30
 
 ### Added

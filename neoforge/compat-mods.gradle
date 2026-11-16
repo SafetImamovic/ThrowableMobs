@@ -1,0 +1,41 @@
+// Opt-in mob mods for compat testing in the dev run configs. Not published, not on by default:
+//   ./gradlew :neoforge:1.21.1:runClient -Pcompat
+// Pick groups with -Pcompat=creepers,bigmobs,mutants (default: all). Entries are Modrinth maven coordinates,
+// "maven.modrinth:<slug>:<version id>", with their required dependencies listed under "libs".
+// Only 1.21.1 is filled in: few mob mods are ported to 26.x yet.
+def compatSets = [
+        '1.21.1': [
+                libs    : [
+                        'maven.modrinth:geckolib:Grwn5rUB',            // 4.9.3
+                        'maven.modrinth:resourceful-lib:x99nCLTm',     // 3.0.12
+                        'maven.modrinth:resourceful-config:lSbyRD6v',  // 3.0.11
+                        'maven.modrinth:citadel-1.21.1-port:mIylVpkN', // 2.7.6
+                        'maven.modrinth:puzzles-lib:kmN5PWk9',         // 21.1.66
+                        'maven.modrinth:flib:i46U23pv',                // 0.2.9 (vein-creeper)
+                ],
+                creepers: [
+                        'maven.modrinth:creeper-overhaul:HNrAYCLH',                  // 4.0.6
+                        'maven.modrinth:elemental-creepers-continued:90MS8xtt',      // 1.1
+                        'maven.modrinth:vein-creeper:BDmWROWW',                      // 1.2.1
+                ],
+                bigmobs : [
+                        'maven.modrinth:mowzies-mobs:xgAXTl17',                      // 1.8.2
+                        'maven.modrinth:alexs-mobs-1.21.1:KSgki4uc',                 // 1.22.17
+                        'maven.modrinth:friends-and-foes-forge:SHNibBGE',            // 5.0.5
+                ],
+                mutants : [
+                        'maven.modrinth:mutant-monsters:dauEcrnZ',                   // 21.1.1
+                ],
+        ],
+]
+
+def compat = rootProject.findProperty('compat')
+def set = compatSets[minecraft_version]
+if (compat != null && set != null) {
+    def groups = (compat == '' || compat == 'true') ? set.keySet() - 'libs' : compat.split(',').collect { it.trim() }
+    dependencies {
+        set.libs.each { localRuntime(it) }
+        groups.each { g -> (set[g] ?: []).each { localRuntime(it) } }
+    }
+    logger.lifecycle("Compat mods on for ${minecraft_version}: ${groups}")
+}
